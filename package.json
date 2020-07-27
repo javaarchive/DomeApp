@@ -1,14 +1,14 @@
 {
-	"name": "app-name",
-	"productName": "App Name",
-	"version": "0.0.0",
+	"name": "dome-app",
+	"productName": "Dome App",
+	"version": "1.0.0",
 	"description": "The best app ever",
 	"license": "MIT",
 	"repository": "sindresorhus/electron-boilerplate",
 	"author": {
-		"name": "Your Name",
-		"email": "user@gmail.com",
-		"url": "https://sindresorhus.com"
+		"name": "Raymond",
+		"email": "awesomecatstudio@gmail.com",
+		"url": "https://ascent.tk"
 	},
 	"scripts": {
 		"postinstall": "electron-builder install-app-deps",
@@ -44,9 +44,9 @@
 		"releaseDraft": false
 	},
 	"build": {
-		"appId": "com.company.AppName",
+		"appId": "io.github.the-ascent",
 		"mac": {
-			"category": "public.app-category.social-networking",
+			"category": "public.app-category.music",
 			"darkModeSupport": true
 		},
 		"dmg": {
@@ -69,7 +69,7 @@
 				"AppImage",
 				"deb"
 			],
-			"category": "Network;Chat"
+			"category": "Music;Video"
 		}
 	}
 }

@@ -41,3 +41,18 @@ header h1 {
 	padding: 0;
 	opacity: 0.7;
 }
+@font-face {
+	font-family: 'Material Icons';
+	font-style: normal;
+	font-weight: 400;
+	src: url(static/mdfont/iconfont/MaterialIcons-Regular.eot); /* For IE6-8 */
+	src: local('Material Icons'),
+	  local('MaterialIcons-Regular'),
+	  url(static/mdfont/iconfont/MaterialIcons-Regular.woff2) format('woff2'),
+	  url(static/mdfont/iconfont/MaterialIcons-Regular.woff) format('woff'),
+	  url(static/mdfont/iconfont/MaterialIcons-Regular.ttf) format('truetype');
+  }
+  .pad-small{
+	  padding: 8px;
+	  margin: 2px;
+  }
