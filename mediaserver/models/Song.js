@@ -1,0 +1,31 @@
+const { DataTypes } = require("sequelize");
+module.exports = function(sequelize) {
+	const Song = sequelize.define(
+		"Song",
+		{
+			artist: {
+				type: DataTypes.STRING,
+			},
+			albumPicture: {
+                type: DataTypes.STRING,
+                defaultValue: "static/BlankAlbum.png"
+            },
+            name: {
+                type: DataTypes.STRING,
+                allowNull: false
+            },
+            contentURI: {
+                type: DataTypes.STRING
+            },id:{
+                type: DataTypes.BIGINT,
+                allowNull: false
+            },AlbumID:{
+                type: DataTypes.BIGINT
+            }
+		},
+		{
+			// Other model options go here
+		}
+    );
+    return Song;
+};

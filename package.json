@@ -26,7 +26,11 @@
 		"electron-store": "^5.1.0",
 		"electron-unhandled": "^3.0.0",
 		"electron-updater": "^4.0.6",
-		"electron-util": "^0.13.0"
+		"electron-util": "^0.13.0",
+		"express": "^4.17.1",
+		"id-auto-increment": "^1.0.1",
+		"lodash": "^4.17.19",
+		"sequelize": "^6.3.3"
 	},
 	"devDependencies": {
 		"electron": "^7.1.1",
