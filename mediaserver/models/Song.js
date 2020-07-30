@@ -18,7 +18,8 @@ module.exports = function(sequelize) {
                 type: DataTypes.STRING
             },id:{
                 type: DataTypes.BIGINT,
-                allowNull: false
+                allowNull: false,
+                primaryKey: true
             },AlbumID:{
                 type: DataTypes.BIGINT
             }
