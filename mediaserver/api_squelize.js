@@ -15,7 +15,7 @@ let self = {
 		let song = await Song.create(fields);
 		return song;
 	},
-	getSongById: async function(id) {
+	getSongByID: async function(id) {
 		return await Song.findOne({ id: id });
 	},
 	getSongsByName: async function(name) {
@@ -47,7 +47,7 @@ let self = {
         return album;
     },
     getAlbumByID: async function(albumID){
-        let album = Album.findAll({id: album});
+        let album = Album.findOne({id: albumID});
         return album;
     },
     addSong: async function(albumID, songID){

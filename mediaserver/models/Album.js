@@ -15,11 +15,13 @@ module.exports = function(sequelize) {
                 defaultValue: "static/BlankAlbum.png"
             },id:{
                 type: DataTypes.BIGINT,
-                allowNull: false
+                allowNull: false,
+                primaryKey: true
             }
 		},
 		{
 			// Other model options go here
 		}
-	);
+    );
+    return Album;
 };
