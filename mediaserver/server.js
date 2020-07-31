@@ -37,7 +37,7 @@ app.use(bodyParser.json());
 function formatResponse(data) {
 	return {
 		status: "ok",
-		requesttime: Date.now().getTime(),
+		requesttime: Date.now(),
 		data: data
 	};
 }
@@ -86,6 +86,30 @@ app.get("/api/authstatus",async (req, res)=>{
 });
 app.get("/api/get_song", async (req, res) => {
 	let resp = await api.getSongByID(req.query.id);
+	if(resp){
+		res.json(formatResponse(resp));
+	}else{
+		res.json({status: "fail"});
+	}
+})
+app.get("/api/get_album", async (req, res) => {
+	let resp = await api.getSongByID(req.query.id);
+	if(resp){
+		res.json(formatResponse(resp));
+	}else{
+		res.json({status: "fail"});
+	}
+})
+app.get("/api/get_album_by_name", async (req, res) => {
+	let resp = await api.getAlbumByName(req.query.name);
+	if(resp){
+		res.json(formatResponse(resp));
+	}else{
+		res.json({status: "fail"});
+	}
+})
+app.get("/api/search_albums_by_name", async (req, res) => {
+	let resp = await api.getAlbumsByName(req.query.name);
 	if(resp){
 		res.json(formatResponse(resp));
 	}else{
