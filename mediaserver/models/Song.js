@@ -21,7 +21,8 @@ module.exports = function(sequelize) {
                 allowNull: false,
                 primaryKey: true
             },AlbumID:{
-                type: DataTypes.BIGINT
+                type: DataTypes.BIGINT,
+                allowNull: true
             }
 		},
 		{
