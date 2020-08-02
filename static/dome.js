@@ -12,4 +12,8 @@ $(function(){
         console.log("Where are you React?");
         console.warn("React did not load");
     }
+    $(".tab").click(function(e){
+        console.log(e);
+        console.log($(e.currentTarget).first().attr("tab-id"));
+    })
 })
