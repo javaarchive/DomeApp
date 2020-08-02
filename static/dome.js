@@ -1,3 +1,7 @@
+var i18n = require("i18n");
+i18n.configure({
+    directory: __dirname + '/locales'
+});
 $(function(){
     console.log("Page has loaded");
     if(M){
@@ -14,6 +18,7 @@ $(function(){
     }
     $(".tab").click(function(e){
         console.log(e);
-        console.log($(e.currentTarget).first().attr("tab-id"));
+        let tabid = $(e.currentTarget).first().attr("tab-id");
+        console.log(tabid);
     })
 })
