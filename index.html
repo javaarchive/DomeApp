@@ -14,9 +14,9 @@
 		  <script src="static/dist/bundle.js" async></script> <!-- Huge annoying bundle-->
 	</head>
 	<body>
-		<div class="container">
+		<div class="outer">
 			<nav class="nav-extended">
-				<div class="nav-wrapper">
+				<div class="nav-wrapper teal">
 				  <a href="#" class="brand-logo pad-small brand-text">Dome</a>
 				  <a href="#" data-target="mobile-demo" class="sidenav-trigger"><i class="material-icons">menu</i></a>
 				  <ul id="nav-mobile" class="right hide-on-med-and-down">
@@ -24,12 +24,12 @@
 					<li class="waves-effect waves-light"><a href="#musicserver">Music Server</a></li>
 				  </ul>
 				</div>
-				<div class="nav-content">
+				<div class="nav-content teal">
 				  <ul class="tabs tabs-transparent">
 					<li class="tab"><a class="active" href="#home">Home</a></li>
-					<li class="tab"><a href="#playlists">Playlists</a></li>
-					<li class="tab"><a href="#songs">All Songs</a></li>
-					<li class="tab"><a href="#albums">Albums</a></li>
+					<li class="tab"><a href="#playlists" tab-id="playlists">Playlists</a></li>
+					<li class="tab"><a href="#songs" tab-id="songs">All Songs</a></li>
+					<li class="tab"><a href="#albums" tab-id="albums">Albums</a></li>
 				  </ul>
 				</div>
 			  </nav>
@@ -38,14 +38,24 @@
 				<li class="waves-effect waves-light"><a href="#mymusic">My music</a></li>
 				<li class="waves-effect waves-light"><a href="#musicserver">Music Server</a></li>
 			  </ul>
-			
-			  <div id="test1" class="col s12"></div>
-			  <div id="test2" class="col s12"></div>
-			  <div id="test3" class="col s12"></div>
-			  <div id="test4" class="col s12"></div>
+			  <div class="container">
+			  <div id="home" class="col s12">
+				  <h3>Home!</h3>
+				  <span></span>
+			  </div>
+			  <div id="songs" class="col s12">
+				  <h3>Viewing Songs</h3>
+			  </div>
+			  <div id="playlists" class="col s12">
+				  <h3>Showing Playlists</h3>
+			  </div>
+			  <div id="albums" class="col s12">
+				  <h3>Album Listing</h3>
+			  </div>
 			  <div class="content-pane">
 
 			  </div>
+			</div>
 		</div>
 		<script src="static/jquery-3.5.1.min.js"></script>
 		<script src="static/materialize/js/materialize.min.js"></script>
