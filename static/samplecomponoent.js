@@ -11,7 +11,14 @@ class Component extends React.Component {
     componentWillUnmount() {
       // Componoent dies -> deconstructor
     }
-  
+    stateChange(){
+      this.setState(function(state, props) {
+        return {
+          
+        };
+      });
+      
+    }
     render() {
       return (
         <div>
