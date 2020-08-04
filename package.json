@@ -23,7 +23,9 @@
 	"dependencies": {
 		"@material-ui/core": "^4.11.0",
 		"@material-ui/lab": "^4.0.0-alpha.56",
+		"ascii-table": "0.0.9",
 		"body-parser": "^1.19.0",
+		"commander": "^6.0.0",
 		"dotenv": "^8.2.0",
 		"electron-context-menu": "^0.15.0",
 		"electron-debug": "^3.0.0",
