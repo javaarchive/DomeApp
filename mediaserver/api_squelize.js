@@ -113,13 +113,16 @@ if(require.main == module){
 	console.log("Running CLI")
 	const { Command } = require('commander');
 	const program = new Command();
+	var AsciiTable = require('ascii-table');
 	program.version('0.0.1');
 	program
   .requiredOption('-m, --mode <mode>', 'execution mode', 'list');
 	program.parse(process.argv);
 	if(program.mode == "list"){
 		console.log("Listing Songs");
-		console.log((await self.fetchSongs({limit: 10})).map((item) => (item.toJSON())));
+		let songs = await self.fetchSongs({limit: 10}));
+		var table = new AsciiTable('A Title')
+		table.setHeading('Name', 'Artist', 'ID');
 	}
 })();
 }
