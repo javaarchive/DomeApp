@@ -9,6 +9,7 @@ let Song = require("./models/Song")(sequelize);
 let Album = require("./models/Album")(sequelize);
 let Playlist = require("./models/Playlist")(sequelize);
 let self = {
+	Song: Song, Playlist: Playlist, Album:Album,
 	createSong: async function(opts) {
 		let id = await idAutoIncrement();
 		let fields = _.defaults(opts, id);
@@ -84,9 +85,42 @@ let self = {
 			}
 		);
 	},
+	fetchSongs: async function(opts){
+		let query = {where:{
+
+		}};
+		if(opts.name){
+			query.where.name = {[Op.like]: opts.name}
+		}
+		if(opts.id){
+			query.where.id = opts.id;
+		}
+		if(opts.artist){
+			query.where.artist = opts.artist;
+		}
+		if(opts.limit){
+
+		}
+		let results = await Song.findAll(query);
+		return results;
+	},
 	refresh: async function() {
 		await sequelize.sync();
 	}
 };
-
+if(require.main == module){
+	(async function(){
+	console.log("Running CLI")
+	const { Command } = require('commander');
+	const program = new Command();
+	program.version('0.0.1');
+	program
+  .requiredOption('-m, --mode <mode>', 'execution mode', 'list');
+	program.parse(process.argv);
+	if(program.mode == "list"){
+		console.log("Listing Songs");
+		console.log((await self.fetchSongs({limit: 10})).map((item) => (item.toJSON())));
+	}
+})();
+}
 module.exports = self;
