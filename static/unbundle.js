@@ -5,8 +5,38 @@ import { Skeleton } from '@material-ui/lab';
 const $ = require("jquery");
 console.log("bundle :D");
 // RIP RepeatedComponent 2020 why did we need that anyway
+class PlaylistView extends React.Component {
+    constructor(props) {
+      super(props);
+      this.state = {};
+    }
+    render(){
+      return <h1>Sample Component</h1>
+    }
+    componentDidMount() {
+      // Code to run when component is destoryed -> constructor
+    }
+  
+    componentWillUnmount() {
+      // Componoent dies -> deconstructor
+    }
+    fetchSearch(){
+        console.log("Updating Search");
+      this.setState(function(state, props) {
+        return {
+          
+        };
+      });
+      
+    }
+    render() {
+      return (
+        <input type="text" id="searchbox-playlists" class="searchbox" onKeyDown={this.fetchSearch()}></input>
+      );
+    }
+  }
 let views = {};
-views.playlists = <h1>Hi</h1>
+views.playlists = <PlaylistView />
 
 
 
