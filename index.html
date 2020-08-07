@@ -22,14 +22,15 @@
 				  <ul id="nav-mobile" class="right hide-on-med-and-down">
 					<li class="waves-effect waves-light"><a href="#mymusic">My music</a></li>
 					<li class="waves-effect waves-light"><a href="#musicserver">Music Server</a></li>
+					<li><a href="#home" onclick="destroy();">Exit</a></li>
 				  </ul>
 				</div>
 				<div class="nav-content teal">
 				  <ul class="tabs tabs-transparent">
-					<li class="tab"><a class="active" href="#home">Home</a></li>
-					<li class="tab"><a href="#playlists" tab-id="playlists">Playlists</a></li>
-					<li class="tab"><a href="#songs" tab-id="songs">All Songs</a></li>
-					<li class="tab"><a href="#albums" tab-id="albums">Albums</a></li>
+					<li class="tab"><a class="active" href="#home" tab-id="home">Home</a></li>
+					<li class="tab"><a href="#playlists" tabid="playlists">Playlists</a></li>
+					<li class="tab"><a href="#songs" tabid="songs">All Songs</a></li>
+					<li class="tab"><a href="#albums" tabid="albums">Albums</a></li>
 				  </ul>
 				</div>
 			  </nav>
@@ -37,6 +38,7 @@
 			  <ul class="sidenav" id="mobile-demo">
 				<li class="waves-effect waves-light"><a href="#mymusic">My music</a></li>
 				<li class="waves-effect waves-light"><a href="#musicserver">Music Server</a></li>
+				<li><a href="#home" onclick="destroy();">Exit</a></li>
 			  </ul>
 			  <div class="container">
 			  <div id="home" class="col s12">
@@ -52,7 +54,7 @@
 			  <div id="albums" class="col s12">
 				  <h3>Album Listing</h3>
 			  </div>
-			  <div class="content-pane">
+			  <div class="content-pane" id="contentview">
 
 			  </div>
 			</div>

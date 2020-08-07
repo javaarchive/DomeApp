@@ -99,7 +99,10 @@ let self = {
 			query.where.artist = opts.artist;
 		}
 		if(opts.limit){
-
+			query.limit = opts.limit;
+		}
+		if(opts.offset){
+			query.offset = opts.offset;
 		}
 		let results = await Song.findAll(query);
 		return results;
@@ -116,13 +119,18 @@ if(require.main == module){
 	var AsciiTable = require('ascii-table');
 	program.version('0.0.1');
 	program
-  .requiredOption('-m, --mode <mode>', 'execution mode', 'list');
+  .requiredOption('-m, --mode <mode>', 'execution mode', 'listsongs');
 	program.parse(process.argv);
-	if(program.mode == "list"){
+	if(program.mode == "listsongs"){
 		console.log("Listing Songs");
-		let songs = await self.fetchSongs({limit: 10}));
-		var table = new AsciiTable('A Title')
+		let songs = await self.fetchSongs({limit: 10});
+		var table = new AsciiTable('Listing Songs')
 		table.setHeading('Name', 'Artist', 'ID');
+		//table.align(AsciiTable.LEFT, '', 7);
+		for(let i = 0; i < songs.length; i ++){
+			table.addRow(songs[i].name, songs[i].artist, songs[i].id);
+		}
+		console.log(table.toString());
 	}
 })();
 }
