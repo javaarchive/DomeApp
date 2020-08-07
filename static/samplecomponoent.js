@@ -4,7 +4,7 @@ class Component extends React.Component {
       this.state = {};
     }
     render(){
-      return <h1>Sample Componoent</h1>
+      return <h1>Sample Component</h1>
     }
     componentDidMount() {
       // Code to run when component is destoryed -> constructor
