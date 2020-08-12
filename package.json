@@ -46,7 +46,8 @@
 		"react-dom": "^16.13.1",
 		"sequelize": "^6.3.3",
 		"sqlite3": "^5.0.0",
-		"uid-generator": "^2.0.0"
+		"uid-generator": "^2.0.0",
+		"url-regex": "^5.0.0"
 	},
 	"devDependencies": {
 		"electron": "^7.1.1",
