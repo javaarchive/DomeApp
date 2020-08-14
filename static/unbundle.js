@@ -3,15 +3,13 @@ import ReactDOM from "react-dom";
 import { Skeleton } from "@material-ui/lab";
 //import {$} from "jquery";
 const $ = require("jquery");
+const config = require("./config");
 console.log("bundle :D");
 // RIP RepeatedComponent 2020 why did we need that anyway
 class ResultView extends React.Component {
     constructor(props) {
       super(props);
-      this.state = {};
-    }
-    render(){
-      return <h1>Sample Component</h1>
+      this.state = {type: props.type};
     }
     componentDidMount() {
       // Code to run when component is destoryed -> constructor
@@ -20,7 +18,8 @@ class ResultView extends React.Component {
     componentWillUnmount() {
       // Componoent dies -> deconstructor
     }
-    stateChange(){
+    search(){
+		//let data = fetch(+"");
       this.setState(function(state, props) {
         return {
           
@@ -39,11 +38,9 @@ class ResultView extends React.Component {
 class PlaylistView extends React.Component {
 	constructor(props) {
 		super(props);
-    this.state = { searchBoxValue: "" };
+	this.state = { searchBoxValue: "" };
+	this.mySearchView = <ResultView type="playlist"></ResultView>
     //this.fetchSearch = this.fetchSearch.bind(this);
-	}
-	render() {
-		return <h1>Sample Component</h1>;
 	}
 	componentDidMount() {
 		// Code to run when component is destoryed -> constructor
@@ -75,6 +72,7 @@ class PlaylistView extends React.Component {
 				onChange={this.fetchSearch.bind(this)}
 				placeholder={i18n.__("Type to search")}
 			/>
+			{this.mySearchView}
       <div>
         
       </div>
