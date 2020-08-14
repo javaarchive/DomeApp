@@ -4,5 +4,8 @@
 	"playlist": "Playlist",
 	"album": "Album",
 	"album-art": "Album Art",
-	"Type to search": "Type to search"
+	"Type to search": "Type to search",
+	"Name": "Name",
+	"Date": "Date",
+	"Songs": "Songs"
 }
