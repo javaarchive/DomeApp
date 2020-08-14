@@ -5,7 +5,8 @@ import { Skeleton } from "@material-ui/lab";
 const $ = require("jquery");
 console.log("bundle :D");
 const columnTypes = {
-	"playlists":["Name", "Date", "Songs"]
+	"playlists":["Name", "Date", "Songs Count"],
+	"songs": ["Name", "Artist", "Duration"]
 }
 // RIP RepeatedComponent 2020 why did we need that anyway
 class ResultView extends React.Component {
@@ -30,10 +31,9 @@ class ResultView extends React.Component {
 		return (
 			<>
 				<div class="row">
-					<div class="col s1">Name</div>
-					<div class="col s1">{this.state.col1}</div>
-					<div class="col s1">{this.state.col2}</div>
-					<div class="col s1">{this.state.col3}</div>
+					<div class="col s4">{this.state.col1}</div>
+					<div class="col s4">{this.state.col2}</div>
+					<div class="col s4">{this.state.col3}</div>
 				</div>
 			</>
 		);
@@ -75,7 +75,7 @@ class PlaylistView extends React.Component {
 					onChange={this.fetchSearch.bind(this)}
 					placeholder={i18n.__("Type to search")}
 				/>
-				<ResultView type="playlists"></ResultView>
+				<ResultView type="playlists" query={this.state.searchBoxValue}></ResultView>
 				<div></div>
 			</>
 		);
