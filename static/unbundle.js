@@ -3,7 +3,6 @@ import ReactDOM from "react-dom";
 import { Skeleton } from "@material-ui/lab";
 //import {$} from "jquery";
 const $ = require("jquery");
-const config = require("./config");
 console.log("bundle :D");
 // RIP RepeatedComponent 2020 why did we need that anyway
 class ResultView extends React.Component {

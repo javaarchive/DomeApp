@@ -1,4 +1,5 @@
 var i18n = require("i18n");
+const config = require("./config");
 i18n.configure({
     directory: __dirname + '/locales'
 });
