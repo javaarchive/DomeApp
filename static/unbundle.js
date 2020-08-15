@@ -8,7 +8,18 @@ const columnTypes = {
 	"playlists":["Name", "Date", "Songs Count"],
 	"songs": ["Name", "Artist", "Duration"]
 }
+let musicServer = "http://localhost:3000"; // NO SLASH!
 // RIP RepeatedComponent 2020 why did we need that anyway
+function capitlizeFirst(string){
+	return string.charAt(0).toUpperCase() + string.slice(1);
+}
+// https://stackoverflow.com/questions/7045065/how-do-i-turn-a-javascript-dictionary-into-an-encoded-url-string
+function serialize(obj) {
+	var str = [];
+	for(var p in obj)
+	   str.push(encodeURIComponent(p) + "=" + encodeURIComponent(obj[p]));
+	return str.join("&");
+  }
 class ResultView extends React.Component {
 	constructor(props) {
 		super(props);
@@ -22,12 +33,14 @@ class ResultView extends React.Component {
 		// Componoent dies -> deconstructor
 	}
 	search() {
-		//let data = fetch(+"");
+		let data = fetch(musicServer+"/fetch"+capitlizeFirst(this.state.type)+"?");
 		this.setState(function (state, props) {
 			return {};
 		});
 	}
 	render() {
+		let comps = [];
+
 		return (
 			<>
 				<div class="row">
@@ -35,6 +48,7 @@ class ResultView extends React.Component {
 					<div class="col s4">{this.state.col2}</div>
 					<div class="col s4">{this.state.col3}</div>
 				</div>
+				{comps}
 			</>
 		);
 	}
