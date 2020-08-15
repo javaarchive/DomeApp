@@ -1,6 +1,11 @@
 import React from "react";
 import ReactDOM from "react-dom";
 import { Skeleton } from "@material-ui/lab";
+// Settings Loading
+const Store = require('electron-store');
+const store = new Store();
+
+
 //import {$} from "jquery";
 const $ = require("jquery");
 console.log("bundle :D");
@@ -33,7 +38,10 @@ class ResultView extends React.Component {
 		// Componoent dies -> deconstructor
 	}
 	search() {
-		let data = fetch(musicServer+"/fetch"+capitlizeFirst(this.state.type)+"?");
+		let data = fetch(musicServer+"/fetch_"+this.type+"?"+serialize({
+
+
+		}));
 		this.setState(function (state, props) {
 			return {};
 		});
