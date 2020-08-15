@@ -2,33 +2,43 @@ import React from "react";
 import ReactDOM from "react-dom";
 import { Skeleton } from "@material-ui/lab";
 // Settings Loading
-const Store = require('electron-store');
-const store = new Store();
-
+const Store = require("electron-store");
+const settings = new Store({
+	defaults: {
+		pageSize: 25,
+	},
+});
 
 //import {$} from "jquery";
 const $ = require("jquery");
 console.log("bundle :D");
 const columnTypes = {
-	"playlists":["Name", "Date", "Songs Count"],
-	"songs": ["Name", "Artist", "Duration"]
-}
+	playlists: ["Name", "Date", "Songs Count"],
+	songs: ["Name", "Artist", "Duration"],
+};
 let musicServer = "http://localhost:3000"; // NO SLASH!
 // RIP RepeatedComponent 2020 why did we need that anyway
-function capitlizeFirst(string){
+function capitlizeFirst(string) {
 	return string.charAt(0).toUpperCase() + string.slice(1);
 }
 // https://stackoverflow.com/questions/7045065/how-do-i-turn-a-javascript-dictionary-into-an-encoded-url-string
 function serialize(obj) {
 	var str = [];
-	for(var p in obj)
-	   str.push(encodeURIComponent(p) + "=" + encodeURIComponent(obj[p]));
+	for (var p in obj)
+		str.push(encodeURIComponent(p) + "=" + encodeURIComponent(obj[p]));
 	return str.join("&");
-  }
+}
 class ResultView extends React.Component {
 	constructor(props) {
 		super(props);
-		this.state = { type: props.type, col1: i18n.__(columnTypes[props.type][0]), col2: i18n.__(columnTypes[props.type][1]), col3: i18n.__(columnTypes[props.type][2])};
+		this.state = {
+			pageIndex: 0,
+			type: props.type,
+			col1: i18n.__(columnTypes[props.type][0]),
+			col2: i18n.__(columnTypes[props.type][1]),
+			col3: i18n.__(columnTypes[props.type][2]),
+			pageData: [],
+		};
 	}
 	componentDidMount() {
 		// Code to run when component is destoryed -> constructor
@@ -38,13 +48,24 @@ class ResultView extends React.Component {
 		// Componoent dies -> deconstructor
 	}
 	search() {
-		let data = fetch(musicServer+"/fetch_"+this.type+"?"+serialize({
-
-
-		}));
-		this.setState(function (state, props) {
-			return {};
-		});
+		let pageSize = settings.get("pageSize");
+		let resp = fetch(
+			musicServer +
+				"/api/fetch_" +
+				this.type +
+				"?" +
+				serialize({
+					limit: pageSize,
+					offset: pageSize * this.state.pageIndex,
+					name: this.state.searchBoxValue + "%",
+				})
+		);
+		if (data.status == "ok") {
+			let data = resp.data;
+			this.setState(function (state, props) {
+				return {pageData: data};
+			});
+		}
 	}
 	render() {
 		let comps = [];
@@ -97,7 +118,10 @@ class PlaylistView extends React.Component {
 					onChange={this.fetchSearch.bind(this)}
 					placeholder={i18n.__("Type to search")}
 				/>
-				<ResultView type="playlists" query={this.state.searchBoxValue}></ResultView>
+				<ResultView
+					type="playlists"
+					query={this.state.searchBoxValue}
+				></ResultView>
 				<div></div>
 			</>
 		);
