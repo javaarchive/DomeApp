@@ -51,3 +51,4 @@ $(function(){
         uiManager.emit("launchview", {id: tabid});
     })
 })
+const Store = require("electron-store");

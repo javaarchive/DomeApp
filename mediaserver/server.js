@@ -123,6 +123,14 @@ app.get("/api/fetch_songs", async (req, res) => {
 	}else{
 		res.json({status: "fail"});
 	}
+});
+app.get("/api/fetch_playlists", async (req, res) => {
+	let resp = await api.fetchPlaylists(req.query);
+	if(resp){
+		res.json(formatResponse(resp));
+	}else{
+		res.json({status: "fail"});
+	}
 })
 app.listen(port, () =>
 	console.log(`Media Server up at http://localhost:${port}`)
