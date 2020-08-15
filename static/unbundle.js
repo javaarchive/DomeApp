@@ -2,7 +2,9 @@ import React from "react";
 import ReactDOM from "react-dom";
 import { Skeleton } from "@material-ui/lab";
 // Settings Loading
-const Store = require("electron-store");
+if(!Store){
+	console.error("NO STORE found");
+}
 const settings = new Store({
 	defaults: {
 		pageSize: 25,
@@ -38,21 +40,29 @@ class ResultView extends React.Component {
 			col2: i18n.__(columnTypes[props.type][1]),
 			col3: i18n.__(columnTypes[props.type][2]),
 			pageData: [],
+			searchBoxValue: props.query
 		};
 	}
 	componentDidMount() {
-		// Code to run when component is destoryed -> constructor
+		// Code to run when component starts
+		this.search();
+		this.updateSearchInterval = setInterval(function(){
+			if(this.query){
+				this.search();
+			}
+		}, 10000);
 	}
 
 	componentWillUnmount() {
 		// Componoent dies -> deconstructor
+		clearInterval(this.updateSearchInterval);
 	}
 	search() {
 		let pageSize = settings.get("pageSize");
 		let resp = fetch(
 			musicServer +
 				"/api/fetch_" +
-				this.type +
+				this.state.type +
 				"?" +
 				serialize({
 					limit: pageSize,
@@ -60,7 +70,7 @@ class ResultView extends React.Component {
 					name: this.state.searchBoxValue + "%",
 				})
 		);
-		if (data.status == "ok") {
+		if (resp.status == "ok") {
 			let data = resp.data;
 			this.setState(function (state, props) {
 				return {pageData: data};

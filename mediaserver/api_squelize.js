@@ -8,6 +8,7 @@ let sequelize = new Sequelize(config.database);
 let Song = require("./models/Song")(sequelize);
 let Album = require("./models/Album")(sequelize);
 let Playlist = require("./models/Playlist")(sequelize);
+const validDirections = ["ASC","DESC"]
 let self = {
 	Song: Song, Playlist: Playlist, Album:Album,
 	createSong: async function(opts) {
@@ -104,6 +105,18 @@ let self = {
 		if(opts.offset){
 			query.offset = opts.offset;
 		}
+		let params = Object.keys(opts);
+		for(let i = 0; i < params.length; i ++){
+			if(params[i].startsWith("sort_")){
+				let orderer = params[i].substr("sort_".length);
+				if(validDirections.includes(opts[params[i]])){
+					if(!("order" in query)){
+						query["order"] = []
+					}
+					query["order"].push({orderer: opts[params[i]]});
+				}
+			}
+		}
 		let results = await Song.findAll(query);
 		return results;
 	},
@@ -117,9 +130,11 @@ if(require.main == module){
 	const { Command } = require('commander');
 	const program = new Command();
 	var AsciiTable = require('ascii-table');
-	program.version('0.0.1');
+	program.version('0.1.1');
 	program
-  .requiredOption('-m, --mode <mode>', 'execution mode', 'listsongs');
+  .requiredOption('-m, --mode <modeparam>', 'execution mode', 'listsongs');
+  	program.option('-on --object-name <objname>', 'specify name for action');
+  	program.option('-oa --object-artist <objArtistName>', 'specify artist name for action');
 	program.parse(process.argv);
 	if(program.mode == "listsongs"){
 		console.log("Listing Songs");
@@ -131,6 +146,13 @@ if(require.main == module){
 			table.addRow(songs[i].name, songs[i].artist, songs[i].id);
 		}
 		console.log(table.toString());
+	}
+	if(program.mode == "addsong"){
+		let songName = program.objectName;
+		let action = {}
+		action["name"] = songName;
+		
+		//self.createSong({})
 	}
 })();
 }
