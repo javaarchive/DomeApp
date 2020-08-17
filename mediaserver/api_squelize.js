@@ -133,26 +133,36 @@ if(require.main == module){
 	program.version('0.1.1');
 	program
   .requiredOption('-m, --mode <modeparam>', 'execution mode', 'listsongs');
-  	program.option('-on --object-name <objname>', 'specify name for action');
-  	program.option('-oa --object-artist <objArtistName>', 'specify artist name for action');
+  	program.option('-n --object-name <objname>', 'specify name for action');
+	program.option('-a --object-artist <objArtistName>', 'specify artist name for action');
+	program.option('-c --object-content-uri <objContentURI>', 'specify content uri for action');
 	program.parse(process.argv);
 	if(program.mode == "listsongs"){
 		console.log("Listing Songs");
 		let songs = await self.fetchSongs({limit: 10});
 		var table = new AsciiTable('Listing Songs')
-		table.setHeading('Name', 'Artist', 'ID');
+		table.setHeading('Name', 'Artist', 'ID','Content URI');
 		//table.align(AsciiTable.LEFT, '', 7);
 		for(let i = 0; i < songs.length; i ++){
-			table.addRow(songs[i].name, songs[i].artist, songs[i].id);
+			table.addRow(songs[i].name, songs[i].artist, songs[i].id, songs[i].contentURI);
 		}
 		console.log(table.toString());
 	}
 	if(program.mode == "addsong"){
 		let songName = program.objectName;
+		let artistName = program.objectArtist;
+		let contentURI = program.objectContentUri;
 		let action = {}
 		action["name"] = songName;
-		
-		//self.createSong({})
+		action["artist"] = artistName;
+		action["contentURI"] = contentURI;
+		console.log("Creating song with args "+JSON.stringify(action));
+		if(!action["name"] || !action["artist"] || !action["contentURI"]){
+			console.error("Error: You need the following name, artist, contentURI");
+			return;
+		}
+		self.createSong(action);
+		console.log('Song created successfully');
 	}
 })();
 }
