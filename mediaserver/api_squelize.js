@@ -8,9 +8,13 @@ let sequelize = new Sequelize(config.database);
 let Song = require("./models/Song")(sequelize);
 let Album = require("./models/Album")(sequelize);
 let Playlist = require("./models/Playlist")(sequelize);
+let models = {"Song": Song, "Album": Album, "Playlist": Playlist};
 const validDirections = ["ASC","DESC"]
 let self = {
 	Song: Song, Playlist: Playlist, Album:Album,
+	getTransaction: async function(){
+		return await sequelize.transaction();
+	},
 	createSong: async function(opts) {
 		let id = await idAutoIncrement();
 		let fields = _.defaults(opts, id);
@@ -56,6 +60,17 @@ let self = {
 		});
 		return album;
 	},
+	// Do not use get and update playlist without transaction, it may cause damage if not
+	getPlaylistAsList: async function(playlistID){
+		let playlist = await Playlist.find({id: playlistID});
+		let idList = JSON.parse(playlist.contents);
+	},
+	updatePlaylistList: async function(playlistID, newList){
+		let serializedList = JSON.stringify(newList);
+		let playlist = await Playlist.find({id: playlistID});
+		playlist.contents = serializedList;
+		await playlist.save();
+	},
 	getAlbumByName: async function(name) {
 		let album = Album.findOne({
 			where: { name: name }
@@ -73,7 +88,7 @@ let self = {
 		return album;
 	},
 	createEmptyPlaylist: async function(name){
-		let id = await idAutoIncrement;
+		let id = await idAutoIncrement();
 		let opts = {}
 		opts["id"] = id;
 		opts["name"] = name;	
@@ -94,7 +109,7 @@ let self = {
 			}
 		);
 	},
-	fetchSongs: async function(opts){
+	fetch: async function(type,opts){
 		let query = {where:{
 
 		}};
@@ -125,8 +140,14 @@ let self = {
 				}
 			}
 		}
-		let results = await Song.findAll(query);
+		let results = await models[type].findAll(query);
 		return results;
+	},
+	fetchSongs: function(opts){
+		return self.fetch("Song",opts);
+	},
+	fetchPlaylists: function(opts){
+		return self.fetch("Playlist",opts);
 	},
 	refresh: async function() {
 		await sequelize.sync();
@@ -145,6 +166,7 @@ if(require.main == module){
 	program.option('-a --object-artist <objArtistName>', 'specify artist name for action');
 	program.option('-c --object-content-uri <objContentURI>', 'specify content uri for action');
 	program.parse(process.argv);
+	await self.refresh();
 	if(program.mode == "listsongs"){
 		console.log("Listing Songs");
 		let songs = await self.fetchSongs({limit: 10});
@@ -153,6 +175,17 @@ if(require.main == module){
 		//table.align(AsciiTable.LEFT, '', 7);
 		for(let i = 0; i < songs.length; i ++){
 			table.addRow(songs[i].name, songs[i].artist, songs[i].id, songs[i].contentURI);
+		}
+		console.log(table.toString());
+	}
+	if(program.mode == "listplaylists"){
+		console.log("Listing Playlists");
+		let playlists = await self.fetchPlaylists({limit: 10});
+		var table = new AsciiTable('Listing Playlists')
+		table.setHeading('Name', 'Playlist Picture', 'ID');
+		//table.align(AsciiTable.LEFT, '', 7);
+		for(let i = 0; i < playlists.length; i ++){
+			table.addRow(playlists[i].name, playlists[i].playlistPicture, playlists[i].id);
 		}
 		console.log(table.toString());
 	}
@@ -169,8 +202,17 @@ if(require.main == module){
 			console.error("Error: You need the following name, artist, contentURI");
 			return;
 		}
-		self.createSong(action);
-		console.log('Song created successfully');
+		let t = await self.getTransaction();
+		try{
+			
+			self.createSong(action);
+			await t.commit();
+			console.log('Song created successfully');
+			
+		}catch(ex){
+			await t.rollback();
+			console.error("Failed to create song")
+		}
 	}
 	if(program.mode == "addplaylist"){
 		let playlistName = program.objectName;
@@ -181,8 +223,15 @@ if(require.main == module){
 			console.error("Error: You need to specify a name");
 			return;
 		}
-		self.createEmptyPlaylist(action["name"]);
-		console.log('Song created successfully');
+		let t = await self.getTransaction();
+		try{
+			await self.createEmptyPlaylist(action["name"]);
+			await t.commit();
+			console.log('Playlist created successfully');
+		}catch(ex){
+			console.error("Playlist creation failed "+ex);
+			await t.rollback();
+		}
 	}
 })();
 }
