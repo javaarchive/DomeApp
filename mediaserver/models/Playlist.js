@@ -9,7 +9,8 @@ module.exports = function(sequelize) {
             },
             contents:{
                 type: DataTypes.STRING,
-                allowNull: false
+                allowNull: false,
+                defaultValue: "[]"
             },playlistPicture: {
                 type: DataTypes.STRING,
                 defaultValue: "static/BlankAlbum.png"
