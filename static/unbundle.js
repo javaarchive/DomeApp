@@ -1,6 +1,7 @@
 import React from "react";
 import ReactDOM from "react-dom";
 import { Skeleton } from "@material-ui/lab";
+const Store = require('electron-store');
 // Settings Loading
 if(!Store){
 	console.error("NO STORE found");
