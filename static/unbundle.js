@@ -50,16 +50,16 @@ class ResultView extends React.Component {
 			if(this.query){
 				this.search();
 			}
-		}, 10000);
+		}, 2500);
 	}
 
 	componentWillUnmount() {
 		// Componoent dies -> deconstructor
 		clearInterval(this.updateSearchInterval);
 	}
-	search() {
+	async search() {
 		let pageSize = settings.get("pageSize");
-		let resp = fetch(
+		let resp = await (await fetch(
 			musicServer +
 				"/api/fetch_" +
 				this.state.type +
@@ -69,7 +69,7 @@ class ResultView extends React.Component {
 					offset: pageSize * this.state.pageIndex,
 					name: this.state.searchBoxValue + "%",
 				})
-		);
+		)).json();
 		if (resp.status == "ok") {
 			let data = resp.data;
 			this.setState(function (state, props) {

@@ -72,6 +72,14 @@ let self = {
 		});
 		return album;
 	},
+	createEmptyPlaylist: async function(name){
+		let id = await idAutoIncrement;
+		let opts = {}
+		opts["id"] = id;
+		opts["name"] = name;	
+		opts["contents"] = "[]";
+		await Playlist.create(opts);
+	},
 	addSong: async function(albumID, songID) {
 		let album = await this.getAlbumByID(albumID);
 		let songsList = JSON.stringify(album.contents);
@@ -162,6 +170,18 @@ if(require.main == module){
 			return;
 		}
 		self.createSong(action);
+		console.log('Song created successfully');
+	}
+	if(program.mode == "addplaylist"){
+		let playlistName = program.objectName;
+		let action = {}
+		action["name"] = playlistName;
+		console.log("Creating playlist with args "+JSON.stringify(action));
+		if(!action["name"]){
+			console.error("Error: You need to specify a name");
+			return;
+		}
+		self.createEmptyPlaylist(action["name"]);
 		console.log('Song created successfully');
 	}
 })();
