@@ -44,6 +44,7 @@
 		"react": "^16.13.1",
 		"react-addons-clone-with-props": "^0.14.8",
 		"react-dom": "^16.13.1",
+		"regenerator-runtime": "^0.13.7",
 		"sequelize": "^6.3.3",
 		"sqlite3": "^5.0.0",
 		"uid-generator": "^2.0.0",

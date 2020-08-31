@@ -13,6 +13,7 @@ const settings = new Store({
 
 //import {$} from "jquery";
 const $ = require("jquery");
+const regeneratorRuntime = require("regenerator-runtime");
 console.log("bundle :D");
 const columnTypes = {
 	playlists: ["Name", "Date", "Songs Count"],
@@ -45,6 +46,7 @@ class ResultView extends React.Component {
 	}
 	componentDidMount() {
 		// Code to run when component starts
+		console.log("Result View Mount")
 		this.search();
 		this.updateSearchInterval = setInterval(function(){
 			if(this.query){
@@ -58,6 +60,7 @@ class ResultView extends React.Component {
 		clearInterval(this.updateSearchInterval);
 	}
 	async search() {
+		console.log("Running Search Request");
 		let pageSize = settings.get("pageSize");
 		let resp = await (await fetch(
 			musicServer +
@@ -78,8 +81,16 @@ class ResultView extends React.Component {
 		}
 	}
 	render() {
-		let comps = [];
-
+		let comps = this.state.pageData.map(function(item){
+			return <>
+			<div class="row">
+					<div class="col s4">{item.name}</div>
+					<div class="col s4">{item.createdAt}</div>
+					<div class="col s4">{JSON.parse(item.contents).length}</div>
+				</div>
+			</>
+		})
+		
 		return (
 			<>
 				<div class="row">
@@ -88,6 +99,7 @@ class ResultView extends React.Component {
 					<div class="col s4">{this.state.col3}</div>
 				</div>
 				{comps}
+				Result View
 			</>
 		);
 	}
