@@ -20,6 +20,9 @@ const columnTypes = {
 	playlists: ["Name", "Date", "Songs Count"],
 	songs: ["Name", "Artist", "Duration"],
 };
+const columnProps = {
+	playlists: [item => item.name , item => item.createdAt, item => item.size]
+}
 let musicServer = "http://localhost:3000"; // NO SLASH!
 // RIP RepeatedComponent 2020 why did we need that anyway
 function capitlizeFirst(string) {
@@ -34,24 +37,35 @@ function serialize(obj) {
 }
 class ResultView extends React.Component {
 	constructor(props) {
-		super(props);
+		super(props );
 		this.state = {
 			pageIndex: 0,
 			type: props.type,
 			col1: i18n.__(columnTypes[props.type][0]),
 			col2: i18n.__(columnTypes[props.type][1]),
 			col3: i18n.__(columnTypes[props.type][2]),
-			pageData: [],
-			searchBoxValue: props.query
+			pageData: []
 		};
+		this.search.bind(this)();
+	}
+	shouldComponentUpdate(nextProps) {
+		console.log("Update Request");
+        const queryChanged = this.props.query !== nextProps.query;
+        return queryChanged;
+	}
+	componentDidUpdate(prevProps){
+		if(this.props.query !== prevProps.query){
+			this.search();
+		}
 	}
 	componentDidMount() {
 		// Code to run when component starts
 		console.log("Result View Mount")
 		this.search();
+		let componentThis = this;
 		this.updateSearchInterval = setInterval(function(){
-			if(this.query){
-				this.search();
+			if(componentThis.query){
+				componentThis.search.bind(componentThis)();
 			}
 		}, 2500);
 	}
@@ -71,11 +85,12 @@ class ResultView extends React.Component {
 				serialize({
 					limit: pageSize,
 					offset: pageSize * this.state.pageIndex,
-					name: this.state.searchBoxValue + "%",
+					name: this.props.query + "%",
 				})
 		)).json();
 		if (resp.status == "ok") {
 			let data = resp.data;
+			console.log("Updating data for "+this.state.query);
 			this.setState(function (state, props) {
 				return {pageData: data};
 			});
@@ -83,31 +98,32 @@ class ResultView extends React.Component {
 	}
 	render() {
 		let comps = this.state.pageData.map(function(item){
-			return <>
-			<div class="row">
-					<div class="col s4">{item.name}</div>
-					<div class="col s4">{item.createdAt}</div>
-					<div class="col s4">{JSON.parse(item.contents).length}</div>
+			return <div className="row" key={item.id}>
+					<div className="col s4">{item.name}</div>
+					<div className="col s4">{item.createdAt}</div>
+					<div className="col s4">{JSON.parse(item.contents).length}</div>
 				</div>
-			</>
 		})
 		
 		return (
 			<>
-				<div class="row">
-					<div class="col s4">{this.state.col1}</div>
-					<div class="col s4">{this.state.col2}</div>
-					<div class="col s4">{this.state.col3}</div>
+				<div className="row">
+					<div className="col s4">{this.state.col1}</div>
+					<div className="col s4">{this.state.col2}</div>
+					<div className="col s4">{this.state.col3}</div>
 				</div>
 				{comps}
-				Result View
+				<p>
+		{i18n.__("Showing ")}{this.state.pageData.length} {i18n.__(" items")};
+				</p>
 			</>
 		);
 	}
 }
 class PlaylistView extends React.Component {
 	constructor(props) {
-		super(props);
+		super();
+		//super(props);
 		this.state = { searchBoxValue: "" };
 		//this.fetchSearch = this.fetchSearch.bind(this);
 	}
@@ -119,9 +135,10 @@ class PlaylistView extends React.Component {
 		// Componoent dies -> deconstructor
 	}
 	fetchSearch(event) {
-		console.log(event);
-		console.log("Updating Search");
+		//console.log(event);
+		//console.log("Updating Search");
 		let searchValue = event.target.value;
+		console.log("New search value "+searchValue);
 		if (event.target.value) {
 			this.setState(function (state, props) {
 				return {
@@ -137,14 +154,16 @@ class PlaylistView extends React.Component {
 				<input
 					type="text"
 					id="searchbox-playlists"
-					class="searchbox"
+					className="searchbox"
 					onChange={this.fetchSearch.bind(this)}
+					onKeyUp={this.fetchSearch.bind(this)}
 					placeholder={i18n.__("Type to search")}
 				/>
 				<ResultView
 					type="playlists"
 					query={this.state.searchBoxValue}
 				></ResultView>
+				<p>{i18n.__("Current querying ")} {settings.get("pageSize")} {i18n.__(" playlists matching the query ")} {this.state.searchBoxValue}</p>
 				<div></div>
 			</>
 		);
