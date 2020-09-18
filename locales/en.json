@@ -8,5 +8,9 @@
 	"Name": "Name",
 	"Date": "Date",
 	"Songs": "Songs",
-	"Songs Count": "Songs Count"
+	"Songs Count": "Songs Count",
+	"Current querying ": "Current querying ",
+	" playlists matching the query ": " playlists matching the query ",
+	"Showing ": "Showing ",
+	" items": " items"
 }
