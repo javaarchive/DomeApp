@@ -9,7 +9,7 @@ let Song = require("./models/Song")(sequelize);
 let Album = require("./models/Album")(sequelize);
 let Playlist = require("./models/Playlist")(sequelize);
 let models = {"Song": Song, "Album": Album, "Playlist": Playlist};
-const validDirections = ["ASC","DESC"];
+const validDirections: string[] = ["ASC","DESC"];
 const schemeHandler = require("./schemehandler");
 let self = {
 	Song: Song, Playlist: Playlist, Album:Album,
