@@ -21,6 +21,7 @@ const columnTypes = {
 	songs: ["Name", "Artist", "Duration"],
 };
 const columnProps = {
+	playlists: [item => item.name , item => item.createdAt, item => JSON.parse(item).length],
 	playlists: [item => item.name , item => item.createdAt, item => item.size]
 }
 let musicServer = "http://localhost:3000"; // NO SLASH!
