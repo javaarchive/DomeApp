@@ -23,6 +23,10 @@ module.exports = function(sequelize) {
             },AlbumID:{
                 type: DataTypes.BIGINT,
                 allowNull: true
+            },duration:{
+                type: DataTypes.INTEGER,
+                allowNull: true,
+                defaultValue: null
             }
 		},
 		{

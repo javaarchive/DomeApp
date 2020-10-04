@@ -9,7 +9,8 @@ let Song = require("./models/Song")(sequelize);
 let Album = require("./models/Album")(sequelize);
 let Playlist = require("./models/Playlist")(sequelize);
 let models = {"Song": Song, "Album": Album, "Playlist": Playlist};
-const validDirections = ["ASC","DESC"]
+const validDirections = ["ASC","DESC"];
+const schemeHandler = require("./schemehandler");
 let self = {
 	Song: Song, Playlist: Playlist, Album:Album,
 	getTransaction: async function(){
@@ -18,6 +19,7 @@ let self = {
 	createSong: async function(opts) {
 		let id = await idAutoIncrement();
 		let fields = _.defaults(opts, id);
+		fields = _.defaults(opts, schemeHandler(opts["contentURI"]));
 		let song = await Song.create(fields);
 		return song;
 	},
@@ -100,7 +102,7 @@ let self = {
 		let songsList = JSON.stringify(album.contents);
 		songsList.push(songID);
 		let newList = JSON.stringify(songsList);
-		await User.update(
+		await Playlist.update(
 			{ contents: newList },
 			{
 				where: {
@@ -150,7 +152,12 @@ let self = {
 		return self.fetch("Playlist",opts);
 	},
 	refresh: async function() {
+		/*let modelsObjects = Object.values(models);
+		for(let i = 0; i < modelsObjects.length; i ++){
+			await modelsObjects[i].sync();
+		}*/
 		await sequelize.sync();
+		await sequelize.sync({alter: true});
 	}
 };
 if(require.main == module){
@@ -171,10 +178,10 @@ if(require.main == module){
 		console.log("Listing Songs");
 		let songs = await self.fetchSongs({limit: 10});
 		var table = new AsciiTable('Listing Songs')
-		table.setHeading('Name', 'Artist', 'ID','Content URI');
+		table.setHeading('Name', 'Artist', 'ID','Content URI', 'Duration');
 		//table.align(AsciiTable.LEFT, '', 7);
 		for(let i = 0; i < songs.length; i ++){
-			table.addRow(songs[i].name, songs[i].artist, songs[i].id, songs[i].contentURI);
+			table.addRow(songs[i].name, songs[i].artist, songs[i].id, songs[i].contentURI, songs[0].duration);
 		}
 		console.log(table.toString());
 	}
