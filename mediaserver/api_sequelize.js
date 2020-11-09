@@ -9,8 +9,9 @@ let Song = require("./models/Song")(sequelize);
 let Album = require("./models/Album")(sequelize);
 let Playlist = require("./models/Playlist")(sequelize);
 let models = {"Song": Song, "Album": Album, "Playlist": Playlist};
-const validDirections: string[] = ["ASC","DESC"];
+const validDirections = ["ASC","DESC"];
 const schemeHandler = require("./schemehandler");
+// console.log(self);
 let self = {
 	Song: Song, Playlist: Playlist, Album:Album,
 	getTransaction: async function(){
