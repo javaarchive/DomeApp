@@ -18,7 +18,8 @@
 		"pack": "electron-builder --dir",
 		"dist": "electron-builder --macos --linux --windows",
 		"release": "np",
-		"wrap": "parcel build -d static/dist --target electron -o bundle.js static/unbundle.js"
+		"wrap": "parcel build -d static/dist --target electron -o bundle.js static/unbundle.js",
+		"wrap watch":"parcel watch -d static/dist --target electron -o bundle.js static/unbundle.js"
 	},
 	"dependencies": {
 		"@babel/runtime": "^7.11.2",
