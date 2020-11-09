@@ -15,7 +15,7 @@ const password = pick("defaultpass",config.password);
 var api;
 if(config.mode == "sequelize"){
 	console.log("Loading sequelize");
-	api = require("./api_squelize");
+	api = require("./api_sequelize");
 }else if(config.mode == "mongodb"){
 	// Other stuff
 }
