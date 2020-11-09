@@ -22,7 +22,7 @@ const columnTypes = {
 };
 const columnProps = {
 	playlists: [item => item.name , item => item.createdAt, item => JSON.parse(item).length],
-	playlists: [item => item.name , item => item.createdAt, item => item.size]
+	songs: [item => item.name , item => item.createdAt, item => item.duration]
 }
 let musicServer = "http://localhost:3000"; // NO SLASH!
 // RIP RepeatedComponent 2020 why did we need that anyway
@@ -35,6 +35,9 @@ function serialize(obj) {
 	for (var p in obj)
 		str.push(encodeURIComponent(p) + "=" + encodeURIComponent(obj[p]));
 	return str.join("&");
+}
+function calcColClass(cols){
+	return "s"+12/cols;
 }
 class ResultView extends React.Component {
 	constructor(props) {
@@ -50,7 +53,7 @@ class ResultView extends React.Component {
 		this.search.bind(this)();
 	}
 	shouldComponentUpdate(nextProps) {
-		console.log("Update Request");
+		console.info("Update Request");
         const queryChanged = this.props.query !== nextProps.query;
         return queryChanged;
 	}
@@ -61,7 +64,7 @@ class ResultView extends React.Component {
 	}
 	componentDidMount() {
 		// Code to run when component starts
-		console.log("Result View Mount")
+		console.info("Result View Mounted")
 		this.search();
 		let componentThis = this;
 		this.updateSearchInterval = setInterval(function(){
@@ -98,13 +101,14 @@ class ResultView extends React.Component {
 		}
 	}
 	render() {
-		let comps = this.state.pageData.map(function(item){
+		let colgenerator = function(item){
 			return <div className="row" key={item.id}>
-					<div className="col s4">{item.name}</div>
+					<div className="col s4">{columnProps[this.props.type][0](item)}</div>
 					<div className="col s4">{item.createdAt}</div>
 					<div className="col s4">{JSON.parse(item.contents).length}</div>
 				</div>
-		})
+		};
+		let comps = this.state.pageData.map(colgenerator.bind(this));
 		
 		return (
 			<>
@@ -173,15 +177,16 @@ class PlaylistView extends React.Component {
 let views = {};
 views.playlists = <PlaylistView />;
 
+
 // Bootstrap code
 if (uiManager) {
-	console.log("Binding to uiManager");
+	console.log("Binding to uiManager instance ");
 	uiManager.on("launchview", function (data) {
 		console.log(data);
-		console.log("Rendering " + data.id);
+		console.log("Rendering ",data.id);
 		console.log(views[data.id]);
 		ReactDOM.render(views[data.id], document.getElementById("contentview"));
-	});
+	}); // Bind to launch view event
 } else {
-	console.log("Error ui manager not found");
+	console.error("Ui manager not found");
 }
