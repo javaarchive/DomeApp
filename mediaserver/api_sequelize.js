@@ -67,6 +67,7 @@ let self = {
 	getPlaylistAsList: async function(playlistID){
 		let playlist = await Playlist.find({id: playlistID});
 		let idList = JSON.parse(playlist.contents);
+		return idList;
 	},
 	updatePlaylistList: async function(playlistID, newList){
 		let serializedList = JSON.stringify(newList);
@@ -152,13 +153,15 @@ let self = {
 	fetchPlaylists: function(opts){
 		return self.fetch("Playlist",opts);
 	},
-	refresh: async function() {
+	refresh: async function(full = false) {
 		/*let modelsObjects = Object.values(models);
 		for(let i = 0; i < modelsObjects.length; i ++){
 			await modelsObjects[i].sync();
 		}*/
 		await sequelize.sync();
-		await sequelize.sync({alter: true});
+		if(full){
+			await sequelize.sync({alter: true});
+		}
 	}
 };
 if(require.main == module){
@@ -173,6 +176,8 @@ if(require.main == module){
   	program.option('-n --object-name <objname>', 'specify name for action');
 	program.option('-a --object-artist <objArtistName>', 'specify artist name for action');
 	program.option('-c --object-content-uri <objContentURI>', 'specify content uri for action');
+	program.option('-f, --full', 'Full Refresh on Database (use after scheme change)');
+	program.option('-i, --object-identifier',"specify id for an action");
 	program.parse(process.argv);
 	await self.refresh();
 	if(program.mode == "listsongs"){
@@ -238,6 +243,61 @@ if(require.main == module){
 			console.log('Playlist created successfully');
 		}catch(ex){
 			console.error("Playlist creation failed "+ex);
+			await t.rollback();
+		}
+	}
+	if(program.mode == "getplaylist"){
+		let playlistName = program.objectName;
+		let action = {}
+		action["name"] = playlistName;
+		console.log("Getting playlist with args "+JSON.stringify(action));
+		if(!action["name"]){
+			console.error("Error: You need to specify a name");
+			return;
+		}
+		let t = await self.getTransaction();
+		try{
+			let playlists = await self.fetchPlaylists(action);
+			console.log(playlists);
+			if(playlists.length > 1){
+				console.warn("Multiple Playlists with the name were found. Printing only the first one. ")
+			}else if(playlists.length == 1){
+				console.log(playlists[0].contents);
+			}else{
+				console.log("No playlist with name found");
+			}
+			await t.commit();
+		}catch(ex){
+			console.error("Playlist fetch failed "+ex);
+			await t.rollback();
+		}
+	}
+	if(program.mode == "appendtoplaylist"){
+		let playlistName = program.objectName;
+		let action = {}
+		action["name"] = playlistName;
+		console.log("Modifying playlist with args "+JSON.stringify(action));
+		if(!action["name"]){
+			console.error("Error: You need to specify a name");
+			return;
+		}
+		let t = await self.getTransaction();
+		try{
+			let playlists = await self.fetchPlaylists(action);
+			//console.log(playlists);
+			if(playlists.length > 1){
+				console.error("Multiple Playlists with the name were found. Aborting!")
+			}else if(playlists.length == 1){
+				console.log("before add ", playlists[0].contents);
+				let tempPlaylist = JSON.parse(playlists[0].contents);
+				tempPlaylist.push(program.objectIdentifier);
+				self.updatePlaylistList(playlists.id,JSON.stringify(tempPlaylist));
+			}else{
+				console.log("No playlist with name found");
+			}
+			await t.commit();
+		}catch(ex){
+			console.error("Playlist fetch failed "+ex);
 			await t.rollback();
 		}
 	}

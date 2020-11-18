@@ -4,7 +4,7 @@ import { Skeleton } from "@material-ui/lab";
 const Store = require('electron-store');
 // Settings Loading
 if(!Store){
-	console.error("NO STORE found");
+	console.warn("NO STORE found");
 }
 const settings = new Store({
 	defaults: {
@@ -19,10 +19,12 @@ console.log("bundle :D");
 const columnTypes = {
 	playlists: ["Name", "Date", "Songs Count"],
 	songs: ["Name", "Artist", "Duration"],
+	albums: ["Name","Last Updated","Songs"]
 };
 const columnProps = {
-	playlists: [item => item.name , item => item.createdAt, item => JSON.parse(item).length],
-	songs: [item => item.name , item => item.createdAt, item => item.duration]
+	playlists: [item => item.name , item => item.createdAt, item => JSON.parse(item.contents).length],
+	songs: [item => item.name , item => item.artist, item => item.duration],
+	albums: [item => item.name , item => item.updatedAt, item => JSON.parse(item.contents).length]
 }
 let musicServer = "http://localhost:3000"; // NO SLASH!
 // RIP RepeatedComponent 2020 why did we need that anyway
@@ -104,8 +106,8 @@ class ResultView extends React.Component {
 		let colgenerator = function(item){
 			return <div className="row" key={item.id}>
 					<div className="col s4">{columnProps[this.props.type][0](item)}</div>
-					<div className="col s4">{item.createdAt}</div>
-					<div className="col s4">{JSON.parse(item.contents).length}</div>
+					<div className="col s4">{columnProps[this.props.type][1](item)}</div>
+					<div className="col s4">{columnProps[this.props.type][2](item)}</div>
 				</div>
 		};
 		let comps = this.state.pageData.map(colgenerator.bind(this));
