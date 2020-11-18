@@ -1,4 +1,4 @@
-process.env.HMR_PORT=55478;process.env.HMR_HOSTNAME="localhost";// modules are defined as an array
+process.env.HMR_PORT=61349;process.env.HMR_HOSTNAME="localhost";// modules are defined as an array
 // [ module function, map of requires ]
 //
 // map of requires is short require name -> numeric require
@@ -132,7 +132,7 @@ const Store = require('electron-store'); // Settings Loading
 
 
 if (!Store) {
-  console.error("NO STORE found");
+  console.warn("NO STORE found");
 }
 
 const settings = new Store({
@@ -148,11 +148,13 @@ const regeneratorRuntime = require("regenerator-runtime");
 console.log("bundle :D");
 const columnTypes = {
   playlists: ["Name", "Date", "Songs Count"],
-  songs: ["Name", "Artist", "Duration"]
+  songs: ["Name", "Artist", "Duration"],
+  albums: ["Name", "Last Updated", "Songs"]
 };
 const columnProps = {
-  playlists: [item => item.name, item => item.createdAt, item => JSON.parse(item).length],
-  songs: [item => item.name, item => item.createdAt, item => item.duration]
+  playlists: [item => item.name, item => item.createdAt, item => JSON.parse(item.contents).length],
+  songs: [item => item.name, item => item.artist, item => item.duration],
+  albums: [item => item.name, item => item.updatedAt, item => JSON.parse(item.contents).length]
 };
 let musicServer = "http://localhost:3000"; // NO SLASH!
 // RIP RepeatedComponent 2020 why did we need that anyway
@@ -246,9 +248,9 @@ class ResultView extends _react.default.Component {
         className: "col s4"
       }, columnProps[this.props.type][0](item)), /*#__PURE__*/_react.default.createElement("div", {
         className: "col s4"
-      }, item.createdAt), /*#__PURE__*/_react.default.createElement("div", {
+      }, columnProps[this.props.type][1](item)), /*#__PURE__*/_react.default.createElement("div", {
         className: "col s4"
-      }, JSON.parse(item.contents).length));
+      }, columnProps[this.props.type][2](item)));
     };
 
     let comps = this.state.pageData.map(colgenerator.bind(this));
