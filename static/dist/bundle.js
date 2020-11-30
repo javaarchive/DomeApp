@@ -1,4 +1,4 @@
-process.env.HMR_PORT=61349;process.env.HMR_HOSTNAME="localhost";// modules are defined as an array
+process.env.HMR_PORT=63009;process.env.HMR_HOSTNAME="localhost";// modules are defined as an array
 // [ module function, map of requires ]
 //
 // map of requires is short require name -> numeric require
@@ -145,7 +145,22 @@ const $ = require("jquery");
 
 const regeneratorRuntime = require("regenerator-runtime");
 
-console.log("bundle :D");
+console.log("bundle :D"); // Localizations
+
+function formatDuration(seconds) {
+  let curSecs = seconds;
+  let out = "";
+
+  if (curSecs > 60 * 60) {
+    out += Math.floor(curSecs / (60 * 60)) + ":";
+    curSecs = curSecs % (60 * 60);
+  }
+
+  out += Math.floor(curSecs / 60).toString().padStart(2, "0") + ":" + (curSecs % 60).toString().padStart(2, "0");
+  return out;
+} // Constants
+
+
 const columnTypes = {
   playlists: ["Name", "Date", "Songs Count"],
   songs: ["Name", "Artist", "Duration"],
@@ -153,7 +168,7 @@ const columnTypes = {
 };
 const columnProps = {
   playlists: [item => item.name, item => item.createdAt, item => JSON.parse(item.contents).length],
-  songs: [item => item.name, item => item.artist, item => item.duration],
+  songs: [item => item.name, item => item.artist, item => item.duration ? formatDuration(item.duration) : "Unknown"],
   albums: [item => item.name, item => item.updatedAt, item => JSON.parse(item.contents).length]
 };
 let musicServer = "http://localhost:3000"; // NO SLASH!
@@ -178,7 +193,8 @@ function calcColClass(cols) {
 
 class ResultView extends _react.default.Component {
   constructor(props) {
-    super(props);
+    super(props); // Deprecated but needed anyway
+
     this.state = {
       pageIndex: 0,
       type: props.type,
@@ -241,28 +257,35 @@ class ResultView extends _react.default.Component {
 
   render() {
     let colgenerator = function (item) {
+      // TODO: Move col sizes to constants
       return /*#__PURE__*/_react.default.createElement("div", {
-        className: "row",
-        key: item.id
+        className: "row wide-item waves-effect waves-light",
+        key: item.id,
+        "data-id": item.id,
+        onclick: this.props.onItemClick
       }, /*#__PURE__*/_react.default.createElement("div", {
-        className: "col s4"
+        className: "col s6"
       }, columnProps[this.props.type][0](item)), /*#__PURE__*/_react.default.createElement("div", {
-        className: "col s4"
+        className: "col s3"
       }, columnProps[this.props.type][1](item)), /*#__PURE__*/_react.default.createElement("div", {
-        className: "col s4"
+        className: "col s3"
       }, columnProps[this.props.type][2](item)));
     };
 
     let comps = this.state.pageData.map(colgenerator.bind(this));
-    return /*#__PURE__*/_react.default.createElement(_react.default.Fragment, null, /*#__PURE__*/_react.default.createElement("div", {
-      className: "row"
+    return /*#__PURE__*/_react.default.createElement("div", {
+      className: "results-wrapper"
     }, /*#__PURE__*/_react.default.createElement("div", {
-      className: "col s4"
+      className: "row wide-item"
+    }, /*#__PURE__*/_react.default.createElement("div", {
+      className: "col s6"
     }, this.state.col1), /*#__PURE__*/_react.default.createElement("div", {
-      className: "col s4"
+      className: "col s3"
     }, this.state.col2), /*#__PURE__*/_react.default.createElement("div", {
-      className: "col s4"
-    }, this.state.col3)), comps, /*#__PURE__*/_react.default.createElement("p", null, i18n.__("Showing "), this.state.pageData.length, " ", i18n.__(" items"), ";"));
+      className: "col s3"
+    }, this.state.col3)), /*#__PURE__*/_react.default.createElement("div", {
+      className: "results-rows"
+    }, comps), /*#__PURE__*/_react.default.createElement("p", null, i18n.__("Showing "), this.state.pageData.length, " ", i18n.__(" items"), ";"));
   }
 
 }
@@ -285,8 +308,7 @@ class PlaylistView extends _react.default.Component {
   fetchSearch(event) {
     //console.log(event);
     //console.log("Updating Search");
-    let searchValue = event.target.value;
-    console.log("New search value " + searchValue);
+    let searchValue = event.target.value; //console.log("New search value "+searchValue);
 
     if (event.target.value) {
       this.setState(function (state, props) {
@@ -313,22 +335,71 @@ class PlaylistView extends _react.default.Component {
 
 }
 
+class SongView extends _react.default.Component {
+  constructor(props) {
+    super(); //super(props);
+
+    this.state = {
+      searchBoxValue: ""
+    }; //this.fetchSearch = this.fetchSearch.bind(this);
+  }
+
+  componentDidMount() {// Code to run when component is destoryed -> constructor
+  }
+
+  componentWillUnmount() {// Componoent dies -> deconstructor
+  }
+
+  fetchSearch(event) {
+    //console.log(event);
+    //console.log("Updating Search");
+    let searchValue = event.target.value; //console.log("New search value "+searchValue);
+
+    if (event.target.value) {
+      this.setState(function (state, props) {
+        return {
+          searchBoxValue: searchValue
+        };
+      });
+    }
+  }
+
+  render() {
+    return /*#__PURE__*/_react.default.createElement(_react.default.Fragment, null, /*#__PURE__*/_react.default.createElement("input", {
+      type: "text",
+      id: "searchbox-playlists",
+      className: "searchbox",
+      onChange: this.fetchSearch.bind(this),
+      onKeyUp: this.fetchSearch.bind(this),
+      placeholder: i18n.__("Type to search")
+    }), /*#__PURE__*/_react.default.createElement(ResultView, {
+      type: "songs",
+      query: this.state.searchBoxValue
+    }), /*#__PURE__*/_react.default.createElement("p", null, i18n.__("Current querying "), " ", settings.get("pageSize"), " ", i18n.__(" songs matching the query "), " ", this.state.searchBoxValue), /*#__PURE__*/_react.default.createElement("div", null));
+  }
+
+}
+
 let views = {};
-views.playlists = /*#__PURE__*/_react.default.createElement(PlaylistView, null); // Bootstrap code
+views.playlists = /*#__PURE__*/_react.default.createElement(PlaylistView, null);
+views.songs = /*#__PURE__*/_react.default.createElement(SongView, null);
+window.debug = {};
+window.debug.views = views; // Bootstrap code
 
 if (uiManager) {
   console.log("Binding to uiManager instance ");
   uiManager.on("launchview", function (data) {
     console.log(data);
-    console.log("Rendering ", data.id);
+    console.log("Rendering", data.id);
     console.log(views[data.id]);
+    console.log(Object.keys(views));
 
     _reactDom.default.render(views[data.id], document.getElementById("contentview"));
   }); // Bind to launch view event
 } else {
   console.error("Ui manager not found");
 }
-},{}],"../node_modules/.pnpm/parcel-bundler@1.12.4/node_modules/parcel-bundler/src/builtins/hmr-runtime.js":[function(require,module,exports) {
+},{}],"../node_modules/parcel-bundler/src/builtins/hmr-runtime.js":[function(require,module,exports) {
 var OVERLAY_ID = '__parcel__error__overlay__';
 
 var OldModule = module.bundle.Module;
@@ -542,5 +613,5 @@ function hmrAcceptRun(bundle, id) {
   }
 }
 
-},{}]},{},["../node_modules/.pnpm/parcel-bundler@1.12.4/node_modules/parcel-bundler/src/builtins/hmr-runtime.js","unbundle.js"], null)
+},{}]},{},["../node_modules/parcel-bundler/src/builtins/hmr-runtime.js","unbundle.js"], null)
 //# sourceMappingURL=/bundle.js.map
