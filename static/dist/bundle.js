@@ -262,7 +262,7 @@ class ResultView extends _react.default.Component {
         className: "row wide-item waves-effect waves-light",
         key: item.id,
         "data-id": item.id,
-        onclick: this.props.onItemClick
+        onClick: this.props.onItemClick
       }, /*#__PURE__*/_react.default.createElement("div", {
         className: "col s6"
       }, columnProps[this.props.type][0](item)), /*#__PURE__*/_react.default.createElement("div", {
@@ -319,6 +319,10 @@ class PlaylistView extends _react.default.Component {
     }
   }
 
+  onItemClick(e) {
+    console.log("Item Click", e, this);
+  }
+
   render() {
     return /*#__PURE__*/_react.default.createElement(_react.default.Fragment, null, /*#__PURE__*/_react.default.createElement("input", {
       type: "text",
@@ -329,7 +333,8 @@ class PlaylistView extends _react.default.Component {
       placeholder: i18n.__("Type to search")
     }), /*#__PURE__*/_react.default.createElement(ResultView, {
       type: "playlists",
-      query: this.state.searchBoxValue
+      query: this.state.searchBoxValue,
+      onItemClick: this.onItemClick.bind(this)
     }), /*#__PURE__*/_react.default.createElement("p", null, i18n.__("Current querying "), " ", settings.get("pageSize"), " ", i18n.__(" playlists matching the query "), " ", this.state.searchBoxValue), /*#__PURE__*/_react.default.createElement("div", null));
   }
 
