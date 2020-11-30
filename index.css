@@ -1,3 +1,16 @@
+/*
+Constant colors
+*/
+:root{
+	--main-theme-color: teal;
+	--main-theme-secondary-color: #146d83;
+	--main-theme-color-light: #4cb0af;
+	--main-theme-text-color: white;
+	--main-background-color:rgba(0, 128, 128, 0.616);
+	--corners-round: 8px;
+}
+
+
 html,
 body {
 	padding: 0;
@@ -55,4 +68,31 @@ header h1 {
   .pad-small{
 	  padding: 8px;
 	  margin: 10px;
+  }
+  /*Component Styles*/
+.wide-item{
+	color: var(--main-theme-text-color);  
+	background-color: var(--main-theme-color);
+	transition: 0.25s;
+	transition-timing-function: cubic-bezier(0.215, 0.610, 0.355, 1);
+	padding: 0.8em;
+	border-radius: var(--corners-round);
+  }
+	div.wide-item{
+		margin: 4px 20px;
+	}
+  div.wide-item.waves-effect{
+	display: block;
+  }
+  .wide-item:hover,.wide-item:focus{
+	color: var(--main-theme-text-color);  
+	background-color: var(--main-theme-secondary-color);
+	
+  }
+  .wide-item:nth-child(2){
+	  background-color: var(--main-theme-secondary-color);
+  }
+  .results-wrapper{
+	  /*background-color: var(--main-background-color);*/
+	  padding: 4px;
   }

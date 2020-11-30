@@ -19,8 +19,10 @@ let self = {
 	},
 	createSong: async function(opts) {
 		let id = await idAutoIncrement();
-		let fields = _.defaults(opts, id);
-		fields = _.defaults(opts, schemeHandler(opts["contentURI"]));
+		let fields = _.defaults(opts, {id:id});
+		let extra_meta = await schemeHandler(opts["contentURI"]);
+		console.log("Extra data found for song",extra_meta);
+		fields = _.defaults(opts, extra_meta);
 		let song = await Song.create(fields);
 		return song;
 	},
@@ -71,7 +73,7 @@ let self = {
 	},
 	updatePlaylistList: async function(playlistID, newList){
 		let serializedList = JSON.stringify(newList);
-		let playlist = await Playlist.find({id: playlistID});
+		let playlist = await Playlist.findOne({id: playlistID});
 		playlist.contents = serializedList;
 		await playlist.save();
 	},
@@ -177,7 +179,7 @@ if(require.main == module){
 	program.option('-a --object-artist <objArtistName>', 'specify artist name for action');
 	program.option('-c --object-content-uri <objContentURI>', 'specify content uri for action');
 	program.option('-f, --full', 'Full Refresh on Database (use after scheme change)');
-	program.option('-i, --object-identifier',"specify id for an action");
+	program.option('-i, --object-identifier <objid>',"specify id for an action");
 	program.parse(process.argv);
 	await self.refresh();
 	if(program.mode == "listsongs"){
@@ -290,8 +292,9 @@ if(require.main == module){
 			}else if(playlists.length == 1){
 				console.log("before add ", playlists[0].contents);
 				let tempPlaylist = JSON.parse(playlists[0].contents);
-				tempPlaylist.push(program.objectIdentifier);
-				self.updatePlaylistList(playlists.id,JSON.stringify(tempPlaylist));
+				tempPlaylist.push(parseInt(program.objectIdentifier));
+				await self.updatePlaylistList(playlists.id,tempPlaylist);
+				console.log("after add",tempPlaylist);
 			}else{
 				console.log("No playlist with name found");
 			}
