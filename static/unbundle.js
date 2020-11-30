@@ -121,7 +121,7 @@ class ResultView extends React.Component {
 	render() {
 		let colgenerator = function(item){
 			// TODO: Move col sizes to constants
-			return <div className="row wide-item waves-effect waves-light" key={item.id} data-id={item.id} onclick={this.props.onItemClick}>
+			return <div className="row wide-item waves-effect waves-light" key={item.id} data-id={item.id} onClick={this.props.onItemClick}>
 					<div className="col s6">{columnProps[this.props.type][0](item)}</div>
 					<div className="col s3">{columnProps[this.props.type][1](item)}</div>
 					<div className="col s3">{columnProps[this.props.type][2](item)}</div>
@@ -173,7 +173,9 @@ class PlaylistView extends React.Component {
 			});
 		}
 	}
-
+	onItemClick(e){
+		console.log("Item Click",e,this);
+	}
 	render() {
 		return (
 			<>
@@ -188,6 +190,7 @@ class PlaylistView extends React.Component {
 				<ResultView
 					type="playlists"
 					query={this.state.searchBoxValue}
+					onItemClick={this.onItemClick.bind(this)}
 				></ResultView>
 				<p>{i18n.__("Current querying ")} {settings.get("pageSize")} {i18n.__(" playlists matching the query ")} {this.state.searchBoxValue}</p>
 				<div></div>
