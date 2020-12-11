@@ -43,7 +43,6 @@ const columnProps = {
 }
 
 let musicServer = "http://localhost:3000"; // NO SLASH!
-// RIP RepeatedComponent 2020 why did we need that anyway
 function capitlizeFirst(string) {
 	return string.charAt(0).toUpperCase() + string.slice(1);
 }
