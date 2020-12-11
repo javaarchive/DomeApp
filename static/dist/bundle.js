@@ -1,4 +1,4 @@
-process.env.HMR_PORT=63009;process.env.HMR_HOSTNAME="localhost";// modules are defined as an array
+process.env.HMR_PORT=52755;process.env.HMR_HOSTNAME="localhost";// modules are defined as an array
 // [ module function, map of requires ]
 //
 // map of requires is short require name -> numeric require
@@ -172,7 +172,6 @@ const columnProps = {
   albums: [item => item.name, item => item.updatedAt, item => JSON.parse(item.contents).length]
 };
 let musicServer = "http://localhost:3000"; // NO SLASH!
-// RIP RepeatedComponent 2020 why did we need that anyway
 
 function capitlizeFirst(string) {
   return string.charAt(0).toUpperCase() + string.slice(1);
