@@ -1,4 +1,4 @@
-process.env.HMR_PORT=52755;process.env.HMR_HOSTNAME="localhost";// modules are defined as an array
+process.env.HMR_PORT=59164;process.env.HMR_HOSTNAME="localhost";// modules are defined as an array
 // [ module function, map of requires ]
 //
 // map of requires is short require name -> numeric require
@@ -117,7 +117,85 @@ parcelRequire = (function (modules, cache, entry, globalName) {
   }
 
   return newRequire;
-})({"unbundle.js":[function(require,module,exports) {
+})({"player.js":[function(require,module,exports) {
+"use strict";
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+exports.PlayerComponent = void 0;
+// React Player to be imported 
+// Meant to be reusable in other contexts
+const hasArtist = ["Song"];
+const hasMultipleArtists = ["Album"]; // Playlists are usually user created so they will have a variety of artists
+
+if (!i18n) {
+  try {
+    var i18n = require("i18n");
+  } catch (ex) {
+    var i18n = null; // Allow custom instances to be added later.
+  }
+} // Might already be init
+
+
+class PlayerComponent extends React.Component {
+  constructor(props) {
+    super(props); // Deprecated but needed
+
+    this.state = {
+      itemName: i18n.__("Nothing Playing")
+    };
+  }
+
+  componentDidMount() {// Code to run when component is destoryed -> constructor
+  }
+
+  componentWillUnmount() {// Componoent dies -> deconstructor
+  }
+
+  updateItem(type, params) {
+    let properties = {};
+
+    if ("name" in params) {
+      properties.itemName = params.name;
+    }
+
+    if (hasArtist.includes(type)) {
+      if ("artist" in params) {
+        properties.itemMadeBy = params.artist;
+      }
+    }
+
+    if ("duration" in params) {
+      properties.duration = params.duration;
+    } else {
+      properties.duration = null; // Not provided
+    }
+
+    this.setState(function (state, props) {
+      return properties;
+    });
+  }
+
+  updateDuration(time) {
+    // Sometimes duration can be found afterwards
+    this.setState(function (state, props) {
+      return {
+        itemDuration: time
+      };
+    });
+  }
+
+  render() {
+    return /*#__PURE__*/React.createElement(React.Fragment, null, /*#__PURE__*/React.createElement("div", {
+      class: "player"
+    }, /*#__PURE__*/React.createElement("h4", null, this.state.itemName)), /*#__PURE__*/React.createElement("hr", null));
+  }
+
+}
+
+exports.PlayerComponent = PlayerComponent;
+},{}],"unbundle.js":[function(require,module,exports) {
 "use strict";
 
 var _react = _interopRequireDefault(require("react"));
@@ -125,6 +203,8 @@ var _react = _interopRequireDefault(require("react"));
 var _reactDom = _interopRequireDefault(require("react-dom"));
 
 var _lab = require("@material-ui/lab");
+
+var _player = require("./player");
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
@@ -398,12 +478,14 @@ if (uiManager) {
     console.log(views[data.id]);
     console.log(Object.keys(views));
 
-    _reactDom.default.render(views[data.id], document.getElementById("contentview"));
+    _reactDom.default.render( /*#__PURE__*/_react.default.createElement(_react.default.Fragment, null, views[data.id], "Player goes here", /*#__PURE__*/_react.default.createElement(_player.PlayerComponent, null)), document.getElementById("contentview"));
   }); // Bind to launch view event
 } else {
   console.error("Ui manager not found");
 }
-},{}],"../node_modules/parcel-bundler/src/builtins/hmr-runtime.js":[function(require,module,exports) {
+
+console.log("Player Comp", _player.PlayerComponent);
+},{"./player":"player.js"}],"../node_modules/parcel-bundler/src/builtins/hmr-runtime.js":[function(require,module,exports) {
 var OVERLAY_ID = '__parcel__error__overlay__';
 
 var OldModule = module.bundle.Module;

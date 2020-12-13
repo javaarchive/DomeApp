@@ -1,6 +1,7 @@
 import React from "react";
 import ReactDOM from "react-dom";
 import { Skeleton } from "@material-ui/lab";
+import {PlayerComponent} from "./player";
 const Store = require('electron-store');
 // Settings Loading
 if(!Store){
@@ -260,8 +261,13 @@ if (uiManager) {
 		console.log("Rendering",data.id);
 		console.log(views[data.id]);
 		console.log(Object.keys(views));
-		ReactDOM.render(views[data.id], document.getElementById("contentview"));
+		ReactDOM.render(<>
+		{views[data.id]}
+		Player goes here
+		<PlayerComponent />
+		</>, document.getElementById("contentview"));
 	}); // Bind to launch view event
 } else {
 	console.error("Ui manager not found");
 }
+console.log("Player Comp", PlayerComponent);
