@@ -15,5 +15,6 @@
 	" items": " items",
 	" songs matching the query ": " songs matching the query ",
 	"Artist": "Artist",
-	"Duration": "Duration"
+	"Duration": "Duration",
+	"Nothing Playing": "Nothing Playing"
 }

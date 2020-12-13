@@ -3,12 +3,18 @@
 // Meant to be reusable in other contexts
 const hasArtist = ["Song"];
 const hasMultipleArtists = ["Album"]; // Playlists are usually user created so they will have a variety of artists
-
+if(!i18n){
+    try{
+        var i18n = require("i18n");
+    }catch(ex){
+        var i18n = null; // Allow custom instances to be added later.
+    }
+} // Might already be init
 class PlayerComponent extends React.Component {
     constructor(props) {
       super(props); // Deprecated but needed
       this.state = {
-          itemName: ""
+          itemName: i18n.__("Nothing Playing")
       };
     }
     componentDidMount() {
@@ -54,7 +60,9 @@ class PlayerComponent extends React.Component {
         <div class="player">
       <h4>{this.state.itemName}</h4>
         </div>
+        <hr />
         </>
       );
     }
   }
+export {PlayerComponent};
