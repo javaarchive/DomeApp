@@ -1,4 +1,4 @@
-process.env.HMR_PORT=59164;process.env.HMR_HOSTNAME="localhost";// modules are defined as an array
+process.env.HMR_PORT=62636;process.env.HMR_HOSTNAME="localhost";// modules are defined as an array
 // [ module function, map of requires ]
 //
 // map of requires is short require name -> numeric require
@@ -124,6 +124,13 @@ Object.defineProperty(exports, "__esModule", {
   value: true
 });
 exports.PlayerComponent = void 0;
+
+var _react = _interopRequireDefault(require("react"));
+
+var _reactDom = _interopRequireDefault(require("react-dom"));
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
 // React Player to be imported 
 // Meant to be reusable in other contexts
 const hasArtist = ["Song"];
@@ -138,7 +145,7 @@ if (!i18n) {
 } // Might already be init
 
 
-class PlayerComponent extends React.Component {
+class PlayerComponent extends _react.default.Component {
   constructor(props) {
     super(props); // Deprecated but needed
 
@@ -187,9 +194,9 @@ class PlayerComponent extends React.Component {
   }
 
   render() {
-    return /*#__PURE__*/React.createElement(React.Fragment, null, /*#__PURE__*/React.createElement("div", {
+    return /*#__PURE__*/_react.default.createElement(_react.default.Fragment, null, /*#__PURE__*/_react.default.createElement("div", {
       class: "player"
-    }, /*#__PURE__*/React.createElement("h4", null, this.state.itemName)), /*#__PURE__*/React.createElement("hr", null));
+    }, /*#__PURE__*/_react.default.createElement("h4", null, this.state.itemName)), /*#__PURE__*/_react.default.createElement("hr", null));
   }
 
 }
@@ -205,10 +212,6 @@ var _reactDom = _interopRequireDefault(require("react-dom"));
 var _lab = require("@material-ui/lab");
 
 var _core = require("@material-ui/core");
-
-var _FormGroup = _interopRequireDefault(require("@material-ui/core/FormGroup"));
-
-var _FormControlLabel = _interopRequireDefault(require("@material-ui/core/FormControlLabel"));
 
 var _styles = require("@material-ui/core/styles");
 
@@ -231,6 +234,8 @@ var _player = require("./player");
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
 // Core components
+// import FormGroup from "@material-ui/core/FormGroup";
+// import FormControlLabel from "@material-ui/core/FormControlLabel";
 // Utilites
 // Ui icons
 // Also called a hamburger
@@ -526,16 +531,56 @@ views.homeview = /*#__PURE__*/_react.default.createElement(HomeComponent, null);
 window.debug = {};
 window.debug.views = views; // Main Comp
 
-class Component extends _react.default.Component {
+class MainComponent extends _react.default.Component {
   constructor(props) {
     super(props);
     this.state = {
-      selectedView: "homeview"
+      selectedView: "homeview",
+      anchorEl: null,
+      setAnchorEl: null
     };
   }
 
   render() {
-    return /*#__PURE__*/_react.default.createElement(_react.default.Fragment, null);
+    const classes = stylesSet();
+    return /*#__PURE__*/_react.default.createElement(_react.default.Fragment, null, /*#__PURE__*/_react.default.createElement("div", {
+      className: classes.root
+    }, /*#__PURE__*/_react.default.createElement(_AppBar.default, {
+      position: "static"
+    }, /*#__PURE__*/_react.default.createElement(_Toolbar.default, null, /*#__PURE__*/_react.default.createElement(IconButton, {
+      edge: "start",
+      className: classes.menuButton,
+      color: "inherit",
+      "aria-label": "menu"
+    }, /*#__PURE__*/_react.default.createElement(_Menu.default, null)), /*#__PURE__*/_react.default.createElement(Typography, {
+      variant: "h6",
+      className: classes.title
+    }, i18n.__("App Name")), /*#__PURE__*/_react.default.createElement("div", null, /*#__PURE__*/_react.default.createElement(IconButton, {
+      "aria-label": "Switch Media Server",
+      "aria-controls": "menu-appbar",
+      "aria-haspopup": "true",
+      onClick: handleMenu
+    }, /*#__PURE__*/_react.default.createElement(_Storage.default, null)), /*#__PURE__*/_react.default.createElement(_Menu2.default, {
+      id: "menu-appbar",
+      anchorEl: anchorEl,
+      anchorOrigin: {
+        vertical: 'top',
+        horizontal: 'right'
+      },
+      keepMounted: true,
+      transformOrigin: {
+        vertical: 'top',
+        horizontal: 'right'
+      },
+      open: open,
+      onClose: handleClose
+    }, /*#__PURE__*/_react.default.createElement(_MenuItem.default, {
+      onClick: setServer
+    }, "Local"), /*#__PURE__*/_react.default.createElement(_MenuItem.default, {
+      onClick: setServer
+    }, "Add new server"))))), /*#__PURE__*/_react.default.createElement(_core.Container, {
+      maxWidth: "sm"
+    }, views[data.id]), /*#__PURE__*/_react.default.createElement(_player.PlayerComponent, null)));
   }
 
   componentDidMount() {// Code to run when component is destoryed -> constructor
@@ -567,13 +612,12 @@ const stylesSet = (0, _styles.makeStyles)(theme => ({
     marginRight: theme.spacing(2)
   }
 }));
+
+function setServer(comp) {}
+
 $(function () {
   // TODO: Replace with Vanilla JS to make script size smaller
-  _reactDom.default.render( /*#__PURE__*/_react.default.createElement(_react.default.Fragment, null, /*#__PURE__*/_react.default.createElement("div", {
-    className: classes.root
-  }, /*#__PURE__*/_react.default.createElement(_core.Container, {
-    maxWidth: "sm"
-  }, views[data.id]), /*#__PURE__*/_react.default.createElement(_player.PlayerComponent, null))), document.getElementById("root"));
+  _reactDom.default.render( /*#__PURE__*/_react.default.createElement(MainComponent, null), document.getElementById("root"));
 });
 console.log("Player Comp", _player.PlayerComponent);
 },{"./player":"player.js"}],"../node_modules/parcel-bundler/src/builtins/hmr-runtime.js":[function(require,module,exports) {
