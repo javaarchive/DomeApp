@@ -3,8 +3,8 @@ import ReactDOM from "react-dom";
 // Core components
 import { Skeleton } from "@material-ui/lab";
 import { Container } from "@material-ui/core";
-import FormGroup from "@material-ui/core/FormGroup";
-import FormControlLabel from "@material-ui/core/FormControlLabel";
+// import FormGroup from "@material-ui/core/FormGroup";
+// import FormControlLabel from "@material-ui/core/FormControlLabel";
 
 // Utilites
 import { makeStyles } from "@material-ui/core/styles";
@@ -332,15 +332,48 @@ window.debug = {};
 window.debug.views = views;
 
 // Main Comp
-class Component extends React.Component {
+class MainComponent extends React.Component {
 	constructor(props) {
 		super(props);
 		this.state = {
 			selectedView: "homeview",
+			anchorEl: null,
+			setAnchorEl: null
 		};
 	}
 	render() {
-		return <></>;
+		const classes = stylesSet();
+
+		return <>
+		<div className={classes.root}>
+			<AppBar position="static">
+				<Toolbar>
+					<IconButton edge="start" className={classes.menuButton} color="inherit" aria-label="menu">
+						<MenuIcon />
+					</IconButton>
+					<Typography variant="h6" className={classes.title}>
+						{i18n.__("App Name")}
+					</Typography>
+					<div>
+						<IconButton aria-label="Switch Media Server" aria-controls="menu-appbar" aria-haspopup="true" onClick={handleMenu}>
+							<StorageIcon />
+						</IconButton>
+						<Menu id="menu-appbar" anchorEl={anchorEl} anchorOrigin={{vertical:'top',horizontal:'right'}} keepMounted transformOrigin={{vertical:'top',horizontal:'right'}} open={open} onClose={handleClose}>
+							<MenuItem onClick={setServer}>
+								Local
+							</MenuItem>
+							<MenuItem onClick={setServer}>
+								Add new server
+							</MenuItem>
+						</Menu>
+					</div>
+				</Toolbar>
+			</AppBar>
+			<Container maxWidth="sm">{views[data.id]}</Container>
+
+			<PlayerComponent />
+		</div>
+	</>;
 	}
 	componentDidMount() {
 		// Code to run when component is destoryed -> constructor
@@ -357,7 +390,6 @@ class Component extends React.Component {
 		});
 	}
 }
-
 // Bootstrap code
 // really odd part i'm learning
 const stylesSet = makeStyles((theme) => ({
@@ -371,17 +403,15 @@ const stylesSet = makeStyles((theme) => ({
 		marginRight: theme.spacing(2),
 	},
 }));
+function setServer(comp){
+	
+}
 $(function () {
 	// TODO: Replace with Vanilla JS to make script size smaller
+	
 
 	ReactDOM.render(
-		<>
-			<div className={classes.root}>
-				<Container maxWidth="sm">{views[data.id]}</Container>
-
-				<PlayerComponent />
-			</div>
-		</>,
+		<MainComponent />,
 		document.getElementById("root")
 	);
 });

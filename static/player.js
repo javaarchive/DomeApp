@@ -1,3 +1,5 @@
+import React from "react";
+import ReactDOM from "react-dom";
 
 // React Player to be imported 
 // Meant to be reusable in other contexts
