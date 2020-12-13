@@ -204,11 +204,39 @@ var _reactDom = _interopRequireDefault(require("react-dom"));
 
 var _lab = require("@material-ui/lab");
 
+var _core = require("@material-ui/core");
+
+var _FormGroup = _interopRequireDefault(require("@material-ui/core/FormGroup"));
+
+var _FormControlLabel = _interopRequireDefault(require("@material-ui/core/FormControlLabel"));
+
+var _styles = require("@material-ui/core/styles");
+
+var _Menu = _interopRequireDefault(require("@material-ui/icons/Menu"));
+
+var _Storage = _interopRequireDefault(require("@material-ui/icons/Storage"));
+
+var _Switch = _interopRequireDefault(require("@material-ui/core/Switch"));
+
+var _Toolbar = _interopRequireDefault(require("@material-ui/core/Toolbar"));
+
+var _MenuItem = _interopRequireDefault(require("@material-ui/core/MenuItem"));
+
+var _Menu2 = _interopRequireDefault(require("@material-ui/core/Menu"));
+
+var _AppBar = _interopRequireDefault(require("@material-ui/core/AppBar"));
+
 var _player = require("./player");
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
-const Store = require('electron-store'); // Settings Loading
+// Core components
+// Utilites
+// Ui icons
+// Also called a hamburger
+// Ui Widgets
+// Reusable Player Componoent
+const Store = require("electron-store"); // Settings Loading
 
 
 if (!Store) {
@@ -462,28 +490,91 @@ class SongView extends _react.default.Component {
     }), /*#__PURE__*/_react.default.createElement("p", null, i18n.__("Current querying "), " ", settings.get("pageSize"), " ", i18n.__(" songs matching the query "), " ", this.state.searchBoxValue), /*#__PURE__*/_react.default.createElement("div", null));
   }
 
-}
+} // Home View
+// TODO: Populate with intresting things
+
+
+class HomeComponent extends _react.default.Component {
+  constructor(props) {
+    super(props);
+    this.state = {};
+  }
+
+  componentDidMount() {// Code to run when component is destoryed -> constructor
+  }
+
+  componentWillUnmount() {// Componoent dies -> deconstructor
+  }
+
+  stateChange() {
+    this.setState(function (state, props) {
+      return {};
+    });
+  }
+
+  render() {
+    return /*#__PURE__*/_react.default.createElement(_react.default.Fragment, null, /*#__PURE__*/_react.default.createElement("h1", null, i18n.__("Hello! This is the default homescreen for now. ")));
+  }
+
+} // Legacy Views System
+
 
 let views = {};
 views.playlists = /*#__PURE__*/_react.default.createElement(PlaylistView, null);
 views.songs = /*#__PURE__*/_react.default.createElement(SongView, null);
+views.homeview = /*#__PURE__*/_react.default.createElement(HomeComponent, null);
 window.debug = {};
-window.debug.views = views; // Bootstrap code
+window.debug.views = views; // Main Comp
 
-if (uiManager) {
-  console.log("Binding to uiManager instance ");
-  uiManager.on("launchview", function (data) {
-    console.log(data);
-    console.log("Rendering", data.id);
-    console.log(views[data.id]);
-    console.log(Object.keys(views));
+class Component extends _react.default.Component {
+  constructor(props) {
+    super(props);
+    this.state = {
+      selectedView: "homeview"
+    };
+  }
 
-    _reactDom.default.render( /*#__PURE__*/_react.default.createElement(_react.default.Fragment, null, views[data.id], "Player goes here", /*#__PURE__*/_react.default.createElement(_player.PlayerComponent, null)), document.getElementById("contentview"));
-  }); // Bind to launch view event
-} else {
-  console.error("Ui manager not found");
-}
+  render() {
+    return /*#__PURE__*/_react.default.createElement(_react.default.Fragment, null);
+  }
 
+  componentDidMount() {// Code to run when component is destoryed -> constructor
+  }
+
+  componentWillUnmount() {// Componoent dies -> deconstructor
+  }
+
+  changeView(view) {
+    this.setState(function (state, props) {
+      return {
+        selectedView: view
+      };
+    });
+  }
+
+} // Bootstrap code
+// really odd part i'm learning
+
+
+const stylesSet = (0, _styles.makeStyles)(theme => ({
+  root: {
+    flexGrow: 1
+  },
+  title: {
+    flexGrow: 1
+  },
+  menuButton: {
+    marginRight: theme.spacing(2)
+  }
+}));
+$(function () {
+  // TODO: Replace with Vanilla JS to make script size smaller
+  _reactDom.default.render( /*#__PURE__*/_react.default.createElement(_react.default.Fragment, null, /*#__PURE__*/_react.default.createElement("div", {
+    className: classes.root
+  }, /*#__PURE__*/_react.default.createElement(_core.Container, {
+    maxWidth: "sm"
+  }, views[data.id]), /*#__PURE__*/_react.default.createElement(_player.PlayerComponent, null))), document.getElementById("root"));
+});
 console.log("Player Comp", _player.PlayerComponent);
 },{"./player":"player.js"}],"../node_modules/parcel-bundler/src/builtins/hmr-runtime.js":[function(require,module,exports) {
 var OVERLAY_ID = '__parcel__error__overlay__';

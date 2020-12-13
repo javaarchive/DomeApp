@@ -14,48 +14,8 @@
 	</head>
 	<body>
 		<div class="outer">
-			<nav class="nav-extended">
-				<div class="nav-wrapper teal">
-				  <a href="#" class="brand-logo pad-small brand-text">Dome</a>
-				  <a href="#" data-target="mobile-demo" class="sidenav-trigger"><i class="material-icons">menu</i></a>
-				  <ul id="nav-mobile" class="right hide-on-med-and-down">
-					<li class="waves-effect waves-light"><a href="#mymusic">My music</a></li>
-					<li class="waves-effect waves-light"><a href="#musicserver">Music Server</a></li>
-					<li><a href="#home" onclick="destroy();">Exit</a></li>
-				  </ul>
-				</div>
-				<div class="nav-content teal">
-				  <ul class="tabs tabs-transparent">
-					<li class="tab"><a class="active" href="#home" tab-id="home">Home</a></li>
-					<li class="tab"><a href="#playlists" tabid="playlists">Playlists</a></li>
-					<li class="tab"><a href="#songs" tabid="songs">All Songs</a></li>
-					<li class="tab"><a href="#albums" tabid="albums">Albums</a></li>
-				  </ul>
-				</div>
-			  </nav>
-			
-			  <ul class="sidenav" id="mobile-demo">
-				<li class="waves-effect waves-light"><a href="#mymusic">My music</a></li>
-				<li class="waves-effect waves-light"><a href="#musicserver">Music Server</a></li>
-				<li><a href="#home" onclick="destroy();">Exit</a></li>
-			  </ul>
-			  <div class="container">
-			  <div id="home" class="col s12">
-				  <h3>Home!</h3>
-				  <span></span>
-			  </div>
-			  <div id="songs" class="col s12">
-				  <h3>Viewing Songs</h3>
-			  </div>
-			  <div id="playlists" class="col s12">
-				  <h3>Showing Playlists</h3>
-			  </div>
-			  <div id="albums" class="col s12">
-				  <h3>Album Listing</h3>
-			  </div>
-			  <div class="content-pane" id="contentview">
+			<div class="content-pane" id="root">
 
-			  </div>
 			</div>
 		</div>
 		<script src="static/jquery-3.5.1.min.js"></script>
