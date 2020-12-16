@@ -1,4 +1,4 @@
-process.env.HMR_PORT=62636;process.env.HMR_HOSTNAME="localhost";// modules are defined as an array
+process.env.HMR_PORT=55225;process.env.HMR_HOSTNAME="localhost";// modules are defined as an array
 // [ module function, map of requires ]
 //
 // map of requires is short require name -> numeric require
@@ -195,7 +195,7 @@ class PlayerComponent extends _react.default.Component {
 
   render() {
     return /*#__PURE__*/_react.default.createElement(_react.default.Fragment, null, /*#__PURE__*/_react.default.createElement("div", {
-      class: "player"
+      className: "player"
     }, /*#__PURE__*/_react.default.createElement("h4", null, this.state.itemName)), /*#__PURE__*/_react.default.createElement("hr", null));
   }
 
@@ -219,6 +219,10 @@ var _Menu = _interopRequireDefault(require("@material-ui/icons/Menu"));
 
 var _Storage = _interopRequireDefault(require("@material-ui/icons/Storage"));
 
+var _AppBar = _interopRequireDefault(require("@material-ui/core/AppBar"));
+
+var _IconButton = _interopRequireDefault(require("@material-ui/core/IconButton"));
+
 var _Switch = _interopRequireDefault(require("@material-ui/core/Switch"));
 
 var _Toolbar = _interopRequireDefault(require("@material-ui/core/Toolbar"));
@@ -227,7 +231,7 @@ var _MenuItem = _interopRequireDefault(require("@material-ui/core/MenuItem"));
 
 var _Menu2 = _interopRequireDefault(require("@material-ui/core/Menu"));
 
-var _AppBar = _interopRequireDefault(require("@material-ui/core/AppBar"));
+var _Typography = _interopRequireDefault(require("@material-ui/core/Typography"));
 
 var _player = require("./player");
 
@@ -531,87 +535,76 @@ views.homeview = /*#__PURE__*/_react.default.createElement(HomeComponent, null);
 window.debug = {};
 window.debug.views = views; // Main Comp
 
-class MainComponent extends _react.default.Component {
-  constructor(props) {
-    super(props);
-    this.state = {
-      selectedView: "homeview",
-      anchorEl: null,
-      setAnchorEl: null
-    };
+function MainComponent() {
+  let [anchorEl, setAnchorEl] = _react.default.useState(null);
+
+  function handleMenu(event) {
+    console.log(this);
+    setAnchorEl(event.target);
   }
 
-  render() {
-    const classes = stylesSet();
-    return /*#__PURE__*/_react.default.createElement(_react.default.Fragment, null, /*#__PURE__*/_react.default.createElement("div", {
-      className: classes.root
-    }, /*#__PURE__*/_react.default.createElement(_AppBar.default, {
-      position: "static"
-    }, /*#__PURE__*/_react.default.createElement(_Toolbar.default, null, /*#__PURE__*/_react.default.createElement(IconButton, {
-      edge: "start",
-      className: classes.menuButton,
-      color: "inherit",
-      "aria-label": "menu"
-    }, /*#__PURE__*/_react.default.createElement(_Menu.default, null)), /*#__PURE__*/_react.default.createElement(Typography, {
-      variant: "h6",
-      className: classes.title
-    }, i18n.__("App Name")), /*#__PURE__*/_react.default.createElement("div", null, /*#__PURE__*/_react.default.createElement(IconButton, {
-      "aria-label": "Switch Media Server",
-      "aria-controls": "menu-appbar",
-      "aria-haspopup": "true",
-      onClick: handleMenu
-    }, /*#__PURE__*/_react.default.createElement(_Storage.default, null)), /*#__PURE__*/_react.default.createElement(_Menu2.default, {
-      id: "menu-appbar",
-      anchorEl: anchorEl,
-      anchorOrigin: {
-        vertical: 'top',
-        horizontal: 'right'
-      },
-      keepMounted: true,
-      transformOrigin: {
-        vertical: 'top',
-        horizontal: 'right'
-      },
-      open: open,
-      onClose: handleClose
-    }, /*#__PURE__*/_react.default.createElement(_MenuItem.default, {
-      onClick: setServer
-    }, "Local"), /*#__PURE__*/_react.default.createElement(_MenuItem.default, {
-      onClick: setServer
-    }, "Add new server"))))), /*#__PURE__*/_react.default.createElement(_core.Container, {
-      maxWidth: "sm"
-    }, views[data.id]), /*#__PURE__*/_react.default.createElement(_player.PlayerComponent, null)));
-  }
+  function handleClose(event) {
+    console.log(this);
+    setAnchorEl(null);
+  } //let [open] = React.useState(true);
 
-  componentDidMount() {// Code to run when component is destoryed -> constructor
-  }
 
-  componentWillUnmount() {// Componoent dies -> deconstructor
-  }
+  let [curView] = _react.default.useState("homeview");
 
-  changeView(view) {
-    this.setState(function (state, props) {
-      return {
-        selectedView: view
-      };
-    });
-  }
-
+  const open = Boolean(anchorEl);
+  const stylesSet = (0, _styles.makeStyles)(theme => ({
+    root: {
+      flexGrow: 1
+    },
+    title: {
+      flexGrow: 1
+    },
+    menuButton: {
+      marginRight: theme.spacing(2)
+    }
+  }));
+  const classes = stylesSet();
+  return /*#__PURE__*/_react.default.createElement(_react.default.Fragment, null, /*#__PURE__*/_react.default.createElement("div", {
+    className: classes.root
+  }, /*#__PURE__*/_react.default.createElement(_AppBar.default, {
+    position: "static"
+  }, /*#__PURE__*/_react.default.createElement(_Toolbar.default, null, /*#__PURE__*/_react.default.createElement(_IconButton.default, {
+    edge: "start",
+    className: classes.menuButton,
+    color: "inherit",
+    "aria-label": "menu"
+  }, /*#__PURE__*/_react.default.createElement(_Menu.default, null)), /*#__PURE__*/_react.default.createElement(_Typography.default, {
+    variant: "h6",
+    className: classes.title
+  }, i18n.__("App Name")), /*#__PURE__*/_react.default.createElement("div", null, /*#__PURE__*/_react.default.createElement(_IconButton.default, {
+    "aria-label": "Switch Media Server",
+    "aria-controls": "menu-appbar",
+    "aria-haspopup": "true",
+    onClick: handleMenu
+  }, /*#__PURE__*/_react.default.createElement(_Storage.default, null)), /*#__PURE__*/_react.default.createElement(_Menu2.default, {
+    id: "menu-appbar",
+    anchorEl: anchorEl,
+    anchorOrigin: {
+      vertical: 'top',
+      horizontal: 'right'
+    },
+    keepMounted: true,
+    transformOrigin: {
+      vertical: 'top',
+      horizontal: 'right'
+    },
+    onClose: handleClose,
+    open: open
+  }, /*#__PURE__*/_react.default.createElement(_MenuItem.default, {
+    onClick: setServer
+  }, "Local"), /*#__PURE__*/_react.default.createElement(_MenuItem.default, {
+    onClick: setServer
+  }, "Add new server"))))), /*#__PURE__*/_react.default.createElement(_core.Container, {
+    maxWidth: "sm"
+  }, views[curView]), /*#__PURE__*/_react.default.createElement(_player.PlayerComponent, null)));
 } // Bootstrap code
 // really odd part i'm learning
 
-
-const stylesSet = (0, _styles.makeStyles)(theme => ({
-  root: {
-    flexGrow: 1
-  },
-  title: {
-    flexGrow: 1
-  },
-  menuButton: {
-    marginRight: theme.spacing(2)
-  }
-}));
 
 function setServer(comp) {}
 

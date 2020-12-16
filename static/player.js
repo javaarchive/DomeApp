@@ -59,7 +59,7 @@ class PlayerComponent extends React.Component {
     render() {
       return (
         <>
-        <div class="player">
+        <div className="player">
       <h4>{this.state.itemName}</h4>
         </div>
         <hr />

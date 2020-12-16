@@ -12,13 +12,15 @@ import { makeStyles } from "@material-ui/core/styles";
 // Ui icons
 import MenuIcon from "@material-ui/icons/Menu"; // Also called a hamburger
 import StorageIcon from "@material-ui/icons/Storage";
+
+// Ui Widgets
+import AppBar from "@material-ui/core/AppBar";
+import IconButton from "@material-ui/core/IconButton";
 import Switch from "@material-ui/core/Switch";
 import Toolbar from "@material-ui/core/Toolbar";
 import MenuItem from "@material-ui/core/MenuItem";
 import Menu from "@material-ui/core/Menu";
-
-// Ui Widgets
-import AppBar from "@material-ui/core/AppBar";
+import Typography from "@material-ui/core/Typography";
 
 // Reusable Player Componoent
 import { PlayerComponent } from "./player";
@@ -332,18 +334,32 @@ window.debug = {};
 window.debug.views = views;
 
 // Main Comp
-class MainComponent extends React.Component {
-	constructor(props) {
-		super(props);
-		this.state = {
-			selectedView: "homeview",
-			anchorEl: null,
-			setAnchorEl: null
-		};
-	}
-	render() {
+function MainComponent(){
+		
+		let [anchorEl, setAnchorEl] = React.useState(null);
+		function handleMenu(event){
+			console.log(this);
+			setAnchorEl(event.target);
+		}
+		function handleClose(event){
+			console.log(this);
+			setAnchorEl(null);
+		}
+		//let [open] = React.useState(true);
+		let [curView] = React.useState("homeview");
+		const open = Boolean(anchorEl);
+		const stylesSet = makeStyles((theme) => ({
+			root: {
+				flexGrow: 1,
+			},
+			title: {
+				flexGrow: 1,
+			},
+			menuButton: {
+				marginRight: theme.spacing(2),
+			},
+		}));
 		const classes = stylesSet();
-
 		return <>
 		<div className={classes.root}>
 			<AppBar position="static">
@@ -358,7 +374,14 @@ class MainComponent extends React.Component {
 						<IconButton aria-label="Switch Media Server" aria-controls="menu-appbar" aria-haspopup="true" onClick={handleMenu}>
 							<StorageIcon />
 						</IconButton>
-						<Menu id="menu-appbar" anchorEl={anchorEl} anchorOrigin={{vertical:'top',horizontal:'right'}} keepMounted transformOrigin={{vertical:'top',horizontal:'right'}} open={open} onClose={handleClose}>
+						<Menu id="menu-appbar"
+						anchorEl={anchorEl} 
+						anchorOrigin={{vertical:'top',horizontal:'right'}}
+						 keepMounted 
+						 transformOrigin={{vertical:'top',horizontal:'right'}}
+					     onClose={handleClose}
+						 open={open}
+						 >
 							<MenuItem onClick={setServer}>
 								Local
 							</MenuItem>
@@ -369,43 +392,19 @@ class MainComponent extends React.Component {
 					</div>
 				</Toolbar>
 			</AppBar>
-			<Container maxWidth="sm">{views[data.id]}</Container>
+			<Container maxWidth="sm">{views[curView]}</Container>
 
 			<PlayerComponent />
 		</div>
 	</>;
-	}
-	componentDidMount() {
-		// Code to run when component is destoryed -> constructor
-	}
-
-	componentWillUnmount() {
-		// Componoent dies -> deconstructor
-	}
-	changeView(view) {
-		this.setState(function (state, props) {
-			return {
-				selectedView: view,
-			};
-		});
-	}
 }
 // Bootstrap code
 // really odd part i'm learning
-const stylesSet = makeStyles((theme) => ({
-	root: {
-		flexGrow: 1,
-	},
-	title: {
-		flexGrow: 1,
-	},
-	menuButton: {
-		marginRight: theme.spacing(2),
-	},
-}));
+
 function setServer(comp){
 	
 }
+
 $(function () {
 	// TODO: Replace with Vanilla JS to make script size smaller
 	

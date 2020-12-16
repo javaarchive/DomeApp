@@ -16,5 +16,7 @@
 	" songs matching the query ": " songs matching the query ",
 	"Artist": "Artist",
 	"Duration": "Duration",
-	"Nothing Playing": "Nothing Playing"
+	"Nothing Playing": "Nothing Playing",
+	"App Name": "App Name",
+	"Hello! This is the default homescreen for now. ": "Hello! This is the default homescreen for now. "
 }
