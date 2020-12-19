@@ -1,5 +1,10 @@
 import React from "react";
 import ReactDOM from "react-dom";
+// Fonts (broken currently)
+// import "fontsource-roboto";
+// Styles
+import styles from "./player.module.css";
+import Typography from "@material-ui/core/Typography";
 
 // React Player to be imported 
 // Meant to be reusable in other contexts
@@ -60,11 +65,16 @@ class PlayerComponent extends React.Component {
       return (
         <>
         <div className="player">
-      <h4>{this.state.itemName}</h4>
+            <span className={styles.playerTitle}>
+                <Typography variant="h5">{this.state.itemName}</Typography>
+            </span>
+            <span className={styles.playerItemMadeBy}>
+                <Typography variant="h6">{this.state.itemMadeBy}</Typography>
+            </span>
         </div>
-        <hr />
         </>
       );
     }
   }
+console.log("Imported styles",styles);
 export {PlayerComponent};

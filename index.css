@@ -1,0 +1,23 @@
+.roboto{
+	font-family: "Roboto";
+}
+.player{
+	position: fixed;
+	bottom: 0px;
+	left:0px;
+	margin: 12px;
+	border-top: 1px;
+	border-bottom: 0px;
+	border-left: 0px;
+	border-right: 0px;
+	border-color: black;
+	border-style: solid;
+	box-shadow: 2px;
+	width: calc(100% - 24px);
+	height: 60px;
+}
+.content-pane{
+	height: calc(100% - 60px);
+	width: 100%;
+	margin: 0px;
+}
