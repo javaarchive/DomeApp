@@ -41,6 +41,7 @@
 		"electron-util": "^0.13.1",
 		"express": "^4.17.1",
 		"express-session": "^1.17.1",
+		"fontsource-roboto": "^3.1.5",
 		"i18n": "^0.10.0",
 		"id-auto-increment": "^1.0.1",
 		"jquery": "^3.5.1",
@@ -61,9 +62,12 @@
 	},
 	"devDependencies": {
 		"@babel/plugin-transform-runtime": "^7.12.1",
+		"autoprefixer": "^9.8.6",
 		"electron": "^7.3.3",
 		"electron-builder": "^21.2.0",
 		"np": "^5.2.1",
+		"postcss": "^8.2.1",
+		"postcss-modules": "^3.2.2",
 		"xo": "^0.33.1"
 	},
 	"xo": {

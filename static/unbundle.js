@@ -1,5 +1,11 @@
 import React from "react";
 import ReactDOM from "react-dom";
+// Fonts
+
+// broken?
+// Roboto font for material
+//import 'fontsource-roboto'; // Workaround parcel issue?
+
 // Core components
 import { Skeleton } from "@material-ui/lab";
 import { Container } from "@material-ui/core";
@@ -319,7 +325,7 @@ class HomeComponent extends React.Component {
 	render() {
 		return (
 			<>
-				<h1>{i18n.__("Hello! This is the default homescreen for now. ")}</h1>
+				<Typography variant="h3">{i18n.__("Hello! This is the default homescreen for now. ")}</Typography>
 			</>
 		);
 	}
@@ -371,8 +377,8 @@ function MainComponent(){
 						{i18n.__("App Name")}
 					</Typography>
 					<div>
-						<IconButton aria-label="Switch Media Server" aria-controls="menu-appbar" aria-haspopup="true" onClick={handleMenu}>
-							<StorageIcon />
+						<IconButton color="inherit" aria-label="Switch Media Server" aria-controls="menu-appbar" aria-haspopup="true" onClick={handleMenu}>
+							<StorageIcon/>
 						</IconButton>
 						<Menu id="menu-appbar"
 						anchorEl={anchorEl} 
@@ -392,7 +398,7 @@ function MainComponent(){
 					</div>
 				</Toolbar>
 			</AppBar>
-			<Container maxWidth="sm">{views[curView]}</Container>
+			<Container maxWidth="md">{views[curView]}</Container>
 
 			<PlayerComponent />
 		</div>
