@@ -191,7 +191,35 @@ module.exports = {
   "playerTitle": "_playerTitle_7a16e",
   "playerItemMadeBy": "_playerItemMadeBy_7a16e"
 };
-},{"_css_loader":"../node_modules/parcel-bundler/src/builtins/css-loader.js"}],"player.js":[function(require,module,exports) {
+},{"_css_loader":"../node_modules/parcel-bundler/src/builtins/css-loader.js"}],"utils.js":[function(require,module,exports) {
+"use strict";
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+exports.localizedFuncs = void 0;
+
+// Localizations
+function formatDuration(seconds) {
+  let curSecs = seconds;
+  let out = "";
+
+  if (curSecs > 60 * 60) {
+    out += Math.floor(curSecs / (60 * 60)) + ":";
+    curSecs = curSecs % (60 * 60);
+  }
+
+  out += Math.floor(curSecs / 60).toString().padStart(2, "0") + ":" + (curSecs % 60).toString().padStart(2, "0");
+  return out;
+}
+
+const localizedFuncs = {
+  "en": {
+    formatDuration: formatDuration
+  }
+};
+exports.localizedFuncs = localizedFuncs;
+},{}],"player.js":[function(require,module,exports) {
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -207,12 +235,22 @@ var _playerModule = _interopRequireDefault(require("./player.module.css"));
 
 var _Typography = _interopRequireDefault(require("@material-ui/core/Typography"));
 
+var _Grid = _interopRequireDefault(require("@material-ui/core/Grid"));
+
+var _Slider = _interopRequireDefault(require("@material-ui/core/Slider"));
+
+var _utils = require("./utils.js");
+
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
 // Fonts (broken currently)
 // import "fontsource-roboto";
 // Styles
-// React Player to be imported 
+// Text Stuff
+// Grid Utils
+// Widgets
+// Get localized functions
+// React Player to be imported
 // Meant to be reusable in other contexts
 const hasArtist = ["Song"];
 const hasMultipleArtists = ["Album"]; // Playlists are usually user created so they will have a variety of artists
@@ -230,9 +268,19 @@ class PlayerComponent extends _react.default.Component {
   constructor(props) {
     super(props); // Deprecated but needed
 
-    this.state = {
-      itemName: i18n.__("Nothing Playing")
+    let preparedState = {
+      itemName: i18n.__("Nothing Playing"),
+      position: 0,
+      length: 1200,
+      enabled: false
     };
+
+    if (props.name) {
+      preparedState["name"] = props.name;
+      preparedState["enabled"] = true;
+    }
+
+    this.state = preparedState;
   }
 
   componentDidMount() {// Code to run when component is destoryed -> constructor
@@ -265,6 +313,15 @@ class PlayerComponent extends _react.default.Component {
     });
   }
 
+  changePos(ev, newVal) {
+    console.log("Position changed to", newVal);
+    this.setState(function (state, props) {
+      return {
+        position: newVal
+      };
+    });
+  }
+
   updateDuration(time) {
     // Sometimes duration can be found afterwards
     this.setState(function (state, props) {
@@ -277,7 +334,23 @@ class PlayerComponent extends _react.default.Component {
   render() {
     return /*#__PURE__*/_react.default.createElement(_react.default.Fragment, null, /*#__PURE__*/_react.default.createElement("div", {
       className: "player"
-    }, /*#__PURE__*/_react.default.createElement("span", {
+    }, /*#__PURE__*/_react.default.createElement(_Grid.default, {
+      container: true,
+      spacing: 2
+    }, /*#__PURE__*/_react.default.createElement(_Grid.default, {
+      item: true,
+      xs: 10
+    }, /*#__PURE__*/_react.default.createElement(_Slider.default, {
+      value: this.state.position,
+      onChange: this.changePos.bind(this),
+      "aria-labelledby": "continuous-slider",
+      min: 0,
+      max: this.state.length,
+      disabled: !this.state.enabled
+    })), /*#__PURE__*/_react.default.createElement(_Grid.default, {
+      item: true,
+      xs: 2
+    }, this.state.enabled ? _utils.localizedFuncs[i18n.getLocale()].formatDuration(this.state.position) : i18n.__("Idle Duration"))), /*#__PURE__*/_react.default.createElement("span", {
       className: _playerModule.default.playerTitle
     }, /*#__PURE__*/_react.default.createElement(_Typography.default, {
       variant: "h5"
@@ -292,7 +365,7 @@ class PlayerComponent extends _react.default.Component {
 
 exports.PlayerComponent = PlayerComponent;
 console.log("Imported styles", _playerModule.default);
-},{"./player.module.css":"player.module.css"}],"unbundle.js":[function(require,module,exports) {
+},{"./player.module.css":"player.module.css","./utils.js":"utils.js"}],"unbundle.js":[function(require,module,exports) {
 "use strict";
 
 var _react = _interopRequireDefault(require("react"));
@@ -325,6 +398,8 @@ var _Typography = _interopRequireDefault(require("@material-ui/core/Typography")
 
 var _player = require("./player");
 
+var _utils = require("./utils.js");
+
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
 // Fonts
@@ -356,22 +431,8 @@ const $ = require("jquery");
 
 const regeneratorRuntime = require("regenerator-runtime");
 
-console.log("bundle :D"); // Localizations
-
-function formatDuration(seconds) {
-  let curSecs = seconds;
-  let out = "";
-
-  if (curSecs > 60 * 60) {
-    out += Math.floor(curSecs / (60 * 60)) + ":";
-    curSecs = curSecs % (60 * 60);
-  }
-
-  out += Math.floor(curSecs / 60).toString().padStart(2, "0") + ":" + (curSecs % 60).toString().padStart(2, "0");
-  return out;
-} // Constants
-
-
+console.log("bundle :D");
+// Constants
 const columnTypes = {
   playlists: ["Name", "Date", "Songs Count"],
   songs: ["Name", "Artist", "Duration"],
@@ -379,7 +440,7 @@ const columnTypes = {
 };
 const columnProps = {
   playlists: [item => item.name, item => item.createdAt, item => JSON.parse(item.contents).length],
-  songs: [item => item.name, item => item.artist, item => item.duration ? formatDuration(item.duration) : "Unknown"],
+  songs: [item => item.name, item => item.artist, item => item.duration ? _utils.localizedFuncs[i18n.getLocale()].formatDuration(item.duration) : "Unknown"],
   albums: [item => item.name, item => item.updatedAt, item => JSON.parse(item.contents).length]
 };
 let musicServer = "http://localhost:3000"; // NO SLASH!
@@ -710,7 +771,7 @@ $(function () {
   _reactDom.default.render( /*#__PURE__*/_react.default.createElement(MainComponent, null), document.getElementById("root"));
 });
 console.log("Player Comp", _player.PlayerComponent);
-},{"./player":"player.js"}],"../node_modules/parcel-bundler/src/builtins/hmr-runtime.js":[function(require,module,exports) {
+},{"./player":"player.js","./utils.js":"utils.js"}],"../node_modules/parcel-bundler/src/builtins/hmr-runtime.js":[function(require,module,exports) {
 var OVERLAY_ID = '__parcel__error__overlay__';
 
 var OldModule = module.bundle.Module;

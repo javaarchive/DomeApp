@@ -46,22 +46,7 @@ const settings = new Store({
 const $ = require("jquery");
 const regeneratorRuntime = require("regenerator-runtime");
 console.log("bundle :D");
-// Localizations
-function formatDuration(seconds) {
-	let curSecs = seconds;
-	let out = "";
-	if (curSecs > 60 * 60) {
-		out += Math.floor(curSecs / (60 * 60)) + ":";
-		curSecs = curSecs % (60 * 60);
-	}
-	out +=
-		Math.floor(curSecs / 60)
-			.toString()
-			.padStart(2, "0") +
-		":" +
-		(curSecs % 60).toString().padStart(2, "0");
-	return out;
-}
+import {localizedFuncs} from "./utils.js";
 
 // Constants
 const columnTypes = {
@@ -78,7 +63,7 @@ const columnProps = {
 	songs: [
 		(item) => item.name,
 		(item) => item.artist,
-		(item) => (item.duration ? formatDuration(item.duration) : "Unknown"),
+		(item) => (item.duration ? localizedFuncs[i18n.getLocale()].formatDuration(item.duration) : "Unknown"),
 	],
 	albums: [
 		(item) => item.name,
