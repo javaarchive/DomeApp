@@ -9,6 +9,9 @@ import ReactDOM from "react-dom";
 // Core components
 import { Skeleton } from "@material-ui/lab";
 import { Container } from "@material-ui/core";
+import CssBaseline from "@material-ui/core/CssBaseline";
+import useMediaQuery from "@material-ui/core/useMediaQuery";
+import { createMuiTheme, ThemeProvider } from "@material-ui/core/styles";
 // import FormGroup from "@material-ui/core/FormGroup";
 // import FormControlLabel from "@material-ui/core/FormControlLabel";
 
@@ -18,18 +21,31 @@ import { makeStyles } from "@material-ui/core/styles";
 // Ui icons
 import MenuIcon from "@material-ui/icons/Menu"; // Also called a hamburger
 import StorageIcon from "@material-ui/icons/Storage";
+import MusicNoteIcon from "@material-ui/icons/MusicNote";
+import HomeRoundedIcon from '@material-ui/icons/HomeRounded';
 
 // Ui Widgets
 import AppBar from "@material-ui/core/AppBar";
+import Drawer from '@material-ui/core/Drawer';
 import IconButton from "@material-ui/core/IconButton";
 import Switch from "@material-ui/core/Switch";
 import Toolbar from "@material-ui/core/Toolbar";
 import MenuItem from "@material-ui/core/MenuItem";
 import Menu from "@material-ui/core/Menu";
 import Typography from "@material-ui/core/Typography";
+import List from '@material-ui/core/List';
+import Divider from '@material-ui/core/Divider';
+import ListItem from '@material-ui/core/ListItem';
+import ListItemIcon from '@material-ui/core/ListItemIcon';
+import ListItemText from '@material-ui/core/ListItemText';
+
+// Utilities
+import clsx from 'clsx';
 
 // Reusable Player Componoent
 import { PlayerComponent } from "./player";
+
+
 
 const Store = require("electron-store");
 // Settings Loading
@@ -46,7 +62,7 @@ const settings = new Store({
 const $ = require("jquery");
 const regeneratorRuntime = require("regenerator-runtime");
 console.log("bundle :D");
-import {localizedFuncs} from "./utils.js";
+import { localizedFuncs } from "./utils.js";
 
 // Constants
 const columnTypes = {
@@ -63,7 +79,10 @@ const columnProps = {
 	songs: [
 		(item) => item.name,
 		(item) => item.artist,
-		(item) => (item.duration ? localizedFuncs[i18n.getLocale()].formatDuration(item.duration) : "Unknown"),
+		(item) =>
+			item.duration
+				? localizedFuncs[i18n.getLocale()].formatDuration(item.duration)
+				: "Unknown",
 	],
 	albums: [
 		(item) => item.name,
@@ -310,11 +329,53 @@ class HomeComponent extends React.Component {
 	render() {
 		return (
 			<>
-				<Typography variant="h3">{i18n.__("Hello! This is the default homescreen for now. ")}</Typography>
+				<Typography variant="h3">
+					{i18n.__("Hello! This is the default homescreen for now. ")}
+				</Typography>
 			</>
 		);
 	}
 }
+// Drawer
+class MainDrawerComponent extends React.Component {
+    constructor(props) {
+      super(props);
+      this.state = {
+
+	  };
+	}
+	triggerView(viewName){
+		return ((event) => this.props.setCurView(viewName)).bind(this);
+	}
+    render(){
+
+	  return <div onClick={this.props.drawerToggle}>
+		<List>
+			<ListItem>
+				<Typography variant="h3">
+					{i18n.__("App Name")}
+				</Typography>
+			</ListItem>
+		  <ListItem button onClick={this.triggerView("homeview")}>
+			  <ListItemIcon>
+					<HomeRoundedIcon />
+			  </ListItemIcon>
+			  <ListItemText primary={"Home"}>
+			  </ListItemText>
+		  </ListItem>
+		  <Divider />
+		  <ListItem button onClick={this.triggerView("songs")}>
+			  <ListItemIcon>
+					<MusicNoteIcon />
+			  </ListItemIcon>
+			  <ListItemText primary={i18n.__("Songs")}>
+			  </ListItemText>
+		  </ListItem>
+	  </List></div>;
+    }
+  }
+
+
 // Legacy Views System
 
 let views = {};
@@ -324,86 +385,118 @@ views.homeview = <HomeComponent />;
 window.debug = {};
 window.debug.views = views;
 
-// Main Comp
-function MainComponent(){
-		
-		let [anchorEl, setAnchorEl] = React.useState(null);
-		function handleMenu(event){
-			console.log(this);
-			setAnchorEl(event.target);
-		}
-		function handleClose(event){
-			console.log(this);
-			setAnchorEl(null);
-		}
-		//let [open] = React.useState(true);
-		let [curView] = React.useState("homeview");
-		const open = Boolean(anchorEl);
-		const stylesSet = makeStyles((theme) => ({
-			root: {
-				flexGrow: 1,
-			},
-			title: {
-				flexGrow: 1,
-			},
-			menuButton: {
-				marginRight: theme.spacing(2),
-			},
-		}));
-		const classes = stylesSet();
-		return <>
-		<div className={classes.root}>
-			<AppBar position="static">
-				<Toolbar>
-					<IconButton edge="start" className={classes.menuButton} color="inherit" aria-label="menu">
-						<MenuIcon />
-					</IconButton>
-					<Typography variant="h6" className={classes.title}>
-						{i18n.__("App Name")}
-					</Typography>
-					<div>
-						<IconButton color="inherit" aria-label="Switch Media Server" aria-controls="menu-appbar" aria-haspopup="true" onClick={handleMenu}>
-							<StorageIcon/>
-						</IconButton>
-						<Menu id="menu-appbar"
-						anchorEl={anchorEl} 
-						anchorOrigin={{vertical:'top',horizontal:'right'}}
-						 keepMounted 
-						 transformOrigin={{vertical:'top',horizontal:'right'}}
-					     onClose={handleClose}
-						 open={open}
-						 >
-							<MenuItem onClick={setServer}>
-								Local
-							</MenuItem>
-							<MenuItem onClick={setServer}>
-								Add new server
-							</MenuItem>
-						</Menu>
-					</div>
-				</Toolbar>
-			</AppBar>
-			<Container maxWidth="md">{views[curView]}</Container>
 
-			<PlayerComponent />
-		</div>
-	</>;
+
+// Main Comp
+function MainComponent() {
+	// Theme Logic
+	const useDarkMode = useMediaQuery("(prefers-color-scheme: dark)");
+
+	const theme = React.useMemo(
+		() =>
+			createMuiTheme({
+				palette: {
+					type: useDarkMode ? "dark" : "light",
+				},
+			}),
+		[useDarkMode]
+	);
+
+	// Handle Menu Logic
+	let [serversAnchorEl, setServersAnchorEl] = React.useState(null);
+	let [drawerOpen, setDrawerOpen] = React.useState(false);
+	function toggleDrawer(event){
+		setDrawerOpen(!drawerOpen);
+	}
+	function handleMenu(event) {
+		console.log(this);
+		setServersAnchorEl(event.target);
+	}
+	function handleClose(event) {
+		console.log(this);
+		setServersAnchorEl(null);
+	}
+
+	//let [open] = React.useState(true);
+	// Current View
+	let [curView, setCurView] = React.useState("homeview");
+	const serversOpen = Boolean(serversAnchorEl);
+	const stylesSet = makeStyles((theme) => ({
+		root: {
+			flexGrow: 1,
+		},
+		title: {
+			flexGrow: 1,
+		},
+		menuButton: {
+			marginRight: theme.spacing(2),
+		},
+	}));
+	const classes = stylesSet();
+	return (
+		<>
+			<ThemeProvider theme={theme}>
+				<CssBaseline />
+				<div className={classes.root}>
+					<Drawer anchor="left" open={drawerOpen} onClick={toggleDrawer}>
+						<MainDrawerComponent drawerToggle={toggleDrawer} setCurView={setCurView}></MainDrawerComponent>
+					</Drawer>
+					<AppBar position="static">
+						<Toolbar>
+							<IconButton
+								edge="start"
+								className={classes.menuButton}
+								color="inherit"
+								aria-label="menu"
+								onClick={toggleDrawer}
+							>
+								<MenuIcon />
+							</IconButton>
+							<Typography variant="h6" className={classes.title}>
+								{i18n.__("App Name")}
+							</Typography>
+							<div>
+								<IconButton
+									color="inherit"
+									aria-label="Switch Media Server"
+									aria-controls="menu-appbar"
+									aria-haspopup="true"
+									onClick={handleMenu}
+								>
+									<StorageIcon />
+								</IconButton>
+								<Menu
+									id="menu-appbar"
+									anchorEl={serversAnchorEl}
+									anchorOrigin={{ vertical: "top", horizontal: "right" }}
+									keepMounted
+									transformOrigin={{ vertical: "top", horizontal: "right" }}
+									onClose={handleClose}
+									open={serversOpen}
+								>
+									<MenuItem onClick={setServer}>Local</MenuItem>
+									<MenuItem onClick={setServer}>Add new server</MenuItem>
+								</Menu>
+							</div>
+						</Toolbar>
+					</AppBar>
+					<Container maxWidth="md">{views[curView]}</Container>
+
+					<PlayerComponent />
+				</div>
+			</ThemeProvider>
+		</>
+	);
 }
 // Bootstrap code
 // really odd part i'm learning
 
-function setServer(comp){
-	
-}
+function setServer(comp) {}
 
 $(function () {
 	// TODO: Replace with Vanilla JS to make script size smaller
-	
 
-	ReactDOM.render(
-		<MainComponent />,
-		document.getElementById("root")
-	);
+	ReactDOM.render(<MainComponent />, document.getElementById("root"));
 });
 
 console.log("Player Comp", PlayerComponent);

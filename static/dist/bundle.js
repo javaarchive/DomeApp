@@ -1,4 +1,4 @@
-process.env.HMR_PORT=55342;process.env.HMR_HOSTNAME="localhost";// modules are defined as an array
+process.env.HMR_PORT=65469;process.env.HMR_HOSTNAME="localhost";// modules are defined as an array
 // [ module function, map of requires ]
 //
 // map of requires is short require name -> numeric require
@@ -271,8 +271,11 @@ class PlayerComponent extends _react.default.Component {
     let preparedState = {
       itemName: i18n.__("Nothing Playing"),
       position: 0,
+      itemLength: 0,
       length: 1200,
-      enabled: false
+      enabled: false,
+      userDragging: false // Do not update while user is dragging
+
     };
 
     if (props.name) {
@@ -329,7 +332,26 @@ class PlayerComponent extends _react.default.Component {
         itemDuration: time
       };
     });
+  } // User Drag Handlers
+  // TODO: Account for multi touch displays???
+
+
+  userDragStart(ev) {
+    this.setState(function (state, props) {
+      return {
+        userDragging: true
+      };
+    });
   }
+
+  userDragEnd(ev) {
+    this.setState(function (state, props) {
+      return {
+        userDragging: false
+      };
+    });
+  } // ! Main Rendering Code
+
 
   render() {
     return /*#__PURE__*/_react.default.createElement(_react.default.Fragment, null, /*#__PURE__*/_react.default.createElement("div", {
@@ -339,7 +361,16 @@ class PlayerComponent extends _react.default.Component {
       spacing: 2
     }, /*#__PURE__*/_react.default.createElement(_Grid.default, {
       item: true,
-      xs: 10
+      xs: 2
+    }, /*#__PURE__*/_react.default.createElement(_Typography.default, {
+      variant: "caption"
+    }, this.state.enabled ? _utils.localizedFuncs[i18n.getLocale()].formatDuration(this.state.position) : i18n.__("Idle Duration"))), /*#__PURE__*/_react.default.createElement(_Grid.default, {
+      item: true,
+      xs: 8
+    }, /*#__PURE__*/_react.default.createElement("div", {
+      className: "playback-progress",
+      onPointerDown: this.userDragStart.bind(this),
+      onPointerUp: this.userDragEnd.bind(this)
     }, /*#__PURE__*/_react.default.createElement(_Slider.default, {
       value: this.state.position,
       onChange: this.changePos.bind(this),
@@ -347,10 +378,12 @@ class PlayerComponent extends _react.default.Component {
       min: 0,
       max: this.state.length,
       disabled: !this.state.enabled
-    })), /*#__PURE__*/_react.default.createElement(_Grid.default, {
+    }))), /*#__PURE__*/_react.default.createElement(_Grid.default, {
       item: true,
       xs: 2
-    }, this.state.enabled ? _utils.localizedFuncs[i18n.getLocale()].formatDuration(this.state.position) : i18n.__("Idle Duration"))), /*#__PURE__*/_react.default.createElement("span", {
+    }, /*#__PURE__*/_react.default.createElement(_Typography.default, {
+      variant: "caption"
+    }, this.state.enabled ? "-" + _utils.localizedFuncs[i18n.getLocale()].formatDuration(this.state.itemLength - this.state.position) : i18n.__("Idle Duration")))), /*#__PURE__*/_react.default.createElement("span", {
       className: _playerModule.default.playerTitle
     }, /*#__PURE__*/_react.default.createElement(_Typography.default, {
       variant: "h5"
@@ -376,13 +409,23 @@ var _lab = require("@material-ui/lab");
 
 var _core = require("@material-ui/core");
 
+var _CssBaseline = _interopRequireDefault(require("@material-ui/core/CssBaseline"));
+
+var _useMediaQuery = _interopRequireDefault(require("@material-ui/core/useMediaQuery"));
+
 var _styles = require("@material-ui/core/styles");
 
 var _Menu = _interopRequireDefault(require("@material-ui/icons/Menu"));
 
 var _Storage = _interopRequireDefault(require("@material-ui/icons/Storage"));
 
+var _MusicNote = _interopRequireDefault(require("@material-ui/icons/MusicNote"));
+
+var _HomeRounded = _interopRequireDefault(require("@material-ui/icons/HomeRounded"));
+
 var _AppBar = _interopRequireDefault(require("@material-ui/core/AppBar"));
+
+var _Drawer = _interopRequireDefault(require("@material-ui/core/Drawer"));
 
 var _IconButton = _interopRequireDefault(require("@material-ui/core/IconButton"));
 
@@ -395,6 +438,18 @@ var _MenuItem = _interopRequireDefault(require("@material-ui/core/MenuItem"));
 var _Menu2 = _interopRequireDefault(require("@material-ui/core/Menu"));
 
 var _Typography = _interopRequireDefault(require("@material-ui/core/Typography"));
+
+var _List = _interopRequireDefault(require("@material-ui/core/List"));
+
+var _Divider = _interopRequireDefault(require("@material-ui/core/Divider"));
+
+var _ListItem = _interopRequireDefault(require("@material-ui/core/ListItem"));
+
+var _ListItemIcon = _interopRequireDefault(require("@material-ui/core/ListItemIcon"));
+
+var _ListItemText = _interopRequireDefault(require("@material-ui/core/ListItemText"));
+
+var _clsx = _interopRequireDefault(require("clsx"));
 
 var _player = require("./player");
 
@@ -413,6 +468,7 @@ function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { de
 // Ui icons
 // Also called a hamburger
 // Ui Widgets
+// Utilities
 // Reusable Player Componoent
 const Store = require("electron-store"); // Settings Loading
 
@@ -682,6 +738,37 @@ class HomeComponent extends _react.default.Component {
     }, i18n.__("Hello! This is the default homescreen for now. ")));
   }
 
+} // Drawer
+
+
+class MainDrawerComponent extends _react.default.Component {
+  constructor(props) {
+    super(props);
+    this.state = {};
+  }
+
+  triggerView(viewName) {
+    return (event => this.props.setCurView(viewName)).bind(this);
+  }
+
+  render() {
+    return /*#__PURE__*/_react.default.createElement("div", {
+      onClick: this.props.drawerToggle
+    }, /*#__PURE__*/_react.default.createElement(_List.default, null, /*#__PURE__*/_react.default.createElement(_ListItem.default, null, /*#__PURE__*/_react.default.createElement(_Typography.default, {
+      variant: "h3"
+    }, i18n.__("App Name"))), /*#__PURE__*/_react.default.createElement(_ListItem.default, {
+      button: true,
+      onClick: this.triggerView("homeview")
+    }, /*#__PURE__*/_react.default.createElement(_ListItemIcon.default, null, /*#__PURE__*/_react.default.createElement(_HomeRounded.default, null)), /*#__PURE__*/_react.default.createElement(_ListItemText.default, {
+      primary: "Home"
+    })), /*#__PURE__*/_react.default.createElement(_Divider.default, null), /*#__PURE__*/_react.default.createElement(_ListItem.default, {
+      button: true,
+      onClick: this.triggerView("songs")
+    }, /*#__PURE__*/_react.default.createElement(_ListItemIcon.default, null, /*#__PURE__*/_react.default.createElement(_MusicNote.default, null)), /*#__PURE__*/_react.default.createElement(_ListItemText.default, {
+      primary: i18n.__("Songs")
+    }))));
+  }
+
 } // Legacy Views System
 
 
@@ -693,22 +780,39 @@ window.debug = {};
 window.debug.views = views; // Main Comp
 
 function MainComponent() {
-  let [anchorEl, setAnchorEl] = _react.default.useState(null);
+  // Theme Logic
+  const useDarkMode = (0, _useMediaQuery.default)("(prefers-color-scheme: dark)");
+
+  const theme = _react.default.useMemo(() => (0, _styles.createMuiTheme)({
+    palette: {
+      type: useDarkMode ? "dark" : "light"
+    }
+  }), [useDarkMode]); // Handle Menu Logic
+
+
+  let [serversAnchorEl, setServersAnchorEl] = _react.default.useState(null);
+
+  let [drawerOpen, setDrawerOpen] = _react.default.useState(false);
+
+  function toggleDrawer(event) {
+    setDrawerOpen(!drawerOpen);
+  }
 
   function handleMenu(event) {
     console.log(this);
-    setAnchorEl(event.target);
+    setServersAnchorEl(event.target);
   }
 
   function handleClose(event) {
     console.log(this);
-    setAnchorEl(null);
+    setServersAnchorEl(null);
   } //let [open] = React.useState(true);
+  // Current View
 
 
-  let [curView] = _react.default.useState("homeview");
+  let [curView, setCurView] = _react.default.useState("homeview");
 
-  const open = Boolean(anchorEl);
+  const serversOpen = Boolean(serversAnchorEl);
   const stylesSet = (0, _styles.makeStyles)(theme => ({
     root: {
       flexGrow: 1
@@ -721,15 +825,25 @@ function MainComponent() {
     }
   }));
   const classes = stylesSet();
-  return /*#__PURE__*/_react.default.createElement(_react.default.Fragment, null, /*#__PURE__*/_react.default.createElement("div", {
+  return /*#__PURE__*/_react.default.createElement(_react.default.Fragment, null, /*#__PURE__*/_react.default.createElement(_styles.ThemeProvider, {
+    theme: theme
+  }, /*#__PURE__*/_react.default.createElement(_CssBaseline.default, null), /*#__PURE__*/_react.default.createElement("div", {
     className: classes.root
-  }, /*#__PURE__*/_react.default.createElement(_AppBar.default, {
+  }, /*#__PURE__*/_react.default.createElement(_Drawer.default, {
+    anchor: "left",
+    open: drawerOpen,
+    onClick: toggleDrawer
+  }, /*#__PURE__*/_react.default.createElement(MainDrawerComponent, {
+    drawerToggle: toggleDrawer,
+    setCurView: setCurView
+  })), /*#__PURE__*/_react.default.createElement(_AppBar.default, {
     position: "static"
   }, /*#__PURE__*/_react.default.createElement(_Toolbar.default, null, /*#__PURE__*/_react.default.createElement(_IconButton.default, {
     edge: "start",
     className: classes.menuButton,
     color: "inherit",
-    "aria-label": "menu"
+    "aria-label": "menu",
+    onClick: toggleDrawer
   }, /*#__PURE__*/_react.default.createElement(_Menu.default, null)), /*#__PURE__*/_react.default.createElement(_Typography.default, {
     variant: "h6",
     className: classes.title
@@ -741,25 +855,25 @@ function MainComponent() {
     onClick: handleMenu
   }, /*#__PURE__*/_react.default.createElement(_Storage.default, null)), /*#__PURE__*/_react.default.createElement(_Menu2.default, {
     id: "menu-appbar",
-    anchorEl: anchorEl,
+    anchorEl: serversAnchorEl,
     anchorOrigin: {
-      vertical: 'top',
-      horizontal: 'right'
+      vertical: "top",
+      horizontal: "right"
     },
     keepMounted: true,
     transformOrigin: {
-      vertical: 'top',
-      horizontal: 'right'
+      vertical: "top",
+      horizontal: "right"
     },
     onClose: handleClose,
-    open: open
+    open: serversOpen
   }, /*#__PURE__*/_react.default.createElement(_MenuItem.default, {
     onClick: setServer
   }, "Local"), /*#__PURE__*/_react.default.createElement(_MenuItem.default, {
     onClick: setServer
   }, "Add new server"))))), /*#__PURE__*/_react.default.createElement(_core.Container, {
     maxWidth: "md"
-  }, views[curView]), /*#__PURE__*/_react.default.createElement(_player.PlayerComponent, null)));
+  }, views[curView]), /*#__PURE__*/_react.default.createElement(_player.PlayerComponent, null))));
 } // Bootstrap code
 // really odd part i'm learning
 
