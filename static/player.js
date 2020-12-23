@@ -31,6 +31,7 @@ class PlayerComponent extends React.Component {
 		let preparedState = {
 			itemName: i18n.__("Nothing Playing"),
 			position: 0,
+			itemLength: 0,
 			length: 1200,
 			enabled: false,
 			userDragging: false, // Do not update while user is dragging
@@ -81,13 +82,35 @@ class PlayerComponent extends React.Component {
 			return { itemDuration: time };
 		});
 	}
+	// User Drag Handlers
+	// TODO: Account for multi touch displays???
+	userDragStart(ev){
+		this.setState(function (state, props) {
+			return { userDragging: true};
+		});
+	}
+	userDragEnd(ev){
+		this.setState(function (state, props) {
+			return { userDragging: false };
+		});
+	}
+	// ! Main Rendering Code
 	render() {
 		return (
 			<>
 				<div className="player">
 					<Grid container spacing={2}>
-						<Grid item xs={10}>
-							<div className="playback-progress">
+						<Grid item xs={2}>
+							
+							<Typography variant="caption">{this.state.enabled
+								? (localizedFuncs[i18n.getLocale()].formatDuration(
+										this.state.position
+								  ))
+								: i18n.__("Idle Duration")}</Typography>
+							
+						</Grid>
+						<Grid item xs={8}>
+							<div className="playback-progress" onPointerDown={this.userDragStart.bind(this)} onPointerUp={this.userDragEnd.bind(this)}>
 								<Slider
 									value={this.state.position}
 									onChange={this.changePos.bind(this)}
@@ -99,11 +122,12 @@ class PlayerComponent extends React.Component {
 							</div>
 						</Grid>
 						<Grid item xs={2}>
-							{this.state.enabled
-								? localizedFuncs[i18n.getLocale()].formatDuration(
-										this.state.position
-								  )
-								: i18n.__("Idle Duration")}
+							<Typography variant="caption">{this.state.enabled
+								? ("-" + localizedFuncs[i18n.getLocale()].formatDuration(
+										this.state.itemLength - this.state.position
+								  ))
+								: i18n.__("Idle Duration")}</Typography>
+							
 						</Grid>
 					</Grid>
 					<span className={styles.playerTitle}>
