@@ -38,6 +38,8 @@ import Typography from "@material-ui/core/Typography";
 import List from "@material-ui/core/List";
 import Divider from "@material-ui/core/Divider";
 import TextField from "@material-ui/core/TextField";
+import Snackbar from '@material-ui/core/Snackbar';
+import MuiAlert from '@material-ui/lab/Alert';
 // List
 import ListItem from "@material-ui/core/ListItem";
 import ListItemIcon from "@material-ui/core/ListItemIcon";
@@ -115,7 +117,11 @@ function serialize(obj) {
 function calcColClass(cols) {
 	return "s" + 12 / cols;
 }
-class ResultView extends React.Component {
+// https://material-ui.com/components/snackbars/
+function Alert(props) {
+	return <MuiAlert elevation={6} variant="filled" {...props} />;
+  }
+class ResultView extends React.PureComponent {
 	constructor(props) {
 		super(props); // Deprecated but needed anyway
 		this.state = {
@@ -125,14 +131,11 @@ class ResultView extends React.Component {
 			col2: i18n.__(columnTypes[props.type][1]),
 			col3: i18n.__(columnTypes[props.type][2]),
 			pageData: [],
+			connectionFailedSnackbarOpen: false
 		};
 		this.search.bind(this)();
 	}
-	shouldComponentUpdate(nextProps) {
-		console.info("Update Request");
-		const queryChanged = this.props.query !== nextProps.query;
-		return queryChanged;
-	}
+	
 	componentDidUpdate(prevProps) {
 		if (this.props.query !== prevProps.query) {
 			this.search();
@@ -168,6 +171,12 @@ class ResultView extends React.Component {
 			};
 		});
 	}
+	handleConnectionFailureSnackbarClose(event,reason){
+		if(reason == "clickaway"){
+			return;
+		}
+		this.hideConnectionFailureSnackbar();
+	}
 	async search() {
 		console.log("Running Search Request");
 		let pageSize = settings.get("pageSize");
@@ -193,7 +202,9 @@ class ResultView extends React.Component {
 				});
 			}
 		} catch (ex) {
-
+			console.log("Connection failed: showing connection failure snackbar",ex);
+			this.showConnectionFailureSnackbar();
+			return;
 		}
 	}
 	render() {
@@ -216,6 +227,7 @@ class ResultView extends React.Component {
 		let comps = this.state.pageData.map(colgenerator.bind(this));
 
 		return (
+			<>
 			<div className="results-wrapper">
 				<TableContainer component={Paper}>
 					<Table>
@@ -234,6 +246,14 @@ class ResultView extends React.Component {
 					{this.state.pageData.length} {i18n.__(" items")};
 				</p>
 			</div>
+			<h1>
+				status: {JSON.stringify(this.state.connectionFailedSnackbarOpen)}
+			</h1>
+			 <Snackbar open={this.state.connectionFailedSnackbarOpen} autoHideDuration={settings.get("snackbarAutoHideDuration")} onClose={this.handleConnectionFailureSnackbarClose.bind(this)}>
+			 <Alert onClose={this.handleConnectionFailureSnackbarClose.bind(this)} severity="error">
+			   {i18n.__("Unable to establish connection to media provider")}
+			 </Alert>
+		   </Snackbar></>
 		);
 	}
 }

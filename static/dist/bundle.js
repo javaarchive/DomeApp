@@ -447,6 +447,10 @@ var _Divider = _interopRequireDefault(require("@material-ui/core/Divider"));
 
 var _TextField = _interopRequireDefault(require("@material-ui/core/TextField"));
 
+var _Snackbar = _interopRequireDefault(require("@material-ui/core/Snackbar"));
+
+var _Alert = _interopRequireDefault(require("@material-ui/lab/Alert"));
+
 var _ListItem = _interopRequireDefault(require("@material-ui/core/ListItem"));
 
 var _ListItemIcon = _interopRequireDefault(require("@material-ui/core/ListItemIcon"));
@@ -473,21 +477,8 @@ var _utils = require("./utils.js");
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
-// Fonts
-// broken?
-// Roboto font for material
-//import 'fontsource-roboto'; // Workaround parcel issue?
-// Core components
-// import FormGroup from "@material-ui/core/FormGroup";
-// import FormControlLabel from "@material-ui/core/FormControlLabel";
-// Utilites
-// Ui icons
-// Also called a hamburger
-// Ui Widgets
-// List
-// Tables
-// Utilities
-// Reusable Player Componoent
+function _extends() { _extends = Object.assign || function (target) { for (var i = 1; i < arguments.length; i++) { var source = arguments[i]; for (var key in source) { if (Object.prototype.hasOwnProperty.call(source, key)) { target[key] = source[key]; } } } return target; }; return _extends.apply(this, arguments); }
+
 const Store = require("electron-store"); // Settings Loading
 
 
@@ -535,9 +526,17 @@ function serialize(obj) {
 
 function calcColClass(cols) {
   return "s" + 12 / cols;
+} // https://material-ui.com/components/snackbars/
+
+
+function Alert(props) {
+  return /*#__PURE__*/_react.default.createElement(_Alert.default, _extends({
+    elevation: 6,
+    variant: "filled"
+  }, props));
 }
 
-class ResultView extends _react.default.Component {
+class ResultView extends _react.default.PureComponent {
   constructor(props) {
     super(props); // Deprecated but needed anyway
 
@@ -547,15 +546,10 @@ class ResultView extends _react.default.Component {
       col1: i18n.__(columnTypes[props.type][0]),
       col2: i18n.__(columnTypes[props.type][1]),
       col3: i18n.__(columnTypes[props.type][2]),
-      pageData: []
+      pageData: [],
+      connectionFailedSnackbarOpen: false
     };
     this.search.bind(this)();
-  }
-
-  shouldComponentUpdate(nextProps) {
-    console.info("Update Request");
-    const queryChanged = this.props.query !== nextProps.query;
-    return queryChanged;
   }
 
   componentDidUpdate(prevProps) {
@@ -597,6 +591,14 @@ class ResultView extends _react.default.Component {
     });
   }
 
+  handleConnectionFailureSnackbarClose(event, reason) {
+    if (reason == "clickaway") {
+      return;
+    }
+
+    this.hideConnectionFailureSnackbar();
+  }
+
   async search() {
     console.log("Running Search Request");
     let pageSize = settings.get("pageSize");
@@ -617,7 +619,11 @@ class ResultView extends _react.default.Component {
           };
         });
       }
-    } catch (ex) {}
+    } catch (ex) {
+      console.log("Connection failed: showing connection failure snackbar", ex);
+      this.showConnectionFailureSnackbar();
+      return;
+    }
   }
 
   render() {
@@ -635,11 +641,18 @@ class ResultView extends _react.default.Component {
     }
 
     let comps = this.state.pageData.map(colgenerator.bind(this));
-    return /*#__PURE__*/_react.default.createElement("div", {
+    return /*#__PURE__*/_react.default.createElement(_react.default.Fragment, null, /*#__PURE__*/_react.default.createElement("div", {
       className: "results-wrapper"
     }, /*#__PURE__*/_react.default.createElement(_TableContainer.default, {
       component: _Paper.default
-    }, /*#__PURE__*/_react.default.createElement(_Table.default, null, /*#__PURE__*/_react.default.createElement(_TableHead.default, null, /*#__PURE__*/_react.default.createElement(_TableRow.default, null, /*#__PURE__*/_react.default.createElement(_TableCell.default, null, this.state.col1), /*#__PURE__*/_react.default.createElement(_TableCell.default, null, this.state.col2), /*#__PURE__*/_react.default.createElement(_TableCell.default, null, this.state.col3))), /*#__PURE__*/_react.default.createElement(_TableBody.default, null, comps))), /*#__PURE__*/_react.default.createElement("p", null, i18n.__("Showing "), this.state.pageData.length, " ", i18n.__(" items"), ";"));
+    }, /*#__PURE__*/_react.default.createElement(_Table.default, null, /*#__PURE__*/_react.default.createElement(_TableHead.default, null, /*#__PURE__*/_react.default.createElement(_TableRow.default, null, /*#__PURE__*/_react.default.createElement(_TableCell.default, null, this.state.col1), /*#__PURE__*/_react.default.createElement(_TableCell.default, null, this.state.col2), /*#__PURE__*/_react.default.createElement(_TableCell.default, null, this.state.col3))), /*#__PURE__*/_react.default.createElement(_TableBody.default, null, comps))), /*#__PURE__*/_react.default.createElement("p", null, i18n.__("Showing "), this.state.pageData.length, " ", i18n.__(" items"), ";")), /*#__PURE__*/_react.default.createElement("h1", null, "status: ", JSON.stringify(this.state.connectionFailedSnackbarOpen)), /*#__PURE__*/_react.default.createElement(_Snackbar.default, {
+      open: this.state.connectionFailedSnackbarOpen,
+      autoHideDuration: settings.get("snackbarAutoHideDuration"),
+      onClose: this.handleConnectionFailureSnackbarClose.bind(this)
+    }, /*#__PURE__*/_react.default.createElement(Alert, {
+      onClose: this.handleConnectionFailureSnackbarClose.bind(this),
+      severity: "error"
+    }, i18n.__("Unable to establish connection to media provider"))));
   }
 
 }
