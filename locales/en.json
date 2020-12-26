@@ -19,5 +19,6 @@
 	"Nothing Playing": "Nothing Playing",
 	"App Name": "Dome",
 	"Hello! This is the default homescreen for now. ": "Hello! This is the default homescreen for now. ",
-	"Idle Duration": "Nonexistent"
+	"Idle Duration": "Nonexistent",
+	"Unable to establish connection to media provider": "Unable to establish connection to media provider"
 }
