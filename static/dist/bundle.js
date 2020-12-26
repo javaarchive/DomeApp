@@ -1,4 +1,4 @@
-process.env.HMR_PORT=65469;process.env.HMR_HOSTNAME="localhost";// modules are defined as an array
+process.env.HMR_PORT=64487;process.env.HMR_HOSTNAME="localhost";// modules are defined as an array
 // [ module function, map of requires ]
 //
 // map of requires is short require name -> numeric require
@@ -423,6 +423,8 @@ var _MusicNote = _interopRequireDefault(require("@material-ui/icons/MusicNote"))
 
 var _HomeRounded = _interopRequireDefault(require("@material-ui/icons/HomeRounded"));
 
+var _Paper = _interopRequireDefault(require("@material-ui/core/Paper"));
+
 var _AppBar = _interopRequireDefault(require("@material-ui/core/AppBar"));
 
 var _Drawer = _interopRequireDefault(require("@material-ui/core/Drawer"));
@@ -443,11 +445,25 @@ var _List = _interopRequireDefault(require("@material-ui/core/List"));
 
 var _Divider = _interopRequireDefault(require("@material-ui/core/Divider"));
 
+var _TextField = _interopRequireDefault(require("@material-ui/core/TextField"));
+
 var _ListItem = _interopRequireDefault(require("@material-ui/core/ListItem"));
 
 var _ListItemIcon = _interopRequireDefault(require("@material-ui/core/ListItemIcon"));
 
 var _ListItemText = _interopRequireDefault(require("@material-ui/core/ListItemText"));
+
+var _Table = _interopRequireDefault(require("@material-ui/core/Table"));
+
+var _TableBody = _interopRequireDefault(require("@material-ui/core/TableBody"));
+
+var _TableCell = _interopRequireDefault(require("@material-ui/core/TableCell"));
+
+var _TableContainer = _interopRequireDefault(require("@material-ui/core/TableContainer"));
+
+var _TableHead = _interopRequireDefault(require("@material-ui/core/TableHead"));
+
+var _TableRow = _interopRequireDefault(require("@material-ui/core/TableRow"));
 
 var _clsx = _interopRequireDefault(require("clsx"));
 
@@ -468,6 +484,8 @@ function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { de
 // Ui icons
 // Also called a hamburger
 // Ui Widgets
+// List
+// Tables
 // Utilities
 // Reusable Player Componoent
 const Store = require("electron-store"); // Settings Loading
@@ -479,7 +497,8 @@ if (!Store) {
 
 const settings = new Store({
   defaults: {
-    pageSize: 25
+    pageSize: 25,
+    snackbarAutoHideDuration: 5000
   }
 }); //import {$} from "jquery";
 
@@ -562,57 +581,65 @@ class ResultView extends _react.default.Component {
     clearInterval(this.updateSearchInterval);
   }
 
+  hideConnectionFailureSnackbar() {
+    this.setState(function (state, props) {
+      return {
+        connectionFailedSnackbarOpen: false
+      };
+    });
+  }
+
+  showConnectionFailureSnackbar() {
+    this.setState(function (state, props) {
+      return {
+        connectionFailedSnackbarOpen: true
+      };
+    });
+  }
+
   async search() {
     console.log("Running Search Request");
     let pageSize = settings.get("pageSize");
-    let resp = await (await fetch(musicServer + "/api/fetch_" + this.state.type + "?" + serialize({
-      limit: pageSize,
-      offset: pageSize * this.state.pageIndex,
-      name: this.props.query + "%"
-    }))).json();
 
-    if (resp.status == "ok") {
-      let data = resp.data;
-      console.log("Updating data for " + this.state.query);
-      this.setState(function (state, props) {
-        return {
-          pageData: data
-        };
-      });
-    }
+    try {
+      let resp = await (await fetch(musicServer + "/api/fetch_" + this.state.type + "?" + serialize({
+        limit: pageSize,
+        offset: pageSize * this.state.pageIndex,
+        name: this.props.query + "%"
+      }))).json();
+
+      if (resp.status == "ok") {
+        let data = resp.data;
+        console.log("Updating data for " + this.state.query);
+        this.setState(function (state, props) {
+          return {
+            pageData: data
+          };
+        });
+      }
+    } catch (ex) {}
   }
 
   render() {
-    let colgenerator = function (item) {
-      // TODO: Move col sizes to constants
-      return /*#__PURE__*/_react.default.createElement("div", {
-        className: "row wide-item waves-effect waves-light",
-        key: item.id,
-        "data-id": item.id,
-        onClick: this.props.onItemClick
-      }, /*#__PURE__*/_react.default.createElement("div", {
-        className: "col s6"
-      }, columnProps[this.props.type][0](item)), /*#__PURE__*/_react.default.createElement("div", {
-        className: "col s3"
-      }, columnProps[this.props.type][1](item)), /*#__PURE__*/_react.default.createElement("div", {
-        className: "col s3"
-      }, columnProps[this.props.type][2](item)));
-    };
+    function cellgenerator(cellFunc, item, index) {
+      return /*#__PURE__*/_react.default.createElement(_TableCell.default, {
+        align: "right",
+        key: index
+      }, cellFunc(item));
+    }
+
+    function colgenerator(item) {
+      return /*#__PURE__*/_react.default.createElement(_TableRow.default, null, columnProps[this.props.type].map(function (func, index) {
+        return cellgenerator.bind(this)(func, item, index);
+      }));
+    }
 
     let comps = this.state.pageData.map(colgenerator.bind(this));
     return /*#__PURE__*/_react.default.createElement("div", {
       className: "results-wrapper"
-    }, /*#__PURE__*/_react.default.createElement("div", {
-      className: "row wide-item"
-    }, /*#__PURE__*/_react.default.createElement("div", {
-      className: "col s6"
-    }, this.state.col1), /*#__PURE__*/_react.default.createElement("div", {
-      className: "col s3"
-    }, this.state.col2), /*#__PURE__*/_react.default.createElement("div", {
-      className: "col s3"
-    }, this.state.col3)), /*#__PURE__*/_react.default.createElement("div", {
-      className: "results-rows"
-    }, comps), /*#__PURE__*/_react.default.createElement("p", null, i18n.__("Showing "), this.state.pageData.length, " ", i18n.__(" items"), ";"));
+    }, /*#__PURE__*/_react.default.createElement(_TableContainer.default, {
+      component: _Paper.default
+    }, /*#__PURE__*/_react.default.createElement(_Table.default, null, /*#__PURE__*/_react.default.createElement(_TableHead.default, null, /*#__PURE__*/_react.default.createElement(_TableRow.default, null, /*#__PURE__*/_react.default.createElement(_TableCell.default, null, this.state.col1), /*#__PURE__*/_react.default.createElement(_TableCell.default, null, this.state.col2), /*#__PURE__*/_react.default.createElement(_TableCell.default, null, this.state.col3))), /*#__PURE__*/_react.default.createElement(_TableBody.default, null, comps))), /*#__PURE__*/_react.default.createElement("p", null, i18n.__("Showing "), this.state.pageData.length, " ", i18n.__(" items"), ";"));
   }
 
 }
@@ -651,13 +678,12 @@ class PlaylistView extends _react.default.Component {
   }
 
   render() {
-    return /*#__PURE__*/_react.default.createElement(_react.default.Fragment, null, /*#__PURE__*/_react.default.createElement("input", {
+    return /*#__PURE__*/_react.default.createElement(_react.default.Fragment, null, /*#__PURE__*/_react.default.createElement(_TextField.default, {
       type: "text",
-      id: "searchbox-playlists",
       className: "searchbox",
       onChange: this.fetchSearch.bind(this),
-      onKeyUp: this.fetchSearch.bind(this),
-      placeholder: i18n.__("Type to search")
+      label: i18n.__("Type to search"),
+      fullWidth: true
     }), /*#__PURE__*/_react.default.createElement(ResultView, {
       type: "playlists",
       query: this.state.searchBoxValue,
@@ -697,13 +723,12 @@ class SongView extends _react.default.Component {
   }
 
   render() {
-    return /*#__PURE__*/_react.default.createElement(_react.default.Fragment, null, /*#__PURE__*/_react.default.createElement("input", {
+    return /*#__PURE__*/_react.default.createElement(_react.default.Fragment, null, /*#__PURE__*/_react.default.createElement(_TextField.default, {
       type: "text",
-      id: "searchbox-playlists",
       className: "searchbox",
       onChange: this.fetchSearch.bind(this),
-      onKeyUp: this.fetchSearch.bind(this),
-      placeholder: i18n.__("Type to search")
+      label: i18n.__("Type to search"),
+      fullWidth: true
     }), /*#__PURE__*/_react.default.createElement(ResultView, {
       type: "songs",
       query: this.state.searchBoxValue

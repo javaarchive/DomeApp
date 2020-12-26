@@ -22,30 +22,39 @@ import { makeStyles } from "@material-ui/core/styles";
 import MenuIcon from "@material-ui/icons/Menu"; // Also called a hamburger
 import StorageIcon from "@material-ui/icons/Storage";
 import MusicNoteIcon from "@material-ui/icons/MusicNote";
-import HomeRoundedIcon from '@material-ui/icons/HomeRounded';
+import HomeRoundedIcon from "@material-ui/icons/HomeRounded";
 
 // Ui Widgets
+
+import Paper from "@material-ui/core/Paper";
 import AppBar from "@material-ui/core/AppBar";
-import Drawer from '@material-ui/core/Drawer';
+import Drawer from "@material-ui/core/Drawer";
 import IconButton from "@material-ui/core/IconButton";
 import Switch from "@material-ui/core/Switch";
 import Toolbar from "@material-ui/core/Toolbar";
 import MenuItem from "@material-ui/core/MenuItem";
 import Menu from "@material-ui/core/Menu";
 import Typography from "@material-ui/core/Typography";
-import List from '@material-ui/core/List';
-import Divider from '@material-ui/core/Divider';
-import ListItem from '@material-ui/core/ListItem';
-import ListItemIcon from '@material-ui/core/ListItemIcon';
-import ListItemText from '@material-ui/core/ListItemText';
+import List from "@material-ui/core/List";
+import Divider from "@material-ui/core/Divider";
+import TextField from "@material-ui/core/TextField";
+// List
+import ListItem from "@material-ui/core/ListItem";
+import ListItemIcon from "@material-ui/core/ListItemIcon";
+import ListItemText from "@material-ui/core/ListItemText";
+// Tables
+import Table from "@material-ui/core/Table";
+import TableBody from "@material-ui/core/TableBody";
+import TableCell from "@material-ui/core/TableCell";
+import TableContainer from "@material-ui/core/TableContainer";
+import TableHead from "@material-ui/core/TableHead";
+import TableRow from "@material-ui/core/TableRow";
 
 // Utilities
-import clsx from 'clsx';
+import clsx from "clsx";
 
 // Reusable Player Componoent
 import { PlayerComponent } from "./player";
-
-
 
 const Store = require("electron-store");
 // Settings Loading
@@ -55,6 +64,7 @@ if (!Store) {
 const settings = new Store({
 	defaults: {
 		pageSize: 25,
+		snackbarAutoHideDuration: 5000,
 	},
 });
 
@@ -144,56 +154,81 @@ class ResultView extends React.Component {
 		// Componoent dies -> deconstructor
 		clearInterval(this.updateSearchInterval);
 	}
+	hideConnectionFailureSnackbar(){
+		this.setState(function (state, props) {
+			return {
+				connectionFailedSnackbarOpen: false,
+			};
+		});
+	}
+	showConnectionFailureSnackbar(){
+		this.setState(function (state, props) {
+			return {
+				connectionFailedSnackbarOpen: true,
+			};
+		});
+	}
 	async search() {
 		console.log("Running Search Request");
 		let pageSize = settings.get("pageSize");
-		let resp = await (
-			await fetch(
-				musicServer +
-					"/api/fetch_" +
-					this.state.type +
-					"?" +
-					serialize({
-						limit: pageSize,
-						offset: pageSize * this.state.pageIndex,
-						name: this.props.query + "%",
-					})
-			)
-		).json();
-		if (resp.status == "ok") {
-			let data = resp.data;
-			console.log("Updating data for " + this.state.query);
-			this.setState(function (state, props) {
-				return { pageData: data };
-			});
+		try {
+			let resp = await (
+				await fetch(
+					musicServer +
+						"/api/fetch_" +
+						this.state.type +
+						"?" +
+						serialize({
+							limit: pageSize,
+							offset: pageSize * this.state.pageIndex,
+							name: this.props.query + "%",
+						})
+				)
+			).json();
+			if (resp.status == "ok") {
+				let data = resp.data;
+				console.log("Updating data for " + this.state.query);
+				this.setState(function (state, props) {
+					return { pageData: data };
+				});
+			}
+		} catch (ex) {
+
 		}
 	}
 	render() {
-		let colgenerator = function (item) {
-			// TODO: Move col sizes to constants
+		function cellgenerator(cellFunc, item, index) {
 			return (
-				<div
-					className="row wide-item waves-effect waves-light"
-					key={item.id}
-					data-id={item.id}
-					onClick={this.props.onItemClick}
-				>
-					<div className="col s6">{columnProps[this.props.type][0](item)}</div>
-					<div className="col s3">{columnProps[this.props.type][1](item)}</div>
-					<div className="col s3">{columnProps[this.props.type][2](item)}</div>
-				</div>
+				<TableCell align="right" key={index}>
+					{cellFunc(item)}
+				</TableCell>
 			);
-		};
+		}
+		function colgenerator(item) {
+			return (
+				<TableRow>
+					{columnProps[this.props.type].map(function (func, index) {
+						return cellgenerator.bind(this)(func, item, index);
+					})}
+				</TableRow>
+			);
+		}
 		let comps = this.state.pageData.map(colgenerator.bind(this));
 
 		return (
 			<div className="results-wrapper">
-				<div className="row wide-item">
-					<div className="col s6">{this.state.col1}</div>
-					<div className="col s3">{this.state.col2}</div>
-					<div className="col s3">{this.state.col3}</div>
-				</div>
-				<div className="results-rows">{comps}</div>
+				<TableContainer component={Paper}>
+					<Table>
+						<TableHead>
+							<TableRow>
+								<TableCell>{this.state.col1}</TableCell>
+								<TableCell>{this.state.col2}</TableCell>
+								<TableCell>{this.state.col3}</TableCell>
+							</TableRow>
+						</TableHead>
+						<TableBody>{comps}</TableBody>
+					</Table>
+				</TableContainer>
 				<p>
 					{i18n.__("Showing ")}
 					{this.state.pageData.length} {i18n.__(" items")};
@@ -235,13 +270,12 @@ class PlaylistView extends React.Component {
 	render() {
 		return (
 			<>
-				<input
+				<TextField
 					type="text"
-					id="searchbox-playlists"
 					className="searchbox"
 					onChange={this.fetchSearch.bind(this)}
-					onKeyUp={this.fetchSearch.bind(this)}
-					placeholder={i18n.__("Type to search")}
+					label={i18n.__("Type to search")}
+					fullWidth={true}
 				/>
 				<ResultView
 					type="playlists"
@@ -289,13 +323,12 @@ class SongView extends React.Component {
 	render() {
 		return (
 			<>
-				<input
+				<TextField
 					type="text"
-					id="searchbox-playlists"
 					className="searchbox"
 					onChange={this.fetchSearch.bind(this)}
-					onKeyUp={this.fetchSearch.bind(this)}
-					placeholder={i18n.__("Type to search")}
+					label={i18n.__("Type to search")}
+					fullWidth={true}
 				/>
 				<ResultView type="songs" query={this.state.searchBoxValue}></ResultView>
 				<p>
@@ -338,43 +371,38 @@ class HomeComponent extends React.Component {
 }
 // Drawer
 class MainDrawerComponent extends React.Component {
-    constructor(props) {
-      super(props);
-      this.state = {
-
-	  };
+	constructor(props) {
+		super(props);
+		this.state = {};
 	}
-	triggerView(viewName){
+	triggerView(viewName) {
 		return ((event) => this.props.setCurView(viewName)).bind(this);
 	}
-    render(){
-
-	  return <div onClick={this.props.drawerToggle}>
-		<List>
-			<ListItem>
-				<Typography variant="h3">
-					{i18n.__("App Name")}
-				</Typography>
-			</ListItem>
-		  <ListItem button onClick={this.triggerView("homeview")}>
-			  <ListItemIcon>
-					<HomeRoundedIcon />
-			  </ListItemIcon>
-			  <ListItemText primary={"Home"}>
-			  </ListItemText>
-		  </ListItem>
-		  <Divider />
-		  <ListItem button onClick={this.triggerView("songs")}>
-			  <ListItemIcon>
-					<MusicNoteIcon />
-			  </ListItemIcon>
-			  <ListItemText primary={i18n.__("Songs")}>
-			  </ListItemText>
-		  </ListItem>
-	  </List></div>;
-    }
-  }
-
+	render() {
+		return (
+			<div onClick={this.props.drawerToggle}>
+				<List>
+					<ListItem>
+						<Typography variant="h3">{i18n.__("App Name")}</Typography>
+					</ListItem>
+					<ListItem button onClick={this.triggerView("homeview")}>
+						<ListItemIcon>
+							<HomeRoundedIcon />
+						</ListItemIcon>
+						<ListItemText primary={"Home"}></ListItemText>
+					</ListItem>
+					<Divider />
+					<ListItem button onClick={this.triggerView("songs")}>
+						<ListItemIcon>
+							<MusicNoteIcon />
+						</ListItemIcon>
+						<ListItemText primary={i18n.__("Songs")}></ListItemText>
+					</ListItem>
+				</List>
+			</div>
+		);
+	}
+}
 
 // Legacy Views System
 
@@ -384,8 +412,6 @@ views.songs = <SongView />;
 views.homeview = <HomeComponent />;
 window.debug = {};
 window.debug.views = views;
-
-
 
 // Main Comp
 function MainComponent() {
@@ -405,7 +431,7 @@ function MainComponent() {
 	// Handle Menu Logic
 	let [serversAnchorEl, setServersAnchorEl] = React.useState(null);
 	let [drawerOpen, setDrawerOpen] = React.useState(false);
-	function toggleDrawer(event){
+	function toggleDrawer(event) {
 		setDrawerOpen(!drawerOpen);
 	}
 	function handleMenu(event) {
@@ -439,7 +465,10 @@ function MainComponent() {
 				<CssBaseline />
 				<div className={classes.root}>
 					<Drawer anchor="left" open={drawerOpen} onClick={toggleDrawer}>
-						<MainDrawerComponent drawerToggle={toggleDrawer} setCurView={setCurView}></MainDrawerComponent>
+						<MainDrawerComponent
+							drawerToggle={toggleDrawer}
+							setCurView={setCurView}
+						></MainDrawerComponent>
 					</Drawer>
 					<AppBar position="static">
 						<Toolbar>
