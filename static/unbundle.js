@@ -247,9 +247,7 @@ class ResultView extends React.PureComponent {
 					{this.state.pageData.length} {i18n.__(" items")};
 				</p>
 			</div>
-			<h1>
-				status: {JSON.stringify(this.state.connectionFailedSnackbarOpen)}
-			</h1>
+			
 			 <Snackbar open={this.state.connectionFailedSnackbarOpen} autoHideDuration={settings.get("snackbarAutoHideDuration")} onClose={this.handleConnectionFailureSnackbarClose.bind(this)}>
 			 <Alert onClose={this.handleConnectionFailureSnackbarClose.bind(this)} severity="error">
 			   {i18n.__("Unable to establish connection to media provider")}
