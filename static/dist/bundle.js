@@ -398,7 +398,21 @@ class PlayerComponent extends _react.default.Component {
 
 exports.PlayerComponent = PlayerComponent;
 console.log("Imported styles", _playerModule.default);
-},{"./player.module.css":"player.module.css","./utils.js":"utils.js"}],"unbundle.js":[function(require,module,exports) {
+},{"./player.module.css":"player.module.css","./utils.js":"utils.js"}],"sharedStyles.js":[function(require,module,exports) {
+"use strict";
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+exports.colStyleGenerator = void 0;
+const colStyleGenerator = makeStyles(theme => ({
+  previewImage: {
+    width: "auto",
+    height: "100%"
+  }
+}));
+exports.colStyleGenerator = colStyleGenerator;
+},{}],"unbundle.js":[function(require,module,exports) {
 "use strict";
 
 var _react = _interopRequireDefault(require("react"));
@@ -473,6 +487,8 @@ var _clsx = _interopRequireDefault(require("clsx"));
 
 var _player = require("./player");
 
+var _sharedStyles = require("./sharedStyles");
+
 var _utils = require("./utils.js");
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
@@ -499,16 +515,6 @@ const regeneratorRuntime = require("regenerator-runtime");
 
 console.log("bundle :D");
 // Constants
-const columnTypes = {
-  playlists: ["Name", "Date", "Songs Count"],
-  songs: ["Name", "Artist", "Duration"],
-  albums: ["Name", "Last Updated", "Songs"]
-};
-const columnProps = {
-  playlists: [item => item.name, item => item.createdAt, item => JSON.parse(item.contents).length],
-  songs: [item => item.name, item => item.artist, item => item.duration ? _utils.localizedFuncs[i18n.getLocale()].formatDuration(item.duration) : "Unknown"],
-  albums: [item => item.name, item => item.updatedAt, item => JSON.parse(item.contents).length]
-};
 let musicServer = "http://localhost:3000"; // NO SLASH!
 
 function capitlizeFirst(string) {
@@ -543,9 +549,9 @@ class ResultView extends _react.default.PureComponent {
     this.state = {
       pageIndex: 0,
       type: props.type,
-      col1: i18n.__(columnTypes[props.type][0]),
-      col2: i18n.__(columnTypes[props.type][1]),
-      col3: i18n.__(columnTypes[props.type][2]),
+      col1: i18n.__(props.colNames[0]),
+      col2: i18n.__(props.colNames[1]),
+      col3: i18n.__(props.colNames[2]),
       pageData: [],
       connectionFailedSnackbarOpen: false
     };
@@ -628,20 +634,12 @@ class ResultView extends _react.default.PureComponent {
 
   render() {
     let outerThis = this;
-
-    function cellgenerator(cellFunc, item, index) {
-      return /*#__PURE__*/_react.default.createElement(_TableCell.default, {
-        align: "right",
-        key: index
-      }, cellFunc(item));
-    }
+    let classes = (0, _sharedStyles.colStyleGenerator)(this.props);
 
     function colgenerator(item, index) {
       return /*#__PURE__*/_react.default.createElement(_TableRow.default, {
         key: index
-      }, columnProps[this.props.type].map(function (func, index) {
-        return cellgenerator.bind(this)(func, item, index);
-      }));
+      }, "outerThis.props.renderCols(item, index, classes);");
     }
 
     let comps = this.state.pageData.map(colgenerator.bind(this));
@@ -739,13 +737,27 @@ class SongView extends _react.default.Component {
     }
   }
 
+  createSongNameCol(item, classes) {
+    return /*#__PURE__*/_react.default.createElement(_TableCell.default, null, /*#__PURE__*/_react.default.createElement("img", {
+      src: item.AlbumPicture,
+      className: classes.previewImage
+    }));
+  }
+
+  renderCols(item, index, classes) {
+    let colGenerators = [this.createSongNameCol.bind(this)]; // TODO: Not hardcode this here
+
+    return colGenerators[index](item, classes); // Execute column generator function with the index
+  }
+
   render() {
     return /*#__PURE__*/_react.default.createElement(_react.default.Fragment, null, /*#__PURE__*/_react.default.createElement(_TextField.default, {
       type: "text",
       className: "searchbox",
       onChange: this.fetchSearch.bind(this),
       label: i18n.__("Type to search"),
-      fullWidth: true
+      fullWidth: true,
+      renderCols: this.renderCols.bind(this)
     }), /*#__PURE__*/_react.default.createElement(ResultView, {
       type: "songs",
       query: this.state.searchBoxValue
@@ -927,7 +939,7 @@ $(function () {
   _reactDom.default.render( /*#__PURE__*/_react.default.createElement(MainComponent, null), document.getElementById("root"));
 });
 console.log("Player Comp", _player.PlayerComponent);
-},{"./player":"player.js","./utils.js":"utils.js"}],"../node_modules/parcel-bundler/src/builtins/hmr-runtime.js":[function(require,module,exports) {
+},{"./player":"player.js","./sharedStyles":"sharedStyles.js","./utils.js":"utils.js"}],"../node_modules/parcel-bundler/src/builtins/hmr-runtime.js":[function(require,module,exports) {
 var OVERLAY_ID = '__parcel__error__overlay__';
 
 var OldModule = module.bundle.Module;
