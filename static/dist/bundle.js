@@ -1,4 +1,4 @@
-process.env.HMR_PORT=61956;process.env.HMR_HOSTNAME="localhost";// modules are defined as an array
+process.env.HMR_PORT=50946;process.env.HMR_HOSTNAME="localhost";// modules are defined as an array
 // [ module function, map of requires ]
 //
 // map of requires is short require name -> numeric require
@@ -398,21 +398,7 @@ class PlayerComponent extends _react.default.Component {
 
 exports.PlayerComponent = PlayerComponent;
 console.log("Imported styles", _playerModule.default);
-},{"./player.module.css":"player.module.css","./utils.js":"utils.js"}],"sharedStyles.js":[function(require,module,exports) {
-"use strict";
-
-Object.defineProperty(exports, "__esModule", {
-  value: true
-});
-exports.colStyleGenerator = void 0;
-const colStyleGenerator = makeStyles(theme => ({
-  previewImage: {
-    width: "auto",
-    height: "100%"
-  }
-}));
-exports.colStyleGenerator = colStyleGenerator;
-},{}],"unbundle.js":[function(require,module,exports) {
+},{"./player.module.css":"player.module.css","./utils.js":"utils.js"}],"unbundle.js":[function(require,module,exports) {
 "use strict";
 
 var _react = _interopRequireDefault(require("react"));
@@ -487,8 +473,6 @@ var _clsx = _interopRequireDefault(require("clsx"));
 
 var _player = require("./player");
 
-var _sharedStyles = require("./sharedStyles");
-
 var _utils = require("./utils.js");
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
@@ -542,6 +526,12 @@ function Alert(props) {
   }, props));
 }
 
+function placeholder(item) {
+  return /*#__PURE__*/_react.default.createElement(_lab.Skeleton, {
+    animation: "wave"
+  });
+}
+
 class ResultView extends _react.default.PureComponent {
   constructor(props) {
     super(props); // Deprecated but needed anyway
@@ -549,9 +539,6 @@ class ResultView extends _react.default.PureComponent {
     this.state = {
       pageIndex: 0,
       type: props.type,
-      col1: i18n.__(props.colNames[0]),
-      col2: i18n.__(props.colNames[1]),
-      col3: i18n.__(props.colNames[2]),
       pageData: [],
       connectionFailedSnackbarOpen: false
     };
@@ -634,12 +621,11 @@ class ResultView extends _react.default.PureComponent {
 
   render() {
     let outerThis = this;
-    let classes = (0, _sharedStyles.colStyleGenerator)(this.props);
 
     function colgenerator(item, index) {
       return /*#__PURE__*/_react.default.createElement(_TableRow.default, {
         key: index
-      }, "outerThis.props.renderCols(item, index, classes);");
+      }, outerThis.props.renderCols(item, index));
     }
 
     let comps = this.state.pageData.map(colgenerator.bind(this));
@@ -737,17 +723,21 @@ class SongView extends _react.default.Component {
     }
   }
 
-  createSongNameCol(item, classes) {
+  createSongNameCol(item) {
+    // TODO: NOT USE INLINE STYLES
     return /*#__PURE__*/_react.default.createElement(_TableCell.default, null, /*#__PURE__*/_react.default.createElement("img", {
       src: item.AlbumPicture,
-      className: classes.previewImage
+      style: {
+        height: "100%",
+        width: "auto"
+      }
     }));
   }
 
   renderCols(item, index, classes) {
-    let colGenerators = [this.createSongNameCol.bind(this)]; // TODO: Not hardcode this here
+    let colGenerators = [this.createSongNameCol.bind(this), placeholder, placeholder]; // TODO: Not hardcode this here
 
-    return colGenerators[index](item, classes); // Execute column generator function with the index
+    return colGenerators[index](item); // Execute column generator function with the index
   }
 
   render() {
@@ -939,7 +929,7 @@ $(function () {
   _reactDom.default.render( /*#__PURE__*/_react.default.createElement(MainComponent, null), document.getElementById("root"));
 });
 console.log("Player Comp", _player.PlayerComponent);
-},{"./player":"player.js","./sharedStyles":"sharedStyles.js","./utils.js":"utils.js"}],"../node_modules/parcel-bundler/src/builtins/hmr-runtime.js":[function(require,module,exports) {
+},{"./player":"player.js","./utils.js":"utils.js"}],"../node_modules/parcel-bundler/src/builtins/hmr-runtime.js":[function(require,module,exports) {
 var OVERLAY_ID = '__parcel__error__overlay__';
 
 var OldModule = module.bundle.Module;

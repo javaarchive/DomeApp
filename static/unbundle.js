@@ -57,8 +57,6 @@ import clsx from "clsx";
 
 // Reusable Player Componoent
 import { PlayerComponent } from "./player";
-// Styles
-import {colStyleGenerator} from "./sharedStyles";
 
 const Store = require("electron-store");
 // Settings Loading
@@ -98,15 +96,15 @@ function calcColClass(cols) {
 function Alert(props) {
 	return <MuiAlert elevation={6} variant="filled" {...props} />;
   }
+function placeholder(item){
+	return <Skeleton animation="wave" />;
+}
 class ResultView extends React.PureComponent {
 	constructor(props) {
 		super(props); // Deprecated but needed anyway
 		this.state = {
 			pageIndex: 0,
 			type: props.type,
-			col1: i18n.__(props.colNames[0]),
-			col2: i18n.__(props.colNames[1]),
-			col3: i18n.__(props.colNames[2]),
 			pageData: [],
 			connectionFailedSnackbarOpen: false
 		};
@@ -186,11 +184,10 @@ class ResultView extends React.PureComponent {
 	}
 	render() {
 		let	outerThis = this;
-		let classes = colStyleGenerator(this.props);
 		function colgenerator(item, index) {
 			return (
 				<TableRow key={index}>
-					outerThis.props.renderCols(item, index, classes);
+					{outerThis.props.renderCols(item, index)}
 				</TableRow>
 			);
 		}
@@ -307,14 +304,18 @@ class SongView extends React.Component {
 			});
 		}
 	}
-	createSongNameCol(item,classes){
+	createSongNameCol(item){
+		// TODO: NOT USE INLINE STYLES
 		return <TableCell>
-			<img src={item.AlbumPicture} className={classes.previewImage}></img>
+			<img src={item.AlbumPicture} style={{
+				height: "100%",
+				width: "auto"
+			}}></img>
 		</TableCell>;
 	}
 	renderCols(item, index, classes){
-		let colGenerators = [this.createSongNameCol.bind(this)]; // TODO: Not hardcode this here
-		return colGenerators[index](item,classes); // Execute column generator function with the index
+		let colGenerators = [this.createSongNameCol.bind(this),placeholder,placeholder]; // TODO: Not hardcode this here
+		return colGenerators[index](item); // Execute column generator function with the index
 	}
 
 	render() {
