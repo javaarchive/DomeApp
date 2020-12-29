@@ -208,6 +208,7 @@ class ResultView extends React.PureComponent {
 		}
 	}
 	render() {
+		let	outerThis = this;
 		function cellgenerator(cellFunc, item, index) {
 			return (
 				<TableCell align="right" key={index}>
@@ -215,9 +216,9 @@ class ResultView extends React.PureComponent {
 				</TableCell>
 			);
 		}
-		function colgenerator(item) {
+		function colgenerator(item, index) {
 			return (
-				<TableRow>
+				<TableRow key={index}>
 					{columnProps[this.props.type].map(function (func, index) {
 						return cellgenerator.bind(this)(func, item, index);
 					})}

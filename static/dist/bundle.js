@@ -1,4 +1,4 @@
-process.env.HMR_PORT=64487;process.env.HMR_HOSTNAME="localhost";// modules are defined as an array
+process.env.HMR_PORT=61956;process.env.HMR_HOSTNAME="localhost";// modules are defined as an array
 // [ module function, map of requires ]
 //
 // map of requires is short require name -> numeric require
@@ -627,6 +627,8 @@ class ResultView extends _react.default.PureComponent {
   }
 
   render() {
+    let outerThis = this;
+
     function cellgenerator(cellFunc, item, index) {
       return /*#__PURE__*/_react.default.createElement(_TableCell.default, {
         align: "right",
@@ -634,8 +636,10 @@ class ResultView extends _react.default.PureComponent {
       }, cellFunc(item));
     }
 
-    function colgenerator(item) {
-      return /*#__PURE__*/_react.default.createElement(_TableRow.default, null, columnProps[this.props.type].map(function (func, index) {
+    function colgenerator(item, index) {
+      return /*#__PURE__*/_react.default.createElement(_TableRow.default, {
+        key: index
+      }, columnProps[this.props.type].map(function (func, index) {
         return cellgenerator.bind(this)(func, item, index);
       }));
     }
