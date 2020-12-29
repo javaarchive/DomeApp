@@ -57,6 +57,8 @@ import clsx from "clsx";
 
 // Reusable Player Componoent
 import { PlayerComponent } from "./player";
+// Styles
+import {colStyleGenerator} from "./sharedStyles";
 
 const Store = require("electron-store");
 // Settings Loading
@@ -77,31 +79,6 @@ console.log("bundle :D");
 import { localizedFuncs } from "./utils.js";
 
 // Constants
-const columnTypes = {
-	playlists: ["Name", "Date", "Songs Count"],
-	songs: ["Name", "Artist", "Duration"],
-	albums: ["Name", "Last Updated", "Songs"],
-};
-const columnProps = {
-	playlists: [
-		(item) => item.name,
-		(item) => item.createdAt,
-		(item) => JSON.parse(item.contents).length,
-	],
-	songs: [
-		(item) => item.name,
-		(item) => item.artist,
-		(item) =>
-			item.duration
-				? localizedFuncs[i18n.getLocale()].formatDuration(item.duration)
-				: "Unknown",
-	],
-	albums: [
-		(item) => item.name,
-		(item) => item.updatedAt,
-		(item) => JSON.parse(item.contents).length,
-	],
-};
 
 let musicServer = "http://localhost:3000"; // NO SLASH!
 function capitlizeFirst(string) {
@@ -127,9 +104,9 @@ class ResultView extends React.PureComponent {
 		this.state = {
 			pageIndex: 0,
 			type: props.type,
-			col1: i18n.__(columnTypes[props.type][0]),
-			col2: i18n.__(columnTypes[props.type][1]),
-			col3: i18n.__(columnTypes[props.type][2]),
+			col1: i18n.__(props.colNames[0]),
+			col2: i18n.__(props.colNames[1]),
+			col3: i18n.__(props.colNames[2]),
 			pageData: [],
 			connectionFailedSnackbarOpen: false
 		};
@@ -209,19 +186,11 @@ class ResultView extends React.PureComponent {
 	}
 	render() {
 		let	outerThis = this;
-		function cellgenerator(cellFunc, item, index) {
-			return (
-				<TableCell align="right" key={index}>
-					{cellFunc(item)}
-				</TableCell>
-			);
-		}
+		let classes = colStyleGenerator(this.props);
 		function colgenerator(item, index) {
 			return (
 				<TableRow key={index}>
-					{columnProps[this.props.type].map(function (func, index) {
-						return cellgenerator.bind(this)(func, item, index);
-					})}
+					outerThis.props.renderCols(item, index, classes);
 				</TableRow>
 			);
 		}
@@ -338,6 +307,15 @@ class SongView extends React.Component {
 			});
 		}
 	}
+	createSongNameCol(item,classes){
+		return <TableCell>
+			<img src={item.AlbumPicture} className={classes.previewImage}></img>
+		</TableCell>;
+	}
+	renderCols(item, index, classes){
+		let colGenerators = [this.createSongNameCol.bind(this)]; // TODO: Not hardcode this here
+		return colGenerators[index](item,classes); // Execute column generator function with the index
+	}
 
 	render() {
 		return (
@@ -348,6 +326,7 @@ class SongView extends React.Component {
 					onChange={this.fetchSearch.bind(this)}
 					label={i18n.__("Type to search")}
 					fullWidth={true}
+					renderCols={this.renderCols.bind(this)}
 				/>
 				<ResultView type="songs" query={this.state.searchBoxValue}></ResultView>
 				<p>
