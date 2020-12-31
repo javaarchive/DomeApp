@@ -96,8 +96,8 @@ function calcColClass(cols) {
 function Alert(props) {
 	return <MuiAlert elevation={6} variant="filled" {...props} />;
   }
-function placeholder(item){
-	return <Skeleton animation="wave" />;
+function placeholder(item, key){
+	return <Skeleton animation="wave" key={key} />;
 }
 class ResultView extends React.PureComponent {
 	constructor(props) {
@@ -106,8 +106,12 @@ class ResultView extends React.PureComponent {
 			pageIndex: 0,
 			type: props.type,
 			pageData: [],
-			connectionFailedSnackbarOpen: false
+			connectionFailedSnackbarOpen: false,
+			columns: 3
 		};
+		if(props.columns){
+			this.state.columns = props.columns;
+		}
 		this.search.bind(this)();
 	}
 	
@@ -185,9 +189,14 @@ class ResultView extends React.PureComponent {
 	render() {
 		let	outerThis = this;
 		function colgenerator(item, index) {
+			let cols = [];
+			for(let i = 0; i < this.state.columns; i ++){
+				let elem = <TableCell key={i}>{outerThis.props.rendercols(item, i)}</TableCell>;
+				cols.push(elem);
+			}
 			return (
 				<TableRow key={index}>
-					{outerThis.props.renderCols(item, index)}
+					{cols}
 				</TableRow>
 			);
 		}
@@ -304,21 +313,23 @@ class SongView extends React.Component {
 			});
 		}
 	}
-	createSongNameCol(item){
+	createSongNameCol(item, key){
 		// TODO: NOT USE INLINE STYLES
-		return <TableCell>
+		return 
+		<div key={key}>
 			<img src={item.AlbumPicture} style={{
 				height: "100%",
 				width: "auto"
 			}}></img>
-		</TableCell>;
+		</div>;
 	}
 	renderCols(item, index, classes){
 		let colGenerators = [this.createSongNameCol.bind(this),placeholder,placeholder]; // TODO: Not hardcode this here
-		return colGenerators[index](item); // Execute column generator function with the index
+		return colGenerators[index](item, index); // Execute column generator function with the index
 	}
 
 	render() {
+		let rendercols = this.renderCols;
 		return (
 			<>
 				<TextField
@@ -327,9 +338,9 @@ class SongView extends React.Component {
 					onChange={this.fetchSearch.bind(this)}
 					label={i18n.__("Type to search")}
 					fullWidth={true}
-					renderCols={this.renderCols.bind(this)}
+					rendercols={rendercols.bind(this)}
 				/>
-				<ResultView type="songs" query={this.state.searchBoxValue}></ResultView>
+				<ResultView type="songs" query={this.state.searchBoxValue} rendercols={this.renderCols.bind(this)}></ResultView>
 				<p>
 					{i18n.__("Current querying ")} {settings.get("pageSize")}{" "}
 					{i18n.__(" songs matching the query ")} {this.state.searchBoxValue}

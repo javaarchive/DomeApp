@@ -1,4 +1,4 @@
-process.env.HMR_PORT=50946;process.env.HMR_HOSTNAME="localhost";// modules are defined as an array
+process.env.HMR_PORT=60816;process.env.HMR_HOSTNAME="localhost";// modules are defined as an array
 // [ module function, map of requires ]
 //
 // map of requires is short require name -> numeric require
@@ -526,9 +526,10 @@ function Alert(props) {
   }, props));
 }
 
-function placeholder(item) {
+function placeholder(item, key) {
   return /*#__PURE__*/_react.default.createElement(_lab.Skeleton, {
-    animation: "wave"
+    animation: "wave",
+    key: key
   });
 }
 
@@ -540,8 +541,14 @@ class ResultView extends _react.default.PureComponent {
       pageIndex: 0,
       type: props.type,
       pageData: [],
-      connectionFailedSnackbarOpen: false
+      connectionFailedSnackbarOpen: false,
+      columns: 3
     };
+
+    if (props.columns) {
+      this.state.columns = props.columns;
+    }
+
     this.search.bind(this)();
   }
 
@@ -623,9 +630,19 @@ class ResultView extends _react.default.PureComponent {
     let outerThis = this;
 
     function colgenerator(item, index) {
+      let cols = [];
+
+      for (let i = 0; i < this.state.columns; i++) {
+        let elem = /*#__PURE__*/_react.default.createElement(_TableCell.default, {
+          key: i
+        }, outerThis.props.rendercols(item, i));
+
+        cols.push(elem);
+      }
+
       return /*#__PURE__*/_react.default.createElement(_TableRow.default, {
         key: index
-      }, outerThis.props.renderCols(item, index));
+      }, cols);
     }
 
     let comps = this.state.pageData.map(colgenerator.bind(this));
@@ -723,9 +740,14 @@ class SongView extends _react.default.Component {
     }
   }
 
-  createSongNameCol(item) {
+  createSongNameCol(item, key) {
     // TODO: NOT USE INLINE STYLES
-    return /*#__PURE__*/_react.default.createElement(_TableCell.default, null, /*#__PURE__*/_react.default.createElement("img", {
+    return;
+
+    /*#__PURE__*/
+    _react.default.createElement("div", {
+      key: key
+    }, /*#__PURE__*/_react.default.createElement("img", {
       src: item.AlbumPicture,
       style: {
         height: "100%",
@@ -737,20 +759,22 @@ class SongView extends _react.default.Component {
   renderCols(item, index, classes) {
     let colGenerators = [this.createSongNameCol.bind(this), placeholder, placeholder]; // TODO: Not hardcode this here
 
-    return colGenerators[index](item); // Execute column generator function with the index
+    return colGenerators[index](item, index); // Execute column generator function with the index
   }
 
   render() {
+    let rendercols = this.renderCols;
     return /*#__PURE__*/_react.default.createElement(_react.default.Fragment, null, /*#__PURE__*/_react.default.createElement(_TextField.default, {
       type: "text",
       className: "searchbox",
       onChange: this.fetchSearch.bind(this),
       label: i18n.__("Type to search"),
       fullWidth: true,
-      renderCols: this.renderCols.bind(this)
+      rendercols: rendercols.bind(this)
     }), /*#__PURE__*/_react.default.createElement(ResultView, {
       type: "songs",
-      query: this.state.searchBoxValue
+      query: this.state.searchBoxValue,
+      rendercols: this.renderCols.bind(this)
     }), /*#__PURE__*/_react.default.createElement("p", null, i18n.__("Current querying "), " ", settings.get("pageSize"), " ", i18n.__(" songs matching the query "), " ", this.state.searchBoxValue), /*#__PURE__*/_react.default.createElement("div", null));
   }
 
