@@ -423,6 +423,8 @@ var _MusicNote = _interopRequireDefault(require("@material-ui/icons/MusicNote"))
 
 var _HomeRounded = _interopRequireDefault(require("@material-ui/icons/HomeRounded"));
 
+var _Settings = _interopRequireDefault(require("@material-ui/icons/Settings"));
+
 var _Paper = _interopRequireDefault(require("@material-ui/core/Paper"));
 
 var _AppBar = _interopRequireDefault(require("@material-ui/core/AppBar"));
@@ -448,6 +450,8 @@ var _Divider = _interopRequireDefault(require("@material-ui/core/Divider"));
 var _TextField = _interopRequireDefault(require("@material-ui/core/TextField"));
 
 var _Snackbar = _interopRequireDefault(require("@material-ui/core/Snackbar"));
+
+var _ButtonBase = _interopRequireDefault(require("@material-ui/core/ButtonBase"));
 
 var _Alert = _interopRequireDefault(require("@material-ui/lab/Alert"));
 
@@ -635,7 +639,7 @@ class ResultView extends _react.default.PureComponent {
       for (let i = 0; i < this.state.columns; i++) {
         let elem = /*#__PURE__*/_react.default.createElement(_TableCell.default, {
           key: i
-        }, outerThis.props.rendercols(item, i));
+        }, outerThis.props.renderCols(item, i));
 
         cols.push(elem);
       }
@@ -742,18 +746,9 @@ class SongView extends _react.default.Component {
 
   createSongNameCol(item, key) {
     // TODO: NOT USE INLINE STYLES
-    return;
-
-    /*#__PURE__*/
-    _react.default.createElement("div", {
+    return /*#__PURE__*/_react.default.createElement("div", {
       key: key
-    }, /*#__PURE__*/_react.default.createElement("img", {
-      src: item.AlbumPicture,
-      style: {
-        height: "100%",
-        width: "auto"
-      }
-    }));
+    }, /*#__PURE__*/_react.default.createElement(_IconButton.default, null, /*#__PURE__*/_react.default.createElement(_MusicNote.default, null)), item.name);
   }
 
   renderCols(item, index, classes) {
@@ -763,18 +758,16 @@ class SongView extends _react.default.Component {
   }
 
   render() {
-    let rendercols = this.renderCols;
     return /*#__PURE__*/_react.default.createElement(_react.default.Fragment, null, /*#__PURE__*/_react.default.createElement(_TextField.default, {
       type: "text",
       className: "searchbox",
       onChange: this.fetchSearch.bind(this),
       label: i18n.__("Type to search"),
-      fullWidth: true,
-      rendercols: rendercols.bind(this)
+      fullWidth: true
     }), /*#__PURE__*/_react.default.createElement(ResultView, {
       type: "songs",
       query: this.state.searchBoxValue,
-      rendercols: this.renderCols.bind(this)
+      renderCols: this.renderCols.bind(this)
     }), /*#__PURE__*/_react.default.createElement("p", null, i18n.__("Current querying "), " ", settings.get("pageSize"), " ", i18n.__(" songs matching the query "), " ", this.state.searchBoxValue), /*#__PURE__*/_react.default.createElement("div", null));
   }
 
@@ -834,6 +827,11 @@ class MainDrawerComponent extends _react.default.Component {
       onClick: this.triggerView("songs")
     }, /*#__PURE__*/_react.default.createElement(_ListItemIcon.default, null, /*#__PURE__*/_react.default.createElement(_MusicNote.default, null)), /*#__PURE__*/_react.default.createElement(_ListItemText.default, {
       primary: i18n.__("Songs")
+    })), /*#__PURE__*/_react.default.createElement(_ListItem.default, {
+      button: true,
+      onClick: this.triggerView("settings")
+    }, /*#__PURE__*/_react.default.createElement(_ListItemIcon.default, null, /*#__PURE__*/_react.default.createElement(_Settings.default, null)), /*#__PURE__*/_react.default.createElement(_ListItemText.default, {
+      primary: i18n.__("Settings")
     }))));
   }
 

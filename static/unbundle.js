@@ -23,6 +23,7 @@ import MenuIcon from "@material-ui/icons/Menu"; // Also called a hamburger
 import StorageIcon from "@material-ui/icons/Storage";
 import MusicNoteIcon from "@material-ui/icons/MusicNote";
 import HomeRoundedIcon from "@material-ui/icons/HomeRounded";
+import SettingsIcon from '@material-ui/icons/Settings';
 
 // Ui Widgets
 
@@ -39,6 +40,7 @@ import List from "@material-ui/core/List";
 import Divider from "@material-ui/core/Divider";
 import TextField from "@material-ui/core/TextField";
 import Snackbar from '@material-ui/core/Snackbar';
+import ButtonBase from '@material-ui/core/ButtonBase';
 import MuiAlert from '@material-ui/lab/Alert';
 // List
 import ListItem from "@material-ui/core/ListItem";
@@ -191,7 +193,7 @@ class ResultView extends React.PureComponent {
 		function colgenerator(item, index) {
 			let cols = [];
 			for(let i = 0; i < this.state.columns; i ++){
-				let elem = <TableCell key={i}>{outerThis.props.rendercols(item, i)}</TableCell>;
+				let elem = <TableCell key={i}>{outerThis.props.renderCols(item, i)}</TableCell>;
 				cols.push(elem);
 			}
 			return (
@@ -315,12 +317,11 @@ class SongView extends React.Component {
 	}
 	createSongNameCol(item, key){
 		// TODO: NOT USE INLINE STYLES
-		return 
-		<div key={key}>
-			<img src={item.AlbumPicture} style={{
-				height: "100%",
-				width: "auto"
-			}}></img>
+		return <div key={key}>
+			<IconButton>
+				<MusicNoteIcon />
+			</IconButton>
+			{item.name}
 		</div>;
 	}
 	renderCols(item, index, classes){
@@ -329,7 +330,6 @@ class SongView extends React.Component {
 	}
 
 	render() {
-		let rendercols = this.renderCols;
 		return (
 			<>
 				<TextField
@@ -338,9 +338,8 @@ class SongView extends React.Component {
 					onChange={this.fetchSearch.bind(this)}
 					label={i18n.__("Type to search")}
 					fullWidth={true}
-					rendercols={rendercols.bind(this)}
 				/>
-				<ResultView type="songs" query={this.state.searchBoxValue} rendercols={this.renderCols.bind(this)}></ResultView>
+				<ResultView type="songs" query={this.state.searchBoxValue} renderCols={this.renderCols.bind(this)}></ResultView>
 				<p>
 					{i18n.__("Current querying ")} {settings.get("pageSize")}{" "}
 					{i18n.__(" songs matching the query ")} {this.state.searchBoxValue}
@@ -407,6 +406,12 @@ class MainDrawerComponent extends React.Component {
 							<MusicNoteIcon />
 						</ListItemIcon>
 						<ListItemText primary={i18n.__("Songs")}></ListItemText>
+					</ListItem>
+					<ListItem button onClick={this.triggerView("settings")}>
+						<ListItemIcon>
+							<SettingsIcon />
+						</ListItemIcon>
+						<ListItemText primary={i18n.__("Settings")}></ListItemText>
 					</ListItem>
 				</List>
 			</div>
