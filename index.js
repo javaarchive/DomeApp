@@ -8,6 +8,7 @@ const debug = require("electron-debug");
 const contextMenu = require("electron-context-menu");
 const config = require("./config");
 const menu = require("./menu");
+const utils = require("electron-util");
 
 unhandled();
 debug();
@@ -36,7 +37,9 @@ const createMainWindow = async () => {
 		show: false,
 		width: 800,
 		height: 600,
-		webPreferences: { nodeIntegration: true }
+		webPreferences: { nodeIntegration: true },
+		autoHideMenuBar: !utils.is.development,
+		center: true
 	});
 
 	win.on("ready-to-show", () => {
