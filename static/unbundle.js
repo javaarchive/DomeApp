@@ -71,6 +71,10 @@ const settings = new Store({
 		snackbarAutoHideDuration: 5000,
 	},
 });
+// Constants
+const songViewHeaders = ["Song Name","Artist","Duration"];
+
+
 
 //import {$} from "jquery";
 const $ = require("jquery");
@@ -113,6 +117,11 @@ class ResultView extends React.PureComponent {
 		};
 		if(props.columns){
 			this.state.columns = props.columns;
+		}
+		if(props.columnHeaders){
+			this.state.colHeaders = props.columnHeaders.map(unlocalizedName => i18n.__(unlocalizedName));
+		}else{
+			this.state.colHeaders = (new Array(this.state.columns)).map(something => i18n.__("Unknown Header"));
 		}
 		this.search.bind(this)();
 	}
@@ -188,6 +197,9 @@ class ResultView extends React.PureComponent {
 			return;
 		}
 	}
+	onRowClickActivator(index){
+		this.props.onRowClick(this.state.pageData[index],index);
+	}
 	render() {
 		let	outerThis = this;
 		function colgenerator(item, index) {
@@ -197,13 +209,21 @@ class ResultView extends React.PureComponent {
 				cols.push(elem);
 			}
 			return (
-				<TableRow key={index}>
+				<TableRow key={index} onClick={this.onRowClickActivator.bind(this,index)}>
 					{cols}
 				</TableRow>
 			);
 		}
 		let comps = this.state.pageData.map(colgenerator.bind(this));
+		let tableHead = [];
+		for(let i = 0; i < this.state.columns; i ++){
+			tableHead.push(
+				<TableCell key={i}>
+					{this.state.colHeaders[i]}
+				</TableCell>
 
+			)
+		}
 		return (
 			<>
 			<div className="results-wrapper">
@@ -211,9 +231,7 @@ class ResultView extends React.PureComponent {
 					<Table>
 						<TableHead>
 							<TableRow>
-								<TableCell>{this.state.col1}</TableCell>
-								<TableCell>{this.state.col2}</TableCell>
-								<TableCell>{this.state.col3}</TableCell>
+								{tableHead}
 							</TableRow>
 						</TableHead>
 						<TableBody>{comps}</TableBody>
@@ -324,11 +342,23 @@ class SongView extends React.Component {
 			{item.name}
 		</div>;
 	}
+	createSongArtistCol(item, key){
+		return <div>
+			{item.artist}
+		</div>;
+	}
+	createDurationCol(item, key){
+		return <div>
+			{localizedFuncs[i18n.getLocale()].formatDuration(item.duration)}
+		</div>;
+	}
 	renderCols(item, index, classes){
-		let colGenerators = [this.createSongNameCol.bind(this),placeholder,placeholder]; // TODO: Not hardcode this here
+		let colGenerators = [this.createSongNameCol.bind(this),this.createSongArtistCol.bind(this),this.createDurationCol.bind(this)]; // TODO: Not hardcode this here
 		return colGenerators[index](item, index); // Execute column generator function with the index
 	}
-
+	handleRowClick(rowData, index){
+		console.log(rowData);		
+	}
 	render() {
 		return (
 			<>
@@ -339,7 +369,7 @@ class SongView extends React.Component {
 					label={i18n.__("Type to search")}
 					fullWidth={true}
 				/>
-				<ResultView type="songs" query={this.state.searchBoxValue} renderCols={this.renderCols.bind(this)}></ResultView>
+				<ResultView type="songs" query={this.state.searchBoxValue} renderCols={this.renderCols.bind(this)} columnHeaders={songViewHeaders} onRowClick={this.handleRowClick.bind(this)}></ResultView>
 				<p>
 					{i18n.__("Current querying ")} {settings.get("pageSize")}{" "}
 					{i18n.__(" songs matching the query ")} {this.state.searchBoxValue}

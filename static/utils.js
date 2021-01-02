@@ -1,5 +1,8 @@
 // Localizations
 function formatDuration(seconds) {
+	if(!seconds){
+		return "---";
+	}
 	let curSecs = seconds;
 	let out = "";
 	if (curSecs > 60 * 60) {
