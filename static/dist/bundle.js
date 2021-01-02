@@ -1,4 +1,4 @@
-process.env.HMR_PORT=60816;process.env.HMR_HOSTNAME="localhost";// modules are defined as an array
+process.env.HMR_PORT=54013;process.env.HMR_HOSTNAME="localhost";// modules are defined as an array
 // [ module function, map of requires ]
 //
 // map of requires is short require name -> numeric require
@@ -201,6 +201,10 @@ exports.localizedFuncs = void 0;
 
 // Localizations
 function formatDuration(seconds) {
+  if (!seconds) {
+    return "---";
+  }
+
   let curSecs = seconds;
   let out = "";
 
@@ -250,8 +254,11 @@ function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { de
 // Grid Utils
 // Widgets
 // Get localized functions
-// React Player to be imported
+// Event Emitter
+const EventEmitter = require('events'); // React Player to be imported
 // Meant to be reusable in other contexts
+
+
 const hasArtist = ["Song"];
 const hasMultipleArtists = ["Album"]; // Playlists are usually user created so they will have a variety of artists
 
@@ -283,11 +290,27 @@ class PlayerComponent extends _react.default.Component {
       preparedState["enabled"] = true;
     }
 
+    if (props.controller) {
+      preparedState["controller"] = props.controller;
+    } else {
+      preparedState["controller"] = new EventEmitter();
+    }
+
     this.state = preparedState;
   }
 
   componentDidMount() {// Code to run when component is destoryed -> constructor
   }
+
+  setNewController(ee) {
+    this.setState(function (state, props) {
+      return {
+        controller: ee
+      };
+    });
+  }
+
+  registerEvents(ee) {}
 
   componentWillUnmount() {// Componoent dies -> deconstructor
   }
@@ -495,7 +518,9 @@ const settings = new Store({
     pageSize: 25,
     snackbarAutoHideDuration: 5000
   }
-}); //import {$} from "jquery";
+}); // Constants
+
+const songViewHeaders = ["Song Name", "Artist", "Duration"]; //import {$} from "jquery";
 
 const $ = require("jquery");
 
@@ -551,6 +576,12 @@ class ResultView extends _react.default.PureComponent {
 
     if (props.columns) {
       this.state.columns = props.columns;
+    }
+
+    if (props.columnHeaders) {
+      this.state.colHeaders = props.columnHeaders.map(unlocalizedName => i18n.__(unlocalizedName));
+    } else {
+      this.state.colHeaders = new Array(this.state.columns).map(something => i18n.__("Unknown Header"));
     }
 
     this.search.bind(this)();
@@ -630,6 +661,10 @@ class ResultView extends _react.default.PureComponent {
     }
   }
 
+  onRowClickActivator(index) {
+    this.props.onRowClick(this.state.pageData[index], index);
+  }
+
   render() {
     let outerThis = this;
 
@@ -645,16 +680,25 @@ class ResultView extends _react.default.PureComponent {
       }
 
       return /*#__PURE__*/_react.default.createElement(_TableRow.default, {
-        key: index
+        key: index,
+        onClick: this.onRowClickActivator.bind(this, index)
       }, cols);
     }
 
     let comps = this.state.pageData.map(colgenerator.bind(this));
+    let tableHead = [];
+
+    for (let i = 0; i < this.state.columns; i++) {
+      tableHead.push( /*#__PURE__*/_react.default.createElement(_TableCell.default, {
+        key: i
+      }, this.state.colHeaders[i]));
+    }
+
     return /*#__PURE__*/_react.default.createElement(_react.default.Fragment, null, /*#__PURE__*/_react.default.createElement("div", {
       className: "results-wrapper"
     }, /*#__PURE__*/_react.default.createElement(_TableContainer.default, {
       component: _Paper.default
-    }, /*#__PURE__*/_react.default.createElement(_Table.default, null, /*#__PURE__*/_react.default.createElement(_TableHead.default, null, /*#__PURE__*/_react.default.createElement(_TableRow.default, null, /*#__PURE__*/_react.default.createElement(_TableCell.default, null, this.state.col1), /*#__PURE__*/_react.default.createElement(_TableCell.default, null, this.state.col2), /*#__PURE__*/_react.default.createElement(_TableCell.default, null, this.state.col3))), /*#__PURE__*/_react.default.createElement(_TableBody.default, null, comps))), /*#__PURE__*/_react.default.createElement("p", null, i18n.__("Showing "), this.state.pageData.length, " ", i18n.__(" items"), ";")), /*#__PURE__*/_react.default.createElement(_Snackbar.default, {
+    }, /*#__PURE__*/_react.default.createElement(_Table.default, null, /*#__PURE__*/_react.default.createElement(_TableHead.default, null, /*#__PURE__*/_react.default.createElement(_TableRow.default, null, tableHead)), /*#__PURE__*/_react.default.createElement(_TableBody.default, null, comps))), /*#__PURE__*/_react.default.createElement("p", null, i18n.__("Showing "), this.state.pageData.length, " ", i18n.__(" items"), ";")), /*#__PURE__*/_react.default.createElement(_Snackbar.default, {
       open: this.state.connectionFailedSnackbarOpen,
       autoHideDuration: settings.get("snackbarAutoHideDuration"),
       onClose: this.handleConnectionFailureSnackbarClose.bind(this)
@@ -751,10 +795,22 @@ class SongView extends _react.default.Component {
     }, /*#__PURE__*/_react.default.createElement(_IconButton.default, null, /*#__PURE__*/_react.default.createElement(_MusicNote.default, null)), item.name);
   }
 
+  createSongArtistCol(item, key) {
+    return /*#__PURE__*/_react.default.createElement("div", null, item.artist);
+  }
+
+  createDurationCol(item, key) {
+    return /*#__PURE__*/_react.default.createElement("div", null, _utils.localizedFuncs[i18n.getLocale()].formatDuration(item.duration));
+  }
+
   renderCols(item, index, classes) {
-    let colGenerators = [this.createSongNameCol.bind(this), placeholder, placeholder]; // TODO: Not hardcode this here
+    let colGenerators = [this.createSongNameCol.bind(this), this.createSongArtistCol.bind(this), this.createDurationCol.bind(this)]; // TODO: Not hardcode this here
 
     return colGenerators[index](item, index); // Execute column generator function with the index
+  }
+
+  handleRowClick(rowData, index) {
+    console.log(rowData);
   }
 
   render() {
@@ -767,7 +823,9 @@ class SongView extends _react.default.Component {
     }), /*#__PURE__*/_react.default.createElement(ResultView, {
       type: "songs",
       query: this.state.searchBoxValue,
-      renderCols: this.renderCols.bind(this)
+      renderCols: this.renderCols.bind(this),
+      columnHeaders: songViewHeaders,
+      onRowClick: this.handleRowClick.bind(this)
     }), /*#__PURE__*/_react.default.createElement("p", null, i18n.__("Current querying "), " ", settings.get("pageSize"), " ", i18n.__(" songs matching the query "), " ", this.state.searchBoxValue), /*#__PURE__*/_react.default.createElement("div", null));
   }
 

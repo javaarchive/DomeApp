@@ -13,6 +13,8 @@ import Grid from "@material-ui/core/Grid";
 import Slider from "@material-ui/core/Slider";
 // Get localized functions
 import { localizedFuncs } from "./utils.js";
+// Event Emitter
+const EventEmitter = require('events');
 
 // React Player to be imported
 // Meant to be reusable in other contexts
@@ -35,17 +37,37 @@ class PlayerComponent extends React.Component {
 			length: 1200,
 			enabled: false,
 			userDragging: false, // Do not update while user is dragging
+			internalPlaylist: []
 		};
 		if (props.name) {
 			preparedState["name"] = props.name;
 			preparedState["enabled"] = true;
+		}
+		if(props.controller){
+			preparedState["controller"] = props.controller;
+		}else{
+			preparedState["controller"] = new EventEmitter();
 		}
 		this.state = preparedState;
 	}
 	componentDidMount() {
 		// Code to run when component is destoryed -> constructor
 	}
-
+	setNewController(ee){
+		this.setState(function (state, props) {
+			return { controller:ee };
+		});
+	}
+	registerEvents(ee){
+		if(ee.playerEventsRegistered){
+			continue;
+		}
+		let oThis = this; // original this
+		ee.playerEventsRegistered = true;
+		ee.on("queueSong",function(){
+			
+		});
+	}
 	componentWillUnmount() {
 		// Componoent dies -> deconstructor
 	}
