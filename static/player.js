@@ -60,7 +60,7 @@ class PlayerComponent extends React.Component {
 	}
 	registerEvents(ee){
 		if(ee.playerEventsRegistered){
-			continue;
+			return;
 		}
 		let oThis = this; // original this
 		ee.playerEventsRegistered = true;

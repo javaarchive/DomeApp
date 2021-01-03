@@ -9,6 +9,11 @@ const contextMenu = require("electron-context-menu");
 const config = require("./config");
 const menu = require("./menu");
 const utils = require("electron-util");
+const Store = require('electron-store');
+
+const settings = new Store({
+	defaults: require("./static/prefdefaults.json")
+});
 
 unhandled();
 debug();
@@ -39,7 +44,8 @@ const createMainWindow = async () => {
 		height: 600,
 		webPreferences: { nodeIntegration: true },
 		autoHideMenuBar: !utils.is.development,
-		center: true
+		center: true,
+		enableRemoteModule: true
 	});
 
 	win.on("ready-to-show", () => {

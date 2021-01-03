@@ -1,4 +1,4 @@
-process.env.HMR_PORT=54013;process.env.HMR_HOSTNAME="localhost";// modules are defined as an array
+process.env.HMR_PORT=65335;process.env.HMR_HOSTNAME="localhost";// modules are defined as an array
 // [ module function, map of requires ]
 //
 // map of requires is short require name -> numeric require
@@ -117,311 +117,7 @@ parcelRequire = (function (modules, cache, entry, globalName) {
   }
 
   return newRequire;
-})({"../node_modules/parcel-bundler/src/builtins/bundle-url.js":[function(require,module,exports) {
-var bundleURL = null;
-function getBundleURLCached() {
-  if (!bundleURL) {
-    bundleURL = getBundleURL();
-  }
-
-  return bundleURL;
-}
-
-function getBundleURL() {
-  // Attempt to find the URL of the current script and use that as the base URL
-  try {
-    throw new Error;
-  } catch (err) {
-    var matches = ('' + err.stack).match(/(https?|file|ftp|chrome-extension|moz-extension):\/\/[^)\n]+/g);
-    if (matches) {
-      return getBaseURL(matches[0]);
-    }
-  }
-
-  return '/';
-}
-
-function getBaseURL(url) {
-  return ('' + url).replace(/^((?:https?|file|ftp|chrome-extension|moz-extension):\/\/.+)\/[^/]+$/, '$1') + '/';
-}
-
-exports.getBundleURL = getBundleURLCached;
-exports.getBaseURL = getBaseURL;
-
-},{}],"../node_modules/parcel-bundler/src/builtins/css-loader.js":[function(require,module,exports) {
-var bundle = require('./bundle-url');
-
-function updateLink(link) {
-  var newLink = link.cloneNode();
-  newLink.onload = function () {
-    link.remove();
-  };
-  newLink.href = link.href.split('?')[0] + '?' + Date.now();
-  link.parentNode.insertBefore(newLink, link.nextSibling);
-}
-
-var cssTimeout = null;
-function reloadCSS() {
-  if (cssTimeout) {
-    return;
-  }
-
-  cssTimeout = setTimeout(function () {
-    var links = document.querySelectorAll('link[rel="stylesheet"]');
-    for (var i = 0; i < links.length; i++) {
-      if (bundle.getBaseURL(links[i].href) === bundle.getBundleURL()) {
-        updateLink(links[i]);
-      }
-    }
-
-    cssTimeout = null;
-  }, 50);
-}
-
-module.exports = reloadCSS;
-
-},{"./bundle-url":"../node_modules/parcel-bundler/src/builtins/bundle-url.js"}],"player.module.css":[function(require,module,exports) {
-var reloadCSS = require('_css_loader');
-
-module.hot.dispose(reloadCSS);
-module.hot.accept(reloadCSS);
-module.exports = {
-  "player_font": "_player_font_7a16e",
-  "drop-shadow": "_drop-shadow_7a16e",
-  "playerTitle": "_playerTitle_7a16e",
-  "playerItemMadeBy": "_playerItemMadeBy_7a16e"
-};
-},{"_css_loader":"../node_modules/parcel-bundler/src/builtins/css-loader.js"}],"utils.js":[function(require,module,exports) {
-"use strict";
-
-Object.defineProperty(exports, "__esModule", {
-  value: true
-});
-exports.localizedFuncs = void 0;
-
-// Localizations
-function formatDuration(seconds) {
-  if (!seconds) {
-    return "---";
-  }
-
-  let curSecs = seconds;
-  let out = "";
-
-  if (curSecs > 60 * 60) {
-    out += Math.floor(curSecs / (60 * 60)) + ":";
-    curSecs = curSecs % (60 * 60);
-  }
-
-  out += Math.floor(curSecs / 60).toString().padStart(2, "0") + ":" + (curSecs % 60).toString().padStart(2, "0");
-  return out;
-}
-
-const localizedFuncs = {
-  "en": {
-    formatDuration: formatDuration
-  }
-};
-exports.localizedFuncs = localizedFuncs;
-},{}],"player.js":[function(require,module,exports) {
-"use strict";
-
-Object.defineProperty(exports, "__esModule", {
-  value: true
-});
-exports.PlayerComponent = void 0;
-
-var _react = _interopRequireDefault(require("react"));
-
-var _reactDom = _interopRequireDefault(require("react-dom"));
-
-var _playerModule = _interopRequireDefault(require("./player.module.css"));
-
-var _Typography = _interopRequireDefault(require("@material-ui/core/Typography"));
-
-var _Grid = _interopRequireDefault(require("@material-ui/core/Grid"));
-
-var _Slider = _interopRequireDefault(require("@material-ui/core/Slider"));
-
-var _utils = require("./utils.js");
-
-function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
-
-// Fonts (broken currently)
-// import "fontsource-roboto";
-// Styles
-// Text Stuff
-// Grid Utils
-// Widgets
-// Get localized functions
-// Event Emitter
-const EventEmitter = require('events'); // React Player to be imported
-// Meant to be reusable in other contexts
-
-
-const hasArtist = ["Song"];
-const hasMultipleArtists = ["Album"]; // Playlists are usually user created so they will have a variety of artists
-
-if (!i18n) {
-  try {
-    var i18n = require("i18n");
-  } catch (ex) {
-    var i18n = null; // Allow custom instances to be added later.
-  }
-} // Might already be init
-
-
-class PlayerComponent extends _react.default.Component {
-  constructor(props) {
-    super(props); // Deprecated but needed
-
-    let preparedState = {
-      itemName: i18n.__("Nothing Playing"),
-      position: 0,
-      itemLength: 0,
-      length: 1200,
-      enabled: false,
-      userDragging: false // Do not update while user is dragging
-
-    };
-
-    if (props.name) {
-      preparedState["name"] = props.name;
-      preparedState["enabled"] = true;
-    }
-
-    if (props.controller) {
-      preparedState["controller"] = props.controller;
-    } else {
-      preparedState["controller"] = new EventEmitter();
-    }
-
-    this.state = preparedState;
-  }
-
-  componentDidMount() {// Code to run when component is destoryed -> constructor
-  }
-
-  setNewController(ee) {
-    this.setState(function (state, props) {
-      return {
-        controller: ee
-      };
-    });
-  }
-
-  registerEvents(ee) {}
-
-  componentWillUnmount() {// Componoent dies -> deconstructor
-  }
-
-  updateItem(type, params) {
-    let properties = {};
-
-    if ("name" in params) {
-      properties.itemName = params.name;
-    }
-
-    if (hasArtist.includes(type)) {
-      if ("artist" in params) {
-        properties.itemMadeBy = params.artist;
-      }
-    }
-
-    if ("duration" in params) {
-      properties.duration = params.duration;
-    } else {
-      properties.duration = null; // Not provided
-    }
-
-    this.setState(function (state, props) {
-      return properties;
-    });
-  }
-
-  changePos(ev, newVal) {
-    console.log("Position changed to", newVal);
-    this.setState(function (state, props) {
-      return {
-        position: newVal
-      };
-    });
-  }
-
-  updateDuration(time) {
-    // Sometimes duration can be found afterwards
-    this.setState(function (state, props) {
-      return {
-        itemDuration: time
-      };
-    });
-  } // User Drag Handlers
-  // TODO: Account for multi touch displays???
-
-
-  userDragStart(ev) {
-    this.setState(function (state, props) {
-      return {
-        userDragging: true
-      };
-    });
-  }
-
-  userDragEnd(ev) {
-    this.setState(function (state, props) {
-      return {
-        userDragging: false
-      };
-    });
-  } // ! Main Rendering Code
-
-
-  render() {
-    return /*#__PURE__*/_react.default.createElement(_react.default.Fragment, null, /*#__PURE__*/_react.default.createElement("div", {
-      className: "player"
-    }, /*#__PURE__*/_react.default.createElement(_Grid.default, {
-      container: true,
-      spacing: 2
-    }, /*#__PURE__*/_react.default.createElement(_Grid.default, {
-      item: true,
-      xs: 2
-    }, /*#__PURE__*/_react.default.createElement(_Typography.default, {
-      variant: "caption"
-    }, this.state.enabled ? _utils.localizedFuncs[i18n.getLocale()].formatDuration(this.state.position) : i18n.__("Idle Duration"))), /*#__PURE__*/_react.default.createElement(_Grid.default, {
-      item: true,
-      xs: 8
-    }, /*#__PURE__*/_react.default.createElement("div", {
-      className: "playback-progress",
-      onPointerDown: this.userDragStart.bind(this),
-      onPointerUp: this.userDragEnd.bind(this)
-    }, /*#__PURE__*/_react.default.createElement(_Slider.default, {
-      value: this.state.position,
-      onChange: this.changePos.bind(this),
-      "aria-labelledby": "continuous-slider",
-      min: 0,
-      max: this.state.length,
-      disabled: !this.state.enabled
-    }))), /*#__PURE__*/_react.default.createElement(_Grid.default, {
-      item: true,
-      xs: 2
-    }, /*#__PURE__*/_react.default.createElement(_Typography.default, {
-      variant: "caption"
-    }, this.state.enabled ? "-" + _utils.localizedFuncs[i18n.getLocale()].formatDuration(this.state.itemLength - this.state.position) : i18n.__("Idle Duration")))), /*#__PURE__*/_react.default.createElement("span", {
-      className: _playerModule.default.playerTitle
-    }, /*#__PURE__*/_react.default.createElement(_Typography.default, {
-      variant: "h5"
-    }, this.state.itemName)), /*#__PURE__*/_react.default.createElement("span", {
-      className: _playerModule.default.playerItemMadeBy
-    }, /*#__PURE__*/_react.default.createElement(_Typography.default, {
-      variant: "h6"
-    }, this.state.itemMadeBy))));
-  }
-
-}
-
-exports.PlayerComponent = PlayerComponent;
-console.log("Imported styles", _playerModule.default);
-},{"./player.module.css":"player.module.css","./utils.js":"utils.js"}],"unbundle.js":[function(require,module,exports) {
+})({"unbundle.js":[function(require,module,exports) {
 "use strict";
 
 var _react = _interopRequireDefault(require("react"));
@@ -500,6 +196,8 @@ var _clsx = _interopRequireDefault(require("clsx"));
 
 var _player = require("./player");
 
+var _prefdefaults = _interopRequireDefault(require("./prefdefaults.json"));
+
 var _utils = require("./utils.js");
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
@@ -514,10 +212,7 @@ if (!Store) {
 }
 
 const settings = new Store({
-  defaults: {
-    pageSize: 25,
-    snackbarAutoHideDuration: 5000
-  }
+  defaults: _prefdefaults.default
 }); // Constants
 
 const songViewHeaders = ["Song Name", "Artist", "Duration"]; //import {$} from "jquery";
@@ -1009,7 +704,7 @@ $(function () {
   _reactDom.default.render( /*#__PURE__*/_react.default.createElement(MainComponent, null), document.getElementById("root"));
 });
 console.log("Player Comp", _player.PlayerComponent);
-},{"./player":"player.js","./utils.js":"utils.js"}],"../node_modules/parcel-bundler/src/builtins/hmr-runtime.js":[function(require,module,exports) {
+},{}],"../node_modules/parcel-bundler/src/builtins/hmr-runtime.js":[function(require,module,exports) {
 var OVERLAY_ID = '__parcel__error__overlay__';
 
 var OldModule = module.bundle.Module;

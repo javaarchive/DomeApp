@@ -65,11 +65,9 @@ const Store = require("electron-store");
 if (!Store) {
 	console.warn("NO STORE found");
 }
+import prefdefaults from "./prefdefaults.json";
 const settings = new Store({
-	defaults: {
-		pageSize: 25,
-		snackbarAutoHideDuration: 5000,
-	},
+	defaults: prefdefaults,
 });
 // Constants
 const songViewHeaders = ["Song Name","Artist","Duration"];
