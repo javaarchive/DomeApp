@@ -1,5 +1,8 @@
 {
     "pageSize": 25,
     "snackbarAutoHideDuration": 5000,
-    "test": true
+    "test": true,
+    "enabledContentHandlers":["youtube"],
+    "youtubePlayerMethod":"iframe",
+    "fallbackYoutubePlayerMethod":"browserView"
 }
