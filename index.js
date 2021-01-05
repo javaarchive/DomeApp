@@ -12,10 +12,16 @@ const utils = require("electron-util");
 const Store = require("electron-store");
 const http = require("http");
 const fs = require("fs");
+let AdBlockClient = null;
 
 const settings = new Store({
 	defaults: require("./static/prefdefaults.json"),
 });
+try {
+	AdBlockClient = require("adblock-rs");
+} catch (ex) {
+	settings.set("adblock", false); // Disable AdBlock
+}
 
 unhandled();
 debug();
@@ -41,31 +47,41 @@ let mainWindow;
 let adBlockData;
 function downloadFile(url) {
 	return new Promise(function (resolve, reject) {
-	  let timeout = setTimeout(reject,settings.get("adblockTimeout"));
-	  http.get(url, function (error, res, body) {
-		if (!error && res.statusCode == 200) {
-		  clearTimeout(timeout);
-			resolve(body);
-		} else {
-			clearTimeout(timeout);
-		  reject(error);
-		}
-	  });
+		let timeout = setTimeout(reject, settings.get("adblockTimeout"));
+		http.get(url, function (error, res, body) {
+			if (!error && res.statusCode == 200) {
+				clearTimeout(timeout);
+				resolve(body);
+			} else {
+				clearTimeout(timeout);
+				reject(error);
+			}
+		});
 	});
-  }
+}
+var filterSet, client;
 const createMainWindow = async () => {
 	// Init AdBlocker System
 	if (settings.get("adblock") && !adBlockData) {
-		let outstream = fs.createWriteStream(settings.get("adblock-file"));
-		try{
-			let resp = (await downloadFile(settings.get("adblock-download-list")));
-			resp.pipe(outstream);
-			resp.on("finish", function(){
-				outstream.close();
-			})
-		}catch(ex){
-			console.warn("AdBlocker File Failed to Download",outstream);
+		if (fs.existsSync(settings.get("adblock-file"))) {
+			let outstream = fs.createWriteStream(settings.get("adblock-file"));
+
+			try {
+				let resp = await downloadFile(settings.get("adblock-download-list"));
+				resp.pipe(outstream);
+				resp.on("finish", function () {
+					outstream.close();
+				});
+			} catch (ex) {
+				console.warn("AdBlocker File Failed to Download", outstream);
+			}
 		}
+		fs.readFileSync(settings.get("adblock-file"), { encoding: "utf-8" }).split(
+			"\n"
+		);
+		filterSet = new AdBlockClient.FilterSet(true);
+		filterSet.addFilters(rules);
+		client = new AdBlockClient.Engine(filterSet, true);
 	}
 
 	const win = new BrowserWindow({
