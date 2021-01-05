@@ -4,5 +4,8 @@
     "test": true,
     "enabledContentHandlers":["youtube"],
     "youtubePlayerMethod":"iframe",
-    "fallbackYoutubePlayerMethod":"browserView"
+    "fallbackYoutubePlayerMethod":"browserView",
+    "adblock":false,
+    "adblock-file":"easylist.blocklist",
+    "adblock-download-list":"https://easylist.to/easylist/easylist.txt"
 }

@@ -9,10 +9,12 @@ const contextMenu = require("electron-context-menu");
 const config = require("./config");
 const menu = require("./menu");
 const utils = require("electron-util");
-const Store = require('electron-store');
+const Store = require("electron-store");
+const http = require("http");
+const fs = require("fs");
 
 const settings = new Store({
-	defaults: require("./static/prefdefaults.json")
+	defaults: require("./static/prefdefaults.json"),
 });
 
 unhandled();
@@ -34,9 +36,38 @@ app.setAppUserModelId("io.github.the-ascent");
 // }
 
 // Prevent window from being garbage collected
-let mainWindow;
 
+let mainWindow;
+let adBlockData;
+function downloadFile(url) {
+	return new Promise(function (resolve, reject) {
+	  let timeout = setTimeout(reject,settings.get("adblockTimeout"));
+	  http.get(url, function (error, res, body) {
+		if (!error && res.statusCode == 200) {
+		  clearTimeout(timeout);
+			resolve(body);
+		} else {
+			clearTimeout(timeout);
+		  reject(error);
+		}
+	  });
+	});
+  }
 const createMainWindow = async () => {
+	// Init AdBlocker System
+	if (settings.get("adblock") && !adBlockData) {
+		let outstream = fs.createWriteStream(settings.get("adblock-file"));
+		try{
+			let resp = (await downloadFile(settings.get("adblock-download-list")));
+			resp.pipe(outstream);
+			resp.on("finish", function(){
+				outstream.close();
+			})
+		}catch(ex){
+			console.warn("AdBlocker File Failed to Download",outstream);
+		}
+	}
+
 	const win = new BrowserWindow({
 		title: app.name,
 		show: false,
@@ -45,7 +76,7 @@ const createMainWindow = async () => {
 		webPreferences: { nodeIntegration: true },
 		autoHideMenuBar: !utils.is.development,
 		center: true,
-		enableRemoteModule: true
+		enableRemoteModule: true,
 	});
 
 	win.on("ready-to-show", () => {
