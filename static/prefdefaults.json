@@ -5,7 +5,7 @@
     "enabledContentHandlers":["youtube"],
     "youtubePlayerMethod":"iframe",
     "fallbackYoutubePlayerMethod":"browserView",
-    "adblock":false,
+    "adblock":true,
     "adblock-file":"easylist.blocklist",
-    "adblock-download-list":"https://easylist.to/easylist/easylist.txt"
+    "adblock-download-list":"http://easylist.to/easylist/easylist.txt"
 }
