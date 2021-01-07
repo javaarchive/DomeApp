@@ -7,5 +7,6 @@
     "fallbackYoutubePlayerMethod":"browserView",
     "adblock":true,
     "adblock-file":"easylist.blocklist",
-    "adblock-download-list":"http://easylist.to/easylist/easylist.txt"
+    "adblock-download-list":"http://easylist.to/easylist/easylist.txt",
+    "cookie-obliterator":false
 }

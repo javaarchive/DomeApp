@@ -88,7 +88,7 @@ const createMainWindow = async () => {
 		show: false,
 		width: 800,
 		height: 600,
-		webPreferences: { nodeIntegration: true,nodeIntegrationInSubFrames: true,  preload: __dirname + "/preload.js"},
+		webPreferences: { nodeIntegration: true,  preload: path.join(__dirname,"preload.js")},
 		autoHideMenuBar: !utils.is.development,
 		center: true,
 		enableRemoteModule: true
