@@ -46,10 +46,14 @@ class YoutubeEmbedIframePlayer{
             this.buffering = true;
         }
     }
-    async init(){
+    async init(opts){
         this.frame = document.createElement("iframe");
         this.frame.src=this.baseURL + "?jsapi=1";
-        document.body.appendChild(this.frame);
+        if(opts.attachElement){
+            opts.attachElement.appendChild(this.frame);
+        }else{
+            document.body.appendChild(this.frame);
+        }
         loadAPI(document);
         this.YT = await waitForYTtoLoad();
         this.player = new YT.Player('player', {
