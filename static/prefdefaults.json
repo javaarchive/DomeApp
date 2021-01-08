@@ -3,7 +3,7 @@
     "snackbarAutoHideDuration": 5000,
     "test": true,
     "enabledContentHandlers":["youtube"],
-    "youtubePlayerMethod":"iframe",
+    "youtubePlayerMethod":"./modules/youtube_embed_iframe",
     "fallbackYoutubePlayerMethod":"browserView",
     "adblock":true,
     "adblock-file":"easylist.blocklist",
