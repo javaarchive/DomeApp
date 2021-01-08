@@ -188,7 +188,7 @@ if(require.main == module){
 		table.setHeading('Name', 'Artist', 'ID','Content URI', 'Duration');
 		//table.align(AsciiTable.LEFT, '', 7);
 		for(let i = 0; i < songs.length; i ++){
-			table.addRow(songs[i].name, songs[i].artist, songs[i].id, songs[i].contentURI, songs[0].duration);
+			table.addRow(songs[i].name, songs[i].artist, songs[i].id, songs[i].contentURI, songs[i].duration);
 		}
 		console.log(table.toString());
 	}
