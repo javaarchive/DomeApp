@@ -27,6 +27,9 @@ module.exports = function(sequelize) {
                 type: DataTypes.INTEGER,
                 allowNull: true,
                 defaultValue: null
+            },metadata:{
+                type: DataTypes.STRING(1024),
+                defaultValue: "{}"
             }
 		},
 		{

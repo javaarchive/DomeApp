@@ -172,16 +172,15 @@ if(require.main == module){
 	const { Command } = require('commander');
 	const program = new Command();
 	var AsciiTable = require('ascii-table');
-	program.version('0.1.1');
-	program
-  .requiredOption('-m, --mode <modeparam>', 'execution mode', 'listsongs');
-  	program.option('-n --object-name <objname>', 'specify name for action');
-	program.option('-a --object-artist <objArtistName>', 'specify artist name for action');
-	program.option('-c --object-content-uri <objContentURI>', 'specify content uri for action');
-	program.option('-f, --full', 'Full Refresh on Database (use after scheme change)');
-	program.option('-i, --object-identifier <objid>',"specify id for an action");
-	program.parse(process.argv);
-	await self.refresh();
+	program.version('0.2.1');
+	program.requiredOption('-m, --mode <modeparam>', 'execution mode', 'listsongs')
+    .option('-n --object-name <objname>', 'specify name for action')
+	.option('-a --object-artist <objArtistName>', 'specify artist name for action')
+	.option('-c --object-content-uri <objContentURI>', 'specify content uri for action')
+	.option('-f, --full', 'Full Refresh on Database (use after scheme change)')
+	.option('-i, --object-identifier <objid>',"specify id for an action")
+	.parse(process.argv);
+	await self.refresh(program.full);
 	if(program.mode == "listsongs"){
 		console.log("Listing Songs");
 		let songs = await self.fetchSongs({limit: 10});
