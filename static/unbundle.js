@@ -41,6 +41,7 @@ import Divider from "@material-ui/core/Divider";
 import TextField from "@material-ui/core/TextField";
 import Snackbar from '@material-ui/core/Snackbar';
 import ButtonBase from '@material-ui/core/ButtonBase';
+import TouchRipple from '@material-ui/core/ButtonBase/TouchRipple';
 import MuiAlert from '@material-ui/lab/Alert';
 // List
 import ListItem from "@material-ui/core/ListItem";
@@ -203,20 +204,20 @@ class ResultView extends React.PureComponent {
 		function colgenerator(item, index) {
 			let cols = [];
 			for(let i = 0; i < this.state.columns; i ++){
-				let elem = <TableCell key={i}>{outerThis.props.renderCols(item, i)}</TableCell>;
+				let elem = <TableCell align="left" key={i}><ButtonBase style={{width: "100%", height: "100%"}}>{outerThis.props.renderCols(item, i)}</ButtonBase></TableCell>;
 				cols.push(elem);
 			}
 			return (
-				<TableRow key={index} onClick={this.onRowClickActivator.bind(this,index)}>
-					{cols}
-				</TableRow>
+					<TableRow key={index} onClick={this.onRowClickActivator.bind(this,index)}>
+						{cols}
+					</TableRow>				
 			);
 		}
 		let comps = this.state.pageData.map(colgenerator.bind(this));
 		let tableHead = [];
 		for(let i = 0; i < this.state.columns; i ++){
 			tableHead.push(
-				<TableCell key={i}>
+				<TableCell key={i} align="left">
 					{this.state.colHeaders[i]}
 				</TableCell>
 

@@ -1,4 +1,4 @@
-process.env.HMR_PORT=61976;process.env.HMR_HOSTNAME="localhost";// modules are defined as an array
+process.env.HMR_PORT=64437;process.env.HMR_HOSTNAME="localhost";// modules are defined as an array
 // [ module function, map of requires ]
 //
 // map of requires is short require name -> numeric require
@@ -499,6 +499,8 @@ var _Snackbar = _interopRequireDefault(require("@material-ui/core/Snackbar"));
 
 var _ButtonBase = _interopRequireDefault(require("@material-ui/core/ButtonBase"));
 
+var _TouchRipple = _interopRequireDefault(require("@material-ui/core/ButtonBase/TouchRipple"));
+
 var _Alert = _interopRequireDefault(require("@material-ui/lab/Alert"));
 
 var _ListItem = _interopRequireDefault(require("@material-ui/core/ListItem"));
@@ -695,8 +697,14 @@ class ResultView extends _react.default.PureComponent {
 
       for (let i = 0; i < this.state.columns; i++) {
         let elem = /*#__PURE__*/_react.default.createElement(_TableCell.default, {
+          align: "left",
           key: i
-        }, outerThis.props.renderCols(item, i));
+        }, /*#__PURE__*/_react.default.createElement(_ButtonBase.default, {
+          style: {
+            width: "100%",
+            height: "100%"
+          }
+        }, outerThis.props.renderCols(item, i)));
 
         cols.push(elem);
       }
@@ -712,7 +720,8 @@ class ResultView extends _react.default.PureComponent {
 
     for (let i = 0; i < this.state.columns; i++) {
       tableHead.push( /*#__PURE__*/_react.default.createElement(_TableCell.default, {
-        key: i
+        key: i,
+        align: "left"
       }, this.state.colHeaders[i]));
     }
 
