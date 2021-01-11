@@ -27,6 +27,9 @@ if (!i18n) {
 		var i18n = null; // Allow custom instances to be added later.
 	}
 } // Might already be init
+function loadAllContentHandlers(){
+	settings.get("")
+}
 class PlayerComponent extends React.Component {
 	constructor(props) {
 		super(props); // Deprecated but needed
@@ -66,6 +69,9 @@ class PlayerComponent extends React.Component {
 		ee.playerEventsRegistered = true;
 		ee.on("playSong",function(){
 			oThis.updateItem();
+			this.setState(function (state, props) {
+				return {enabled: true}
+			});
 		});
 		ee.on("queueSong",function (songData){
 			this.setState(function (state, props) {

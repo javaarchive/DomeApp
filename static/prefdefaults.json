@@ -2,7 +2,7 @@
     "pageSize": 25,
     "snackbarAutoHideDuration": 5000,
     "test": true,
-    "enabledContentHandlers":["youtube"],
+    "enabledContentHandlers":["./modules/contentHandlers/youtube"],
     "youtubePlayerMethod":"./modules/youtube_embed_iframe",
     "fallbackYoutubePlayerMethod":"browserView",
     "adblock":true,
