@@ -460,8 +460,10 @@ window.debug.views = views;
 // Main Comp
 function MainComponent() {
 	// Theme Logic
-	const useDarkMode = useMediaQuery("(prefers-color-scheme: dark)");
-
+	let useDarkMode = useMediaQuery("(prefers-color-scheme: dark)");
+	if(settings.get("useDarkMode")){
+		useDarkMode = settings.get("useDarkMode");
+	}
 	const theme = React.useMemo(
 		() =>
 			createMuiTheme({
@@ -555,7 +557,7 @@ function MainComponent() {
 					</AppBar>
 					<Container maxWidth="md">{views[curView]}</Container>
 
-					<PlayerComponent />
+					<PlayerComponent settings={settings} />
 				</div>
 			</ThemeProvider>
 		</>

@@ -51,7 +51,7 @@ class PlayerComponent extends React.Component {
 		this.state = preparedState;
 	}
 	componentDidMount() {
-		// Code to run when component is destoryed -> constructor
+		
 	}
 	setNewController(ee){
 		this.setState(function (state, props) {
@@ -64,12 +64,22 @@ class PlayerComponent extends React.Component {
 		}
 		let oThis = this; // original this
 		ee.playerEventsRegistered = true;
-		ee.on("queueSong",function(){
-			
+		ee.on("playSong",function(){
+			oThis.updateItem();
 		});
+		ee.on("queueSong",function (songData){
+			this.setState(function (state, props) {
+				let newPlaylist = new Array(this.state.internalPlaylist);
+				newPlaylist.push(songData);
+				return { internalPlaylist: newPlaylist };
+			});
+		}
 	}
 	componentWillUnmount() {
 		// Componoent dies -> deconstructor
+	}
+	get duration(){
+		return this.state.duration;
 	}
 	updateItem(type, params) {
 		let properties = {};
@@ -83,7 +93,17 @@ class PlayerComponent extends React.Component {
 			}
 		}
 		if ("duration" in params) {
-			properties.duration = params.duration;
+			if(params.start){
+				if(params.end){
+					properties.duration = end - start;
+				}else{
+					properties.duration = params.duration - start;
+				}
+			}else if(params.end){
+				properties.duration = end;
+			}else{
+				properties.duration = params.duration;
+			}
 		} else {
 			properties.duration = null; // Not provided
 		}
@@ -104,8 +124,11 @@ class PlayerComponent extends React.Component {
 			return { itemDuration: time };
 		});
 	}
+	setPosition(num){
+
+	}
 	// User Drag Handlers
-	// TODO: Account for multi touch displays???
+	// TODO: Account for touch displays???
 	userDragStart(ev){
 		this.setState(function (state, props) {
 			return { userDragging: true};

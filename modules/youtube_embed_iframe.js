@@ -81,6 +81,9 @@ class YoutubeEmbedIframePlayer{
     resume(){
         this.player.playVideo();
     }
+    setTime(num){
+        this.player.seekTo(num,true);
+    }
     getDuration(){
         return this.player.getDuration();
     }
