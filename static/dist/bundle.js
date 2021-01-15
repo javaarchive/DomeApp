@@ -272,13 +272,13 @@ if (!i18n) {
 
 
 function loadAllContentHandlers(settings) {
-  settings.get("enabledContentHandlers").map(require);
+  return settings.get("enabledContentHandlers").map(require);
 }
 
 function getBestContentHandler(uris, ch) {
   // Earlier in the protocol string the better
   // Comma seperated URIs are not fully supported yet
-  uriList = uris.split(",");
+  let uriList = uris.split(",");
 
   for (let i = 0; i < uriList.length; i++) {
     for (let j = 0; j < ch.length; j++) {
@@ -320,7 +320,9 @@ class PlayerComponent extends _react.default.Component {
     this.state = preparedState;
   }
 
-  componentDidMount() {}
+  componentDidMount() {
+    this.registerEvents(this.state.controller);
+  }
 
   setNewController(ee) {
     this.setState(function (state, props) {
@@ -331,9 +333,10 @@ class PlayerComponent extends _react.default.Component {
   }
 
   playSong(songData) {
-    let uris = songData.uri; // TODO: NOT DEPEND ON REQUIRE CACHE
+    // Does not check queue
+    let uris = songData.contentURI; // TODO: NOT DEPEND ON REQUIRE CACHE
 
-    let [uri, ch] = getBestContentHandler(uri, loadAllContentHandlers(this.props.settings));
+    let [uri, ch] = getBestContentHandler(uris, loadAllContentHandlers(this.props.settings));
     let prefferedPlayer = this.props.settings.get(ch.prefferedPlayerKey);
 
     let player = require(prefferedPlayer);
@@ -354,15 +357,17 @@ class PlayerComponent extends _react.default.Component {
 
     ee.playerEventsRegistered = true;
     ee.on("playSong", function (songData) {
-      oThis.updateItem("song", songData);
-      this.setState(function (state, props) {
+      // Does not check for queue
+      oThis.updateItem("Song", songData);
+      oThis.playSong(songData);
+      oThis.setState(function (state, props) {
         return {
           enabled: true
         };
       });
     });
     ee.on("queueSong", function (songData) {
-      this.setState(function (state, props) {
+      oThis.setState(function (state, props) {
         let newPlaylist = new Array(this.state.internalPlaylist);
         newPlaylist.push(songData);
         return {
@@ -502,8 +507,8 @@ module.exports = {
   "pageSize": 25,
   "snackbarAutoHideDuration": 5000,
   "test": true,
-  "enabledContentHandlers": ["./modules/contentHandlers/youtube"],
-  "youtubePlayerMethod": "./modules/youtube_embed_iframe",
+  "enabledContentHandlers": ["./static/modules/contenthandlers/youtube"],
+  "youtubePlayerMethod": "./static/modules/youtube_embed_iframe",
   "fallbackYoutubePlayerMethod": "browserView",
   "adblock": true,
   "adblock-file": "easylist.blocklist",
@@ -598,6 +603,9 @@ var _utils = require("./utils.js");
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
 function _extends() { _extends = Object.assign || function (target) { for (var i = 1; i < arguments.length; i++) { var source = arguments[i]; for (var key in source) { if (Object.prototype.hasOwnProperty.call(source, key)) { target[key] = source[key]; } } } return target; }; return _extends.apply(this, arguments); }
+
+const EventEmitter = require('events'); // Reusable Player Componoent
+
 
 const Store = require("electron-store"); // Settings Loading
 
@@ -904,6 +912,7 @@ class SongView extends _react.default.Component {
 
   handleRowClick(rowData, index) {
     console.log(rowData);
+    this.props.controller.emit("playSong", rowData);
   }
 
   render() {
@@ -986,15 +995,8 @@ class MainDrawerComponent extends _react.default.Component {
     }))));
   }
 
-} // Legacy Views System
+} // Main Comp
 
-
-let views = {};
-views.playlists = /*#__PURE__*/_react.default.createElement(PlaylistView, null);
-views.songs = /*#__PURE__*/_react.default.createElement(SongView, null);
-views.homeview = /*#__PURE__*/_react.default.createElement(HomeComponent, null);
-window.debug = {};
-window.debug.views = views; // Main Comp
 
 function MainComponent() {
   // Theme Logic
@@ -1034,6 +1036,18 @@ function MainComponent() {
   let [curView, setCurView] = _react.default.useState("homeview");
 
   const serversOpen = Boolean(serversAnchorEl);
+
+  const [controller, changeController] = _react.default.useState(new EventEmitter()); // Legacy Views System
+
+
+  let views = {};
+  views.playlists = /*#__PURE__*/_react.default.createElement(PlaylistView, null);
+  views.songs = /*#__PURE__*/_react.default.createElement(SongView, {
+    controller: controller
+  });
+  views.homeview = /*#__PURE__*/_react.default.createElement(HomeComponent, null);
+  window.debug = {};
+  window.debug.views = views;
   const stylesSet = (0, _styles.makeStyles)(theme => ({
     root: {
       flexGrow: 1
@@ -1095,7 +1109,8 @@ function MainComponent() {
   }, "Add new server"))))), /*#__PURE__*/_react.default.createElement(_core.Container, {
     maxWidth: "md"
   }, views[curView]), /*#__PURE__*/_react.default.createElement(_player.PlayerComponent, {
-    settings: settings
+    settings: settings,
+    controller: controller
   }))));
 } // Bootstrap code
 // really odd part i'm learning

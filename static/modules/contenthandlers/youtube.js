@@ -1,4 +1,4 @@
-const prefix = "youtube://";
+const PREFIX = "youtube://";
 class YoutubeContentHandler{
     constructor(){
         this.prefferedPlayerKey = "youtubePlayerMethod";
@@ -9,4 +9,4 @@ class YoutubeContentHandler{
     }
     
 }
-module.exports = YoutubeContentHandler;
+module.exports = (new YoutubeContentHandler());

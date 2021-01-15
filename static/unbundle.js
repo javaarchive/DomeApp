@@ -57,6 +57,7 @@ import TableRow from "@material-ui/core/TableRow";
 
 // Utilities
 import clsx from "clsx";
+const EventEmitter = require('events');
 
 // Reusable Player Componoent
 import { PlayerComponent } from "./player";
@@ -358,6 +359,7 @@ class SongView extends React.Component {
 	}
 	handleRowClick(rowData, index){
 		console.log(rowData);		
+		this.props.controller.emit("playSong",rowData);
 	}
 	render() {
 		return (
@@ -449,14 +451,6 @@ class MainDrawerComponent extends React.Component {
 	}
 }
 
-// Legacy Views System
-
-let views = {};
-views.playlists = <PlaylistView />;
-views.songs = <SongView />;
-views.homeview = <HomeComponent />;
-window.debug = {};
-window.debug.views = views;
 
 // Main Comp
 function MainComponent() {
@@ -474,6 +468,8 @@ function MainComponent() {
 			}),
 		[useDarkMode]
 	);
+	
+
 
 	// Handle Menu Logic
 	let [serversAnchorEl, setServersAnchorEl] = React.useState(null);
@@ -494,6 +490,15 @@ function MainComponent() {
 	// Current View
 	let [curView, setCurView] = React.useState("homeview");
 	const serversOpen = Boolean(serversAnchorEl);
+	const [controller,changeController] = React.useState(new EventEmitter());
+
+	// Legacy Views System
+	let views = {};
+	views.playlists = <PlaylistView />;
+	views.songs = <SongView controller={controller} />;
+	views.homeview = <HomeComponent />;
+	window.debug = {};
+	window.debug.views = views;
 	const stylesSet = makeStyles((theme) => ({
 		root: {
 			flexGrow: 1,
@@ -558,7 +563,7 @@ function MainComponent() {
 					</AppBar>
 					<Container maxWidth="md">{views[curView]}</Container>
 
-					<PlayerComponent settings={settings} />
+					<PlayerComponent settings={settings} controller={controller} />
 				</div>
 			</ThemeProvider>
 		</>
