@@ -27,9 +27,24 @@ if (!i18n) {
 		var i18n = null; // Allow custom instances to be added later.
 	}
 } // Might already be init
-function loadAllContentHandlers(){
-	settings.get("")
+function loadAllContentHandlers(settings){
+	settings.get("enabledContentHandlers").map(require);
 }
+function getBestContentHandler(uris,ch){
+	// Earlier in the protocol string the better
+	// Comma seperated URIs are not fully supported yet
+	uriList = uris.split(",");
+	for(let i = 0; i < uriList.length; i ++){
+		for(let j = 0; j < ch.length; j ++){
+			if(ch[j].canHandle(uriList[i])){
+				return [uriList[i],ch[j]];
+			}
+		}
+	}
+}
+
+
+let contentPlayerCache = {};
 class PlayerComponent extends React.Component {
 	constructor(props) {
 		super(props); // Deprecated but needed
@@ -61,25 +76,36 @@ class PlayerComponent extends React.Component {
 			return { controller:ee };
 		});
 	}
+	playSong(songData){
+		let uris = songData.uri;
+		// TODO: NOT DEPEND ON REQUIRE CACHE
+		let [uri,ch] = getBestContentHandler(uri, loadAllContentHandlers(this.props.settings));
+		let prefferedPlayer = this.props.settings.get(ch.prefferedPlayerKey);
+		let player = require(prefferedPlayer);
+		this.setState(function (state, props) {
+			return {player: player}
+		});
+	}
 	registerEvents(ee){
 		if(ee.playerEventsRegistered){
 			return;
 		}
 		let oThis = this; // original this
 		ee.playerEventsRegistered = true;
-		ee.on("playSong",function(){
-			oThis.updateItem();
+		ee.on("playSong",function(songData){
+			oThis.updateItem("song",songData);
 			this.setState(function (state, props) {
 				return {enabled: true}
 			});
 		});
+		
 		ee.on("queueSong",function (songData){
 			this.setState(function (state, props) {
 				let newPlaylist = new Array(this.state.internalPlaylist);
 				newPlaylist.push(songData);
 				return { internalPlaylist: newPlaylist };
 			});
-		}
+		});
 	}
 	componentWillUnmount() {
 		// Componoent dies -> deconstructor

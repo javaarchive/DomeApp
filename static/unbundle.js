@@ -83,6 +83,7 @@ import { localizedFuncs } from "./utils.js";
 
 // Constants
 
+const documentID = Math.floor(Math.random() * 100000).toString();
 let musicServer = "http://localhost:3000"; // NO SLASH!
 function capitlizeFirst(string) {
 	return string.charAt(0).toUpperCase() + string.slice(1);
@@ -204,7 +205,7 @@ class ResultView extends React.PureComponent {
 		function colgenerator(item, index) {
 			let cols = [];
 			for(let i = 0; i < this.state.columns; i ++){
-				let elem = <TableCell align="left" key={i}><ButtonBase style={{width: "100%", height: "100%"}}>{outerThis.props.renderCols(item, i)}</ButtonBase></TableCell>;
+				let elem = <TableCell align="left" key={i}>{outerThis.props.renderCols(item, i)}</TableCell>;
 				cols.push(elem);
 			}
 			return (

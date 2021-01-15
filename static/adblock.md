@@ -1,0 +1,3 @@
+`for(let i = 0; i < vids.length; i ++){vids[i].currentTime = vids[i].getDuration()}`
+still the problem is I haven't figured out how to inject js into iframes
+`function isAdPlaying(){return (document.getElementsByClassName("ytp-ad-preview-container").length != 0 || document.getElementsByClassName("ytp-ad-skip-button-container").length != 0 || document.getElementsByClassName("ytp-ad-skip-button-slot").length != 0 || document.getElementsByClassName("ytp-ad-player-overlay-flyout-cta"))}`

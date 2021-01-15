@@ -1,4 +1,4 @@
-process.env.HMR_PORT=64437;process.env.HMR_HOSTNAME="localhost";// modules are defined as an array
+process.env.HMR_PORT=63483;process.env.HMR_HOSTNAME="localhost";// modules are defined as an array
 // [ module function, map of requires ]
 //
 // map of requires is short require name -> numeric require
@@ -186,10 +186,10 @@ var reloadCSS = require('_css_loader');
 module.hot.dispose(reloadCSS);
 module.hot.accept(reloadCSS);
 module.exports = {
-  "player_font": "_player_font_7a16e",
-  "drop-shadow": "_drop-shadow_7a16e",
-  "playerTitle": "_playerTitle_7a16e",
-  "playerItemMadeBy": "_playerItemMadeBy_7a16e"
+  "player_font": "_player_font_fad94",
+  "drop-shadow": "_drop-shadow_fad94",
+  "playerTitle": "_playerTitle_fad94",
+  "playerItemMadeBy": "_playerItemMadeBy_fad94"
 };
 },{"_css_loader":"../node_modules/parcel-bundler/src/builtins/css-loader.js"}],"utils.js":[function(require,module,exports) {
 "use strict";
@@ -271,6 +271,26 @@ if (!i18n) {
 } // Might already be init
 
 
+function loadAllContentHandlers(settings) {
+  settings.get("enabledContentHandlers").map(require);
+}
+
+function getBestContentHandler(uris, ch) {
+  // Earlier in the protocol string the better
+  // Comma seperated URIs are not fully supported yet
+  uriList = uris.split(",");
+
+  for (let i = 0; i < uriList.length; i++) {
+    for (let j = 0; j < ch.length; j++) {
+      if (ch[j].canHandle(uriList[i])) {
+        return [uriList[i], ch[j]];
+      }
+    }
+  }
+}
+
+let contentPlayerCache = {};
+
 class PlayerComponent extends _react.default.Component {
   constructor(props) {
     super(props); // Deprecated but needed
@@ -300,13 +320,27 @@ class PlayerComponent extends _react.default.Component {
     this.state = preparedState;
   }
 
-  componentDidMount() {// Code to run when component is destoryed -> constructor
-  }
+  componentDidMount() {}
 
   setNewController(ee) {
     this.setState(function (state, props) {
       return {
         controller: ee
+      };
+    });
+  }
+
+  playSong(songData) {
+    let uris = songData.uri; // TODO: NOT DEPEND ON REQUIRE CACHE
+
+    let [uri, ch] = getBestContentHandler(uri, loadAllContentHandlers(this.props.settings));
+    let prefferedPlayer = this.props.settings.get(ch.prefferedPlayerKey);
+
+    let player = require(prefferedPlayer);
+
+    this.setState(function (state, props) {
+      return {
+        player: player
       };
     });
   }
@@ -319,10 +353,30 @@ class PlayerComponent extends _react.default.Component {
     let oThis = this; // original this
 
     ee.playerEventsRegistered = true;
-    ee.on("queueSong", function () {});
+    ee.on("playSong", function (songData) {
+      oThis.updateItem("song", songData);
+      this.setState(function (state, props) {
+        return {
+          enabled: true
+        };
+      });
+    });
+    ee.on("queueSong", function (songData) {
+      this.setState(function (state, props) {
+        let newPlaylist = new Array(this.state.internalPlaylist);
+        newPlaylist.push(songData);
+        return {
+          internalPlaylist: newPlaylist
+        };
+      });
+    });
   }
 
   componentWillUnmount() {// Componoent dies -> deconstructor
+  }
+
+  get duration() {
+    return this.state.duration;
   }
 
   updateItem(type, params) {
@@ -339,7 +393,17 @@ class PlayerComponent extends _react.default.Component {
     }
 
     if ("duration" in params) {
-      properties.duration = params.duration;
+      if (params.start) {
+        if (params.end) {
+          properties.duration = end - start;
+        } else {
+          properties.duration = params.duration - start;
+        }
+      } else if (params.end) {
+        properties.duration = end;
+      } else {
+        properties.duration = params.duration;
+      }
     } else {
       properties.duration = null; // Not provided
     }
@@ -365,8 +429,10 @@ class PlayerComponent extends _react.default.Component {
         itemDuration: time
       };
     });
-  } // User Drag Handlers
-  // TODO: Account for multi touch displays???
+  }
+
+  setPosition(num) {} // User Drag Handlers
+  // TODO: Account for touch displays???
 
 
   userDragStart(ev) {
@@ -436,7 +502,7 @@ module.exports = {
   "pageSize": 25,
   "snackbarAutoHideDuration": 5000,
   "test": true,
-  "enabledContentHandlers": ["youtube"],
+  "enabledContentHandlers": ["./modules/contentHandlers/youtube"],
   "youtubePlayerMethod": "./modules/youtube_embed_iframe",
   "fallbackYoutubePlayerMethod": "browserView",
   "adblock": true,
@@ -552,6 +618,7 @@ const regeneratorRuntime = require("regenerator-runtime");
 
 console.log("bundle :D");
 // Constants
+const documentID = Math.floor(Math.random() * 100000).toString();
 let musicServer = "http://localhost:3000"; // NO SLASH!
 
 function capitlizeFirst(string) {
@@ -699,12 +766,7 @@ class ResultView extends _react.default.PureComponent {
         let elem = /*#__PURE__*/_react.default.createElement(_TableCell.default, {
           align: "left",
           key: i
-        }, /*#__PURE__*/_react.default.createElement(_ButtonBase.default, {
-          style: {
-            width: "100%",
-            height: "100%"
-          }
-        }, outerThis.props.renderCols(item, i)));
+        }, outerThis.props.renderCols(item, i));
 
         cols.push(elem);
       }
@@ -936,7 +998,11 @@ window.debug.views = views; // Main Comp
 
 function MainComponent() {
   // Theme Logic
-  const useDarkMode = (0, _useMediaQuery.default)("(prefers-color-scheme: dark)");
+  let useDarkMode = (0, _useMediaQuery.default)("(prefers-color-scheme: dark)");
+
+  if (settings.get("useDarkMode")) {
+    useDarkMode = settings.get("useDarkMode");
+  }
 
   const theme = _react.default.useMemo(() => (0, _styles.createMuiTheme)({
     palette: {
@@ -1028,7 +1094,9 @@ function MainComponent() {
     onClick: setServer
   }, "Add new server"))))), /*#__PURE__*/_react.default.createElement(_core.Container, {
     maxWidth: "md"
-  }, views[curView]), /*#__PURE__*/_react.default.createElement(_player.PlayerComponent, null))));
+  }, views[curView]), /*#__PURE__*/_react.default.createElement(_player.PlayerComponent, {
+    settings: settings
+  }))));
 } // Bootstrap code
 // really odd part i'm learning
 

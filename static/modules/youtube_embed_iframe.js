@@ -65,6 +65,7 @@ class YoutubeEmbedIframePlayer{
 
     }
     load(id,start,end){
+        id = id.replace('youtube://',""); // TODO: use better practices
         let opts = {"videoId":id};
         this.start = 0;
         if(start){
