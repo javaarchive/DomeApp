@@ -1,4 +1,4 @@
-function waitForYTtoLoad(document) {
+function waitForYTtoLoad(document,window) {
 	if (document.ytLoaded) {
 		return window.YT;
 	}
@@ -11,7 +11,8 @@ function waitForYTtoLoad(document) {
 			resolve(YT);
 		};
 	});
-	document.ytLoadingPromise = promise;
+    document.ytLoadingPromise = promise;
+    return promise;
 }
 function loadAPI(document) {
 	var tag = document.createElement("script");
@@ -51,18 +52,21 @@ class YoutubeEmbedIframePlayer {
 		}
 	}
 	async init(opts) {
-		this.frame = document.createElement("iframe");
+        let curDocument = this.opts.document;
+        let curWindow = this.opts.window;
+		this.frame = curDocument.createElement("iframe");
 		this.frame.src = this.baseURL + "?jsapi=1";
 		if (this.opts.attachElement) {
 			this.opts.attachElement.appendChild(this.frame);
 		} else {
-			document.body.appendChild(this.frame);
+			curDocument.body.appendChild(this.frame);
 		}
-		loadAPI(document);
+		loadAPI(curDocument);
 		console.log("Waiting for yt to load");
-		this.YT = await waitForYTtoLoad(document);
+        this.YT = await waitForYTtoLoad(curDocument,curWindow);
+        console.log("Got YT",this.YT);
 		console.log("Created player instance");
-		this.player = new YT.Player("player", {
+		this.player = new this.YT.Player("player", {
 			events: {
 				onReady: this.onPlayerReady.bind(this),
 				onStateChange: this.onPlayerStateChange.bind(this),
@@ -78,8 +82,9 @@ class YoutubeEmbedIframePlayer {
 		}
 		if (end) {
 			opts["endSeconds"] = end;
-		}
-		window.loadVideoById(opts);
+        }
+        let curWindow = this.opts.window;
+		curWindow.loadVideoById(opts);
 	}
 	pause() {
 		this.player.pauseVideo();

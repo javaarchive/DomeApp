@@ -83,7 +83,7 @@ class PlayerComponent extends React.Component {
 		let [uri,ch] = getBestContentHandler(uris, loadAllContentHandlers(this.props.settings));
 		let prefferedPlayer = this.props.settings.get(ch.prefferedPlayerKey);
 		let SelectedPlayer = require(prefferedPlayer);
-		let player = new SelectedPlayer({});
+		let player = new SelectedPlayer({document:document,window:window});
 		await player.init();
 		console.log('Init Finished');
 		await player.load(uri);

@@ -341,7 +341,10 @@ class PlayerComponent extends _react.default.Component {
 
     let SelectedPlayer = require(prefferedPlayer);
 
-    let player = new SelectedPlayer({});
+    let player = new SelectedPlayer({
+      document: document,
+      window: window
+    });
     await player.init();
     console.log('Init Finished');
     await player.load(uri);
