@@ -1,4 +1,4 @@
-process.env.HMR_PORT=63483;process.env.HMR_HOSTNAME="localhost";// modules are defined as an array
+process.env.HMR_PORT=61353;process.env.HMR_HOSTNAME="localhost";// modules are defined as an array
 // [ module function, map of requires ]
 //
 // map of requires is short require name -> numeric require
@@ -332,15 +332,22 @@ class PlayerComponent extends _react.default.Component {
     });
   }
 
-  playSong(songData) {
+  async playSong(songData) {
     // Does not check queue
     let uris = songData.contentURI; // TODO: NOT DEPEND ON REQUIRE CACHE
 
     let [uri, ch] = getBestContentHandler(uris, loadAllContentHandlers(this.props.settings));
     let prefferedPlayer = this.props.settings.get(ch.prefferedPlayerKey);
 
-    let player = require(prefferedPlayer);
+    let SelectedPlayer = require(prefferedPlayer);
 
+    let player = new SelectedPlayer({});
+    await player.init();
+    console.log('Init Finished');
+    await player.load(uri);
+    console.log("Loaded uri into player");
+    await player.play();
+    console.log("Playing");
     this.setState(function (state, props) {
       return {
         player: player
@@ -356,17 +363,17 @@ class PlayerComponent extends _react.default.Component {
     let oThis = this; // original this
 
     ee.playerEventsRegistered = true;
-    ee.on("playSong", function (songData) {
+    ee.on("playSong", async function (songData) {
       // Does not check for queue
       oThis.updateItem("Song", songData);
-      oThis.playSong(songData);
+      await oThis.playSong(songData);
       oThis.setState(function (state, props) {
         return {
           enabled: true
         };
       });
     });
-    ee.on("queueSong", function (songData) {
+    ee.on("queueSong", async function (songData) {
       oThis.setState(function (state, props) {
         let newPlaylist = new Array(this.state.internalPlaylist);
         newPlaylist.push(songData);

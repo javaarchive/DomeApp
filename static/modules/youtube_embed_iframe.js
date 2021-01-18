@@ -23,6 +23,9 @@ function loadAPI(document){
 class YoutubeEmbedIframePlayer{
     constructor(options){
         this.opts = options;
+        if(!this.opts.privacyMode){
+            this.opts.privacyMode = false;
+        }
         this.baseURL = this.opts.privacyMode?"https://www.youtube-nocookie.com/embed/":"https://www.youtube.com/embed/"; // ! Important base urls
         this.playerState = -1;
     }
@@ -49,13 +52,15 @@ class YoutubeEmbedIframePlayer{
     async init(opts){
         this.frame = document.createElement("iframe");
         this.frame.src=this.baseURL + "?jsapi=1";
-        if(opts.attachElement){
-            opts.attachElement.appendChild(this.frame);
+        if(this.opts.attachElement){
+            this.opts.attachElement.appendChild(this.frame);
         }else{
             document.body.appendChild(this.frame);
         }
         loadAPI(document);
-        this.YT = await waitForYTtoLoad();
+        console.log("Waiting for yt to load")
+        this.YT = await waitForYTtoLoad(document);
+        console.log("Created player instance");
         this.player = new YT.Player('player', {
             events: {
               'onReady': this.onPlayerReady.bind(this),
@@ -80,6 +85,9 @@ class YoutubeEmbedIframePlayer{
         this.player.pauseVideo();
     }
     resume(){
+        this.player.playVideo();
+    }
+    play(){
         this.player.playVideo();
     }
     setTime(num){

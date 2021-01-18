@@ -12,6 +12,10 @@ const utils = require("electron-util");
 const Store = require("electron-store");
 const https = require("https");
 const fs = require("fs");
+const { ipcMain } = require('electron');
+ipcMain.on("debug", function(event,msg){
+	console.log(msg);
+})
 
 const settings = new Store({
 	defaults: require("./static/prefdefaults.json"),
@@ -88,7 +92,10 @@ const createMainWindow = async () => {
 		show: false,
 		width: 800,
 		height: 600,
-		webPreferences: { nodeIntegration: true,  preload: path.join(__dirname,"preload.js")},
+		webPreferences: { nodeIntegration: true, 
+			 preload: path.join(__dirname,"preload.js"),
+			 nodeIntegrationInSubFrames: true // Required, causes security issues but required for iframe control. Preload will sandbox
+			},
 		autoHideMenuBar: !utils.is.development,
 		center: true,
 		enableRemoteModule: true
