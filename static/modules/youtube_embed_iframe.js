@@ -11,8 +11,9 @@ function waitForYTtoLoad(document){
         document.ytLoaded = true;
         resolve(YT);
     }
-    document.ytLoadingPromise = promise;
+   
 });
+document.ytLoadingPromise = promise;
 }
 function loadAPI(document){
     var tag = document.createElement('script');
