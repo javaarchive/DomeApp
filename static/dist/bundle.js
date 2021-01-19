@@ -1,4 +1,4 @@
-process.env.HMR_PORT=61353;process.env.HMR_HOSTNAME="localhost";// modules are defined as an array
+process.env.HMR_PORT=57496;process.env.HMR_HOSTNAME="localhost";// modules are defined as an array
 // [ module function, map of requires ]
 //
 // map of requires is short require name -> numeric require
@@ -320,8 +320,23 @@ class PlayerComponent extends _react.default.Component {
     this.state = preparedState;
   }
 
+  tick() {
+    if (!this.player) {
+      return;
+    }
+
+    if (!this.state.userDragging) {
+      this.setState(function (state, props) {
+        return {
+          position: this.state.player.getDuration()
+        };
+      });
+    }
+  }
+
   componentDidMount() {
     this.registerEvents(this.state.controller);
+    setInterval(this.tick.bind(this), this.props.settings.get("playerTickrate"));
   }
 
   setNewController(ee) {
@@ -497,7 +512,7 @@ class PlayerComponent extends _react.default.Component {
       xs: 2
     }, /*#__PURE__*/_react.default.createElement(_Typography.default, {
       variant: "caption"
-    }, this.state.enabled ? "-" + _utils.localizedFuncs[i18n.getLocale()].formatDuration(this.state.itemLength - this.state.position) : i18n.__("Idle Duration")))), /*#__PURE__*/_react.default.createElement("span", {
+    }, this.state.enabled ? "-" + _utils.localizedFuncs[i18n.getLocale()].formatDuration(Math.abs(this.state.itemLength - this.state.position)) : i18n.__("Idle Duration")))), /*#__PURE__*/_react.default.createElement("span", {
       className: _playerModule.default.playerTitle
     }, /*#__PURE__*/_react.default.createElement(_Typography.default, {
       variant: "h5"

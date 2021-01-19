@@ -31,10 +31,11 @@ class YoutubeEmbedIframePlayer {
 			: "https://www.youtube.com/embed/"; // ! Important base urls
 		this.playerState = -1;
 	}
-	onReady(event) {
+	onPlayerReady(event) {
 		event.target.playVideo();
 	}
 	onPlayerStateChange(event) {
+        console.log("New State",event.data);
 		this.playerState = event.data;
 		if (this.playerState == 2) {
 			this.paused = true;
@@ -55,7 +56,8 @@ class YoutubeEmbedIframePlayer {
         let curDocument = this.opts.document;
         let curWindow = this.opts.window;
 		this.frame = curDocument.createElement("iframe");
-		this.frame.src = this.baseURL + "?jsapi=1";
+		this.frame.src = this.baseURL + "8tPnX7OPo0Q?enablejsapi=1";
+		this.frame.id = "player"
 		if (this.opts.attachElement) {
 			this.opts.attachElement.appendChild(this.frame);
 		} else {
@@ -65,15 +67,23 @@ class YoutubeEmbedIframePlayer {
 		console.log("Waiting for yt to load");
         this.YT = await waitForYTtoLoad(curDocument,curWindow);
         console.log("Got YT",this.YT);
-		console.log("Created player instance");
-		this.player = new this.YT.Player("player", {
+        
+        this.playerReadyPromise = new Promise((resolve,reject) => {
+            this.player = new this.YT.Player("player", {
 			events: {
-				onReady: this.onPlayerReady.bind(this),
-				onStateChange: this.onPlayerStateChange.bind(this),
+				'onReady': ev => {
+                    console.log("iframe Player Ready");
+                    this.onPlayerReady(ev); resolve(ev)
+                },
+				'onStateChange': this.onPlayerStateChange.bind(this),
 			},
 		});
+		console.log("Created player instance",this.player);
+        })
+		await this.playerReadyPromise;
 	}
 	load(id, start, end) {
+        
 		id = id.replace("youtube://", ""); // TODO: use better practices
 		let opts = { videoId: id };
 		this.start = 0;
@@ -84,7 +94,8 @@ class YoutubeEmbedIframePlayer {
 			opts["endSeconds"] = end;
         }
         let curWindow = this.opts.window;
-		curWindow.loadVideoById(opts);
+        console.log(this.player);
+		this.player.loadVideoById(opts);
 	}
 	pause() {
 		this.player.pauseVideo();

@@ -68,8 +68,19 @@ class PlayerComponent extends React.Component {
 		}
 		this.state = preparedState;
 	}
+	tick(){
+		if(!this.player){
+			return;
+		}
+		if(!this.state.userDragging){
+			this.setState(function (state, props) {
+				return { position:this.state.player.getDuration()};
+			});
+		}
+	}
 	componentDidMount() {
 		this.registerEvents(this.state.controller);
+		setInterval(this.tick.bind(this),this.props.settings.get("playerTickrate"));
 	}
 	setNewController(ee){
 		this.setState(function (state, props) {
@@ -211,7 +222,7 @@ class PlayerComponent extends React.Component {
 						<Grid item xs={2}>
 							<Typography variant="caption">{this.state.enabled
 								? ("-" + localizedFuncs[i18n.getLocale()].formatDuration(
-										this.state.itemLength - this.state.position
+										Math.abs(this.state.itemLength - this.state.position)
 								  ))
 								: i18n.__("Idle Duration")}</Typography>
 							
