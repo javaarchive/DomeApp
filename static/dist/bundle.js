@@ -550,7 +550,9 @@ module.exports = {
   "adblock": true,
   "adblock-file": "easylist.blocklist",
   "adblock-download-list": "http://easylist.to/easylist/easylist.txt",
-  "cookie-obliterator": false
+  "cookie-obliterator": false,
+  "initialWindowHeight": 600,
+  "initialWindowWidth": 800
 };
 },{}],"unbundle.js":[function(require,module,exports) {
 "use strict";
