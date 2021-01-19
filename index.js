@@ -1,4 +1,3 @@
-"use strict";
 const path = require("path");
 const { app, BrowserWindow, Menu, session } = require("electron");
 /// const {autoUpdater} = require('electron-updater');
@@ -90,8 +89,8 @@ const createMainWindow = async () => {
 	const win = new BrowserWindow({
 		title: app.name,
 		show: false,
-		width: 800,
-		height: 600,
+		width: 1000,
+		height: 1000,
 		webPreferences: { nodeIntegration: true, 
 			 preload: path.join(__dirname,"preload.js"),
 			 nodeIntegrationInSubFrames: true // Required, causes security issues but required for iframe control. Preload will sandbox

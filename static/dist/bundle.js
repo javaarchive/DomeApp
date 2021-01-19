@@ -303,7 +303,8 @@ class PlayerComponent extends _react.default.Component {
       enabled: false,
       userDragging: false,
       // Do not update while user is dragging
-      internalPlaylist: []
+      internalPlaylist: [],
+      playerType: "none"
     };
 
     if (props.name) {
@@ -356,11 +357,22 @@ class PlayerComponent extends _react.default.Component {
 
     let SelectedPlayer = require(prefferedPlayer);
 
-    let player = new SelectedPlayer({
-      document: document,
-      window: window
-    });
-    await player.init();
+    let player;
+
+    if (this.state.playerType != SelectedPlayer.id) {
+      if (this.state.player && this.state.player.unload) {
+        await this.state.player.unload();
+      }
+
+      player = new SelectedPlayer({
+        document: document,
+        window: window
+      });
+      await player.init();
+    } else {
+      player = this.state.player; // Get existing player
+    }
+
     console.log('Init Finished');
     await player.load(uri);
     console.log("Loaded uri into player");
@@ -368,7 +380,8 @@ class PlayerComponent extends _react.default.Component {
     console.log("Playing");
     this.setState(function (state, props) {
       return {
-        player: player
+        player: player,
+        playerType: SelectedPlayer.id
       };
     });
   }
@@ -459,9 +472,7 @@ class PlayerComponent extends _react.default.Component {
         itemDuration: time
       };
     });
-  }
-
-  setPosition(num) {} // User Drag Handlers
+  } // User Drag Handlers
   // TODO: Account for touch displays???
 
 
@@ -479,6 +490,7 @@ class PlayerComponent extends _react.default.Component {
         userDragging: false
       };
     });
+    this.state.controller.emit("setPosition", this.state.position);
   } // ! Main Rendering Code
 
 

@@ -55,7 +55,8 @@ class PlayerComponent extends React.Component {
 			length: 1200,
 			enabled: false,
 			userDragging: false, // Do not update while user is dragging
-			internalPlaylist: []
+			internalPlaylist: [],
+			playerType: "none"
 		};
 		if (props.name) {
 			preparedState["name"] = props.name;
@@ -94,15 +95,23 @@ class PlayerComponent extends React.Component {
 		let [uri,ch] = getBestContentHandler(uris, loadAllContentHandlers(this.props.settings));
 		let prefferedPlayer = this.props.settings.get(ch.prefferedPlayerKey);
 		let SelectedPlayer = require(prefferedPlayer);
-		let player = new SelectedPlayer({document:document,window:window});
-		await player.init();
+		let player;
+		if(this.state.playerType != SelectedPlayer.id){
+			if(this.state.player && this.state.player.unload){
+				await this.state.player.unload();
+			}
+			player = new SelectedPlayer({document:document,window:window});
+			await player.init();
+		}else{
+			player = this.state.player; // Get existing player
+		}
 		console.log('Init Finished');
 		await player.load(uri);
 		console.log("Loaded uri into player");
 		await player.play();
 		console.log("Playing")
 		this.setState(function (state, props) {
-			return {player: player}
+			return {player: player,playerType:SelectedPlayer.id}
 		});
 	}
 	registerEvents(ee){
@@ -177,9 +186,6 @@ class PlayerComponent extends React.Component {
 			return { itemDuration: time };
 		});
 	}
-	setPosition(num){
-
-	}
 	// User Drag Handlers
 	// TODO: Account for touch displays???
 	userDragStart(ev){
@@ -191,6 +197,7 @@ class PlayerComponent extends React.Component {
 		this.setState(function (state, props) {
 			return { userDragging: false };
 		});
+		this.state.controller.emit("setPosition",this.state.position);
 	}
 	// ! Main Rendering Code
 	render() {

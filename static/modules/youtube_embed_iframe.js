@@ -21,7 +21,11 @@ function loadAPI(document) {
 	firstScriptTag.parentNode.insertBefore(tag, firstScriptTag);
 }
 class YoutubeEmbedIframePlayer {
+	static id = "io.github.javaarchive.pulsify.youtube_embed_iframe_player";
 	constructor(options) {
+		// Constants
+		
+		// Save opts
 		this.opts = options;
 		if (!this.opts.privacyMode) {
 			this.opts.privacyMode = false;
