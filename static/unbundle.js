@@ -571,6 +571,13 @@ function MainComponent() {
 }
 // Bootstrap code
 // really odd part i'm learning
+if(settings.get("customWindowbar")){
+	const customTitlebar = require('custom-electron-titlebar');
+
+new customTitlebar.Titlebar({
+	backgroundColor: customTitlebar.Color.fromHex('#444')
+});
+}
 
 function setServer(comp) {}
 

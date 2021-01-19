@@ -97,7 +97,8 @@ const createMainWindow = async () => {
 			},
 		autoHideMenuBar: !utils.is.development,
 		center: true,
-		enableRemoteModule: true
+		enableRemoteModule: true,
+		titleBarStyle: settings.get("customWindowbar")?"hidden":"default"
 	});
 
 	win.on("ready-to-show", () => {

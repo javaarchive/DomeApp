@@ -552,7 +552,8 @@ module.exports = {
   "adblock-download-list": "http://easylist.to/easylist/easylist.txt",
   "cookie-obliterator": false,
   "initialWindowHeight": 600,
-  "initialWindowWidth": 800
+  "initialWindowWidth": 800,
+  "customWindowbar": true
 };
 },{}],"unbundle.js":[function(require,module,exports) {
 "use strict";
@@ -1154,6 +1155,14 @@ function MainComponent() {
 } // Bootstrap code
 // really odd part i'm learning
 
+
+if (settings.get("customWindowbar")) {
+  const customTitlebar = require('custom-electron-titlebar');
+
+  new customTitlebar.Titlebar({
+    backgroundColor: customTitlebar.Color.fromHex('#444')
+  });
+}
 
 function setServer(comp) {}
 
