@@ -1,4 +1,4 @@
-process.env.HMR_PORT=57496;process.env.HMR_HOSTNAME="localhost";// modules are defined as an array
+process.env.HMR_PORT=52992;process.env.HMR_HOSTNAME="localhost";// modules are defined as an array
 // [ module function, map of requires ]
 //
 // map of requires is short require name -> numeric require
@@ -201,6 +201,8 @@ exports.localizedFuncs = void 0;
 
 // Localizations
 function formatDuration(seconds) {
+  seconds = Math.floor(seconds);
+
   if (!seconds) {
     return "---";
   }
@@ -322,14 +324,20 @@ class PlayerComponent extends _react.default.Component {
   }
 
   tick() {
-    if (!this.player) {
+    if (!this.state.player) {
+      console.log("tick aborted, due to no player");
       return;
     }
 
+    console.log("Ticking");
+
     if (!this.state.userDragging) {
+      console.log('user is not dragging');
       this.setState(function (state, props) {
+        let curTime = this.state.player.getCurrentTime();
+        console.log("Set current time to", curTime);
         return {
-          position: this.state.player.getDuration()
+          position: curTime
         };
       });
     }
@@ -337,7 +345,13 @@ class PlayerComponent extends _react.default.Component {
 
   componentDidMount() {
     this.registerEvents(this.state.controller);
-    setInterval(this.tick.bind(this), this.props.settings.get("playerTickrate"));
+    this.tickInterval = setInterval(this.tick.bind(this), this.props.settings.get("playerTickrate"));
+  }
+
+  componentWillUnmount() {
+    if (this.tickInterval) {
+      clearInterval(this.tickInterval);
+    }
   }
 
   setNewController(ee) {
@@ -366,7 +380,8 @@ class PlayerComponent extends _react.default.Component {
 
       player = new SelectedPlayer({
         document: document,
-        window: window
+        window: window,
+        emitter: this.state.controller
       });
       await player.init();
     } else {
@@ -413,6 +428,9 @@ class PlayerComponent extends _react.default.Component {
         };
       });
     });
+    ee.on("playing", function (player) {
+      oThis.tick();
+    });
   }
 
   componentWillUnmount() {// Componoent dies -> deconstructor
@@ -447,6 +465,8 @@ class PlayerComponent extends _react.default.Component {
       } else {
         properties.duration = params.duration;
       }
+
+      properties.itemLength = properties.duration;
     } else {
       properties.duration = null; // Not provided
     }
@@ -553,7 +573,9 @@ module.exports = {
   "cookie-obliterator": false,
   "initialWindowHeight": 600,
   "initialWindowWidth": 800,
-  "customWindowbar": true
+  "customWindowbar": true,
+  "playerTickrate": 250,
+  "useDarkMode": "system"
 };
 },{}],"unbundle.js":[function(require,module,exports) {
 "use strict";
@@ -644,7 +666,11 @@ function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { de
 
 function _extends() { _extends = Object.assign || function (target) { for (var i = 1; i < arguments.length; i++) { var source = arguments[i]; for (var key in source) { if (Object.prototype.hasOwnProperty.call(source, key)) { target[key] = source[key]; } } } return target; }; return _extends.apply(this, arguments); }
 
-const EventEmitter = require('events'); // Reusable Player Componoent
+const {
+  is
+} = require('electron-util');
+
+const EventEmitter = require("events"); // Reusable Player Componoent
 
 
 const Store = require("electron-store"); // Settings Loading
@@ -1042,7 +1068,7 @@ function MainComponent() {
   // Theme Logic
   let useDarkMode = (0, _useMediaQuery.default)("(prefers-color-scheme: dark)");
 
-  if (settings.get("useDarkMode")) {
+  if (settings.get("useDarkMode") != "system") {
     useDarkMode = settings.get("useDarkMode");
   }
 
@@ -1156,18 +1182,24 @@ function MainComponent() {
 // really odd part i'm learning
 
 
-if (settings.get("customWindowbar")) {
-  const customTitlebar = require('custom-electron-titlebar');
-
-  new customTitlebar.Titlebar({
-    backgroundColor: customTitlebar.Color.fromHex('#444')
-  });
-}
-
 function setServer(comp) {}
 
 $(function () {
   // TODO: Replace with Vanilla JS to make script size smaller
+  if (settings.get("customWindowbar")) {
+    const customTitlebar = require("custom-electron-titlebar");
+
+    new customTitlebar.Titlebar({
+      backgroundColor: customTitlebar.Color.fromHex("#444")
+    });
+
+    if (is.development) {
+      $("#menufix").remove();
+    } else {
+      $("div[role=menubar]").remove();
+    }
+  }
+
   _reactDom.default.render( /*#__PURE__*/_react.default.createElement(MainComponent, null), document.getElementById("root"));
 });
 console.log("Player Comp", _player.PlayerComponent);

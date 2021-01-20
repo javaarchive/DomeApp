@@ -1,0 +1,9 @@
+.titlebar,.menubar{
+    z-index: 0 !important;
+    /*
+    Custom titlebar hack
+    */
+}
+.open,.menubar-menu-container{
+    z-index: 999999 !important;
+}

@@ -70,18 +70,28 @@ class PlayerComponent extends React.Component {
 		this.state = preparedState;
 	}
 	tick(){
-		if(!this.player){
+		if(!this.state.player){
+			console.log("tick aborted, due to no player");
 			return;
 		}
+		console.log("Ticking");
 		if(!this.state.userDragging){
+			console.log('user is not dragging');
 			this.setState(function (state, props) {
-				return { position:this.state.player.getDuration()};
+				let curTime = this.state.player.getCurrentTime();
+				console.log("Set current time to",curTime);
+				return { position:curTime};
 			});
 		}
 	}
 	componentDidMount() {
 		this.registerEvents(this.state.controller);
-		setInterval(this.tick.bind(this),this.props.settings.get("playerTickrate"));
+		this.tickInterval = setInterval(this.tick.bind(this),this.props.settings.get("playerTickrate"));
+	}
+	componentWillUnmount(){
+		if(this.tickInterval){
+			clearInterval(this.tickInterval);
+		}
 	}
 	setNewController(ee){
 		this.setState(function (state, props) {
@@ -100,7 +110,7 @@ class PlayerComponent extends React.Component {
 			if(this.state.player && this.state.player.unload){
 				await this.state.player.unload();
 			}
-			player = new SelectedPlayer({document:document,window:window});
+			player = new SelectedPlayer({document:document,window:window,emitter:this.state.controller});
 			await player.init();
 		}else{
 			player = this.state.player; // Get existing player
@@ -136,6 +146,10 @@ class PlayerComponent extends React.Component {
 				return { internalPlaylist: newPlaylist };
 			});
 		});
+		
+		ee.on("playing",function(player){
+			oThis.tick();
+		})
 	}
 	componentWillUnmount() {
 		// Componoent dies -> deconstructor
@@ -166,10 +180,11 @@ class PlayerComponent extends React.Component {
 			}else{
 				properties.duration = params.duration;
 			}
+			properties.itemLength = properties.duration;
 		} else {
 			properties.duration = null; // Not provided
 		}
-
+		
 		this.setState(function (state, props) {
 			return properties;
 		});

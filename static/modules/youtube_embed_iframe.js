@@ -41,18 +41,21 @@ class YoutubeEmbedIframePlayer {
 	onPlayerStateChange(event) {
         console.log("New State",event.data);
 		this.playerState = event.data;
-		if (this.playerState == 2) {
+		if (this.playerState == this.YT.PlayerState.PAUSED) {
 			this.paused = true;
 			this.buffering = false;
-		} else if (this.playerState == 3) {
+			this.opts.emitter.emit("pause",this);
+		} else if (this.playerState == this.YT.PlayerState.BUFFERING) {
 			this.buffering = true;
-		} else if (this.playerState == 1) {
+		} else if (this.playerState == this.YT.PlayerState.PLAYING) {
 			this.paused = false;
 			this.buffering = false;
-		} else if (this.playerState == 0) {
+			this.opts.emitter.emit("playing",this);
+		} else if (this.playerState == this.YT.PlayerState.ENDED) {
 			this.paused = true;
 			this.buffering = false;
-		} else if (this.playerState == -1) {
+			this.opts.emitter.emit("end",this)
+		} else if (this.playerState == -1) { // Unstarted
 			this.buffering = true;
 		}
 	}
@@ -120,7 +123,7 @@ class YoutubeEmbedIframePlayer {
 		return this.getDuration();
 	}
 	getCurrentTime() {
-		return player.getCurrentTime();
+		return this.player.getCurrentTime();
 	}
 	get curTime() {
 		return this.getCurrentTime();

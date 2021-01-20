@@ -1,7 +1,7 @@
 {
 	"name": "dome-app",
 	"productName": "Dome App",
-	"version": "1.0.1",
+	"version": "1.1.1",
 	"description": "The best app ever",
 	"license": "MIT",
 	"repository": "javaarchive/DomeApp",
@@ -16,7 +16,7 @@
 		"test": "npm run lint",
 		"start": "electron .",
 		"pack": "electron-builder --dir",
-		"dist": "electron-builder --linux --windows",
+		"dist": "electron-builder --windows",
 		"wrap": "parcel build -d static/dist --target electron -o bundle.js static/unbundle.js",
 		"wrap-watch": "parcel watch -d static/dist --target electron -o bundle.js static/unbundle.js",
 		"run-server": "cd mediaserver && node server.js",
@@ -32,6 +32,7 @@
 		"ascii-table": "0.0.9",
 		"body-parser": "^1.19.0",
 		"commander": "^6.2.0",
+		"custom-electron-titlebar": "^3.2.6",
 		"dotenv": "^8.2.0",
 		"electron-context-menu": "^0.15.2",
 		"electron-debug": "^3.1.0",
@@ -82,6 +83,9 @@
 	},
 	"build": {
 		"appId": "io.github.the-ascent",
+		"win":{
+			"publish":["github"]
+		},
 		"mac": {
 			"category": "public.app-category.music",
 			"darkModeSupport": true

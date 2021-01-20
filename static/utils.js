@@ -1,5 +1,6 @@
 // Localizations
 function formatDuration(seconds) {
+	seconds = Math.floor(seconds);
 	if(!seconds){
 		return "---";
 	}

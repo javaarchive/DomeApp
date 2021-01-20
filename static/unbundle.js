@@ -23,7 +23,7 @@ import MenuIcon from "@material-ui/icons/Menu"; // Also called a hamburger
 import StorageIcon from "@material-ui/icons/Storage";
 import MusicNoteIcon from "@material-ui/icons/MusicNote";
 import HomeRoundedIcon from "@material-ui/icons/HomeRounded";
-import SettingsIcon from '@material-ui/icons/Settings';
+import SettingsIcon from "@material-ui/icons/Settings";
 
 // Ui Widgets
 
@@ -39,10 +39,10 @@ import Typography from "@material-ui/core/Typography";
 import List from "@material-ui/core/List";
 import Divider from "@material-ui/core/Divider";
 import TextField from "@material-ui/core/TextField";
-import Snackbar from '@material-ui/core/Snackbar';
-import ButtonBase from '@material-ui/core/ButtonBase';
-import TouchRipple from '@material-ui/core/ButtonBase/TouchRipple';
-import MuiAlert from '@material-ui/lab/Alert';
+import Snackbar from "@material-ui/core/Snackbar";
+import ButtonBase from "@material-ui/core/ButtonBase";
+import TouchRipple from "@material-ui/core/ButtonBase/TouchRipple";
+import MuiAlert from "@material-ui/lab/Alert";
 // List
 import ListItem from "@material-ui/core/ListItem";
 import ListItemIcon from "@material-ui/core/ListItemIcon";
@@ -57,7 +57,8 @@ import TableRow from "@material-ui/core/TableRow";
 
 // Utilities
 import clsx from "clsx";
-const EventEmitter = require('events');
+const {is} = require('electron-util');
+const EventEmitter = require("events");
 
 // Reusable Player Componoent
 import { PlayerComponent } from "./player";
@@ -72,9 +73,7 @@ const settings = new Store({
 	defaults: prefdefaults,
 });
 // Constants
-const songViewHeaders = ["Song Name","Artist","Duration"];
-
-
+const songViewHeaders = ["Song Name", "Artist", "Duration"];
 
 //import {$} from "jquery";
 const $ = require("jquery");
@@ -102,8 +101,8 @@ function calcColClass(cols) {
 // https://material-ui.com/components/snackbars/
 function Alert(props) {
 	return <MuiAlert elevation={6} variant="filled" {...props} />;
-  }
-function placeholder(item, key){
+}
+function placeholder(item, key) {
 	return <Skeleton animation="wave" key={key} />;
 }
 class ResultView extends React.PureComponent {
@@ -114,19 +113,23 @@ class ResultView extends React.PureComponent {
 			type: props.type,
 			pageData: [],
 			connectionFailedSnackbarOpen: false,
-			columns: 3
+			columns: 3,
 		};
-		if(props.columns){
+		if (props.columns) {
 			this.state.columns = props.columns;
 		}
-		if(props.columnHeaders){
-			this.state.colHeaders = props.columnHeaders.map(unlocalizedName => i18n.__(unlocalizedName));
-		}else{
-			this.state.colHeaders = (new Array(this.state.columns)).map(something => i18n.__("Unknown Header"));
+		if (props.columnHeaders) {
+			this.state.colHeaders = props.columnHeaders.map((unlocalizedName) =>
+				i18n.__(unlocalizedName)
+			);
+		} else {
+			this.state.colHeaders = new Array(this.state.columns).map((something) =>
+				i18n.__("Unknown Header")
+			);
 		}
 		this.search.bind(this)();
 	}
-	
+
 	componentDidUpdate(prevProps) {
 		if (this.props.query !== prevProps.query) {
 			this.search();
@@ -148,22 +151,22 @@ class ResultView extends React.PureComponent {
 		// Componoent dies -> deconstructor
 		clearInterval(this.updateSearchInterval);
 	}
-	hideConnectionFailureSnackbar(){
+	hideConnectionFailureSnackbar() {
 		this.setState(function (state, props) {
 			return {
 				connectionFailedSnackbarOpen: false,
 			};
 		});
 	}
-	showConnectionFailureSnackbar(){
+	showConnectionFailureSnackbar() {
 		this.setState(function (state, props) {
 			return {
 				connectionFailedSnackbarOpen: true,
 			};
 		});
 	}
-	handleConnectionFailureSnackbarClose(event,reason){
-		if(reason == "clickaway"){
+	handleConnectionFailureSnackbarClose(event, reason) {
+		if (reason == "clickaway") {
 			return;
 		}
 		this.hideConnectionFailureSnackbar();
@@ -193,62 +196,74 @@ class ResultView extends React.PureComponent {
 				});
 			}
 		} catch (ex) {
-			console.log("Connection failed: showing connection failure snackbar",ex);
+			console.log("Connection failed: showing connection failure snackbar", ex);
 			this.showConnectionFailureSnackbar();
 			return;
 		}
 	}
-	onRowClickActivator(index){
-		this.props.onRowClick(this.state.pageData[index],index);
+	onRowClickActivator(index) {
+		this.props.onRowClick(this.state.pageData[index], index);
 	}
 	render() {
-		let	outerThis = this;
+		let outerThis = this;
 		function colgenerator(item, index) {
 			let cols = [];
-			for(let i = 0; i < this.state.columns; i ++){
-				let elem = <TableCell align="left" key={i}>{outerThis.props.renderCols(item, i)}</TableCell>;
+			for (let i = 0; i < this.state.columns; i++) {
+				let elem = (
+					<TableCell align="left" key={i}>
+						{outerThis.props.renderCols(item, i)}
+					</TableCell>
+				);
 				cols.push(elem);
 			}
 			return (
-					<TableRow key={index} onClick={this.onRowClickActivator.bind(this,index)}>
-						{cols}
-					</TableRow>				
+				<TableRow
+					key={index}
+					onClick={this.onRowClickActivator.bind(this, index)}
+				>
+					{cols}
+				</TableRow>
 			);
 		}
 		let comps = this.state.pageData.map(colgenerator.bind(this));
 		let tableHead = [];
-		for(let i = 0; i < this.state.columns; i ++){
+		for (let i = 0; i < this.state.columns; i++) {
 			tableHead.push(
 				<TableCell key={i} align="left">
 					{this.state.colHeaders[i]}
 				</TableCell>
-
-			)
+			);
 		}
 		return (
 			<>
-			<div className="results-wrapper">
-				<TableContainer component={Paper}>
-					<Table>
-						<TableHead>
-							<TableRow>
-								{tableHead}
-							</TableRow>
-						</TableHead>
-						<TableBody>{comps}</TableBody>
-					</Table>
-				</TableContainer>
-				<p>
-					{i18n.__("Showing ")}
-					{this.state.pageData.length} {i18n.__(" items")};
-				</p>
-			</div>
-			
-			 <Snackbar open={this.state.connectionFailedSnackbarOpen} autoHideDuration={settings.get("snackbarAutoHideDuration")} onClose={this.handleConnectionFailureSnackbarClose.bind(this)}>
-			 <Alert onClose={this.handleConnectionFailureSnackbarClose.bind(this)} severity="error">
-			   {i18n.__("Unable to establish connection to media provider")}
-			 </Alert>
-		   </Snackbar></>
+				<div className="results-wrapper">
+					<TableContainer component={Paper}>
+						<Table>
+							<TableHead>
+								<TableRow>{tableHead}</TableRow>
+							</TableHead>
+							<TableBody>{comps}</TableBody>
+						</Table>
+					</TableContainer>
+					<p>
+						{i18n.__("Showing ")}
+						{this.state.pageData.length} {i18n.__(" items")};
+					</p>
+				</div>
+
+				<Snackbar
+					open={this.state.connectionFailedSnackbarOpen}
+					autoHideDuration={settings.get("snackbarAutoHideDuration")}
+					onClose={this.handleConnectionFailureSnackbarClose.bind(this)}
+				>
+					<Alert
+						onClose={this.handleConnectionFailureSnackbarClose.bind(this)}
+						severity="error"
+					>
+						{i18n.__("Unable to establish connection to media provider")}
+					</Alert>
+				</Snackbar>
+			</>
 		);
 	}
 }
@@ -334,32 +349,38 @@ class SongView extends React.Component {
 			});
 		}
 	}
-	createSongNameCol(item, key){
+	createSongNameCol(item, key) {
 		// TODO: NOT USE INLINE STYLES
-		return <div key={key}>
-			<IconButton>
-				<MusicNoteIcon />
-			</IconButton>
-			{item.name}
-		</div>;
+		return (
+			<div key={key}>
+				<IconButton>
+					<MusicNoteIcon />
+				</IconButton>
+				{item.name}
+			</div>
+		);
 	}
-	createSongArtistCol(item, key){
-		return <div>
-			{item.artist}
-		</div>;
+	createSongArtistCol(item, key) {
+		return <div>{item.artist}</div>;
 	}
-	createDurationCol(item, key){
-		return <div>
-			{localizedFuncs[i18n.getLocale()].formatDuration(item.duration)}
-		</div>;
+	createDurationCol(item, key) {
+		return (
+			<div>
+				{localizedFuncs[i18n.getLocale()].formatDuration(item.duration)}
+			</div>
+		);
 	}
-	renderCols(item, index, classes){
-		let colGenerators = [this.createSongNameCol.bind(this),this.createSongArtistCol.bind(this),this.createDurationCol.bind(this)]; // TODO: Not hardcode this here
+	renderCols(item, index, classes) {
+		let colGenerators = [
+			this.createSongNameCol.bind(this),
+			this.createSongArtistCol.bind(this),
+			this.createDurationCol.bind(this),
+		]; // TODO: Not hardcode this here
 		return colGenerators[index](item, index); // Execute column generator function with the index
 	}
-	handleRowClick(rowData, index){
-		console.log(rowData);		
-		this.props.controller.emit("playSong",rowData);
+	handleRowClick(rowData, index) {
+		console.log(rowData);
+		this.props.controller.emit("playSong", rowData);
 	}
 	render() {
 		return (
@@ -371,7 +392,13 @@ class SongView extends React.Component {
 					label={i18n.__("Type to search")}
 					fullWidth={true}
 				/>
-				<ResultView type="songs" query={this.state.searchBoxValue} renderCols={this.renderCols.bind(this)} columnHeaders={songViewHeaders} onRowClick={this.handleRowClick.bind(this)}></ResultView>
+				<ResultView
+					type="songs"
+					query={this.state.searchBoxValue}
+					renderCols={this.renderCols.bind(this)}
+					columnHeaders={songViewHeaders}
+					onRowClick={this.handleRowClick.bind(this)}
+				></ResultView>
 				<p>
 					{i18n.__("Current querying ")} {settings.get("pageSize")}{" "}
 					{i18n.__(" songs matching the query ")} {this.state.searchBoxValue}
@@ -451,12 +478,11 @@ class MainDrawerComponent extends React.Component {
 	}
 }
 
-
 // Main Comp
 function MainComponent() {
 	// Theme Logic
 	let useDarkMode = useMediaQuery("(prefers-color-scheme: dark)");
-	if(settings.get("useDarkMode")){
+	if (settings.get("useDarkMode") != "system") {
 		useDarkMode = settings.get("useDarkMode");
 	}
 	const theme = React.useMemo(
@@ -468,8 +494,6 @@ function MainComponent() {
 			}),
 		[useDarkMode]
 	);
-	
-
 
 	// Handle Menu Logic
 	let [serversAnchorEl, setServersAnchorEl] = React.useState(null);
@@ -490,7 +514,7 @@ function MainComponent() {
 	// Current View
 	let [curView, setCurView] = React.useState("homeview");
 	const serversOpen = Boolean(serversAnchorEl);
-	const [controller,changeController] = React.useState(new EventEmitter());
+	const [controller, changeController] = React.useState(new EventEmitter());
 
 	// Legacy Views System
 	let views = {};
@@ -571,19 +595,24 @@ function MainComponent() {
 }
 // Bootstrap code
 // really odd part i'm learning
-if(settings.get("customWindowbar")){
-	const customTitlebar = require('custom-electron-titlebar');
 
-new customTitlebar.Titlebar({
-	backgroundColor: customTitlebar.Color.fromHex('#444')
-});
-}
 
 function setServer(comp) {}
 
 $(function () {
 	// TODO: Replace with Vanilla JS to make script size smaller
+	if (settings.get("customWindowbar")) {
+		const customTitlebar = require("custom-electron-titlebar");
 
+		new customTitlebar.Titlebar({
+			backgroundColor: customTitlebar.Color.fromHex("#444"),
+		});
+		if(is.development){
+			$("#menufix").remove()
+		}else{
+			$("div[role=menubar]").remove();
+		}
+	}
 	ReactDOM.render(<MainComponent />, document.getElementById("root"));
 });
 
