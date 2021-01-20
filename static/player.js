@@ -70,11 +70,15 @@ class PlayerComponent extends React.Component {
 		this.state = preparedState;
 	}
 	tick(){
+		if(!this.state.enabled && this.state.internalPlaylist.length > 0){
+			this.playNextSong();
+		}
 		if(!this.state.player){
 			console.log("tick aborted, due to no player");
 			return;
 		}
 		console.log("Ticking");
+		
 		if(!this.state.userDragging){
 			console.log('user is not dragging');
 			this.setState(function (state, props) {
@@ -83,6 +87,7 @@ class PlayerComponent extends React.Component {
 				return { position:curTime};
 			});
 		}
+		
 	}
 	componentDidMount() {
 		this.registerEvents(this.state.controller);
@@ -124,6 +129,21 @@ class PlayerComponent extends React.Component {
 			return {player: player,playerType:SelectedPlayer.id}
 		});
 	}
+	playNextSong(){
+		if(this.state.internalPlaylist.length == 0){
+			this.setState(function (state, props) {
+				return {enabled: false};
+			});
+			return;
+		}
+		let newPlaylist = Array.from(this.state.internalPlaylist);
+		console.log(JSON.stringify(newPlaylist));
+		let nextSong = newPlaylist.shift();
+		this.setState(function (state, props) {
+			return {internalPlaylist: newPlaylist};
+		});
+		this.state.controller.emit("playSong",nextSong);
+	}
 	registerEvents(ee){
 		if(ee.playerEventsRegistered){
 			return;
@@ -139,20 +159,24 @@ class PlayerComponent extends React.Component {
 			});
 		});
 
-		ee.on("queueSong",async function (songData){
+		ee.on("queueSong",async function (songData){			
 			oThis.setState(function (state, props) {
-				let newPlaylist = new Array(this.state.internalPlaylist);
+				let newPlaylist = Array.from(this.state.internalPlaylist); // How to not screw up internal state
 				newPlaylist.push(songData);
+				
 				return { internalPlaylist: newPlaylist };
 			});
 		});
 		
 		ee.on("playing",function(player){
+			oThis.updateDuration(player.getDuration());
 			oThis.tick();
-		})
-	}
-	componentWillUnmount() {
-		// Componoent dies -> deconstructor
+		});
+
+		ee.on("end", (player) => {
+			this.playNextSong();
+		});
+		
 	}
 	get duration(){
 		return this.state.duration;
@@ -189,16 +213,18 @@ class PlayerComponent extends React.Component {
 			return properties;
 		});
 	}
-	changePos(ev, newVal) {
+	userChangePos(ev, newVal) {
 		console.log("Position changed to", newVal);
+		await this.player.setCurrentTime(newVal);
 		this.setState(function (state, props) {
 			return { position: newVal };
 		});
 	}
 	updateDuration(time) {
+		console.log("Duration updated to ",time);
 		// Sometimes duration can be found afterwards
 		this.setState(function (state, props) {
-			return { itemDuration: time };
+			return { itemLength: time, duration: time };
 		});
 	}
 	// User Drag Handlers
@@ -212,7 +238,7 @@ class PlayerComponent extends React.Component {
 		this.setState(function (state, props) {
 			return { userDragging: false };
 		});
-		this.state.controller.emit("setPosition",this.state.position);
+		this.userChangePos(ev,this.state.position);
 	}
 	// ! Main Rendering Code
 	render() {
@@ -236,7 +262,7 @@ class PlayerComponent extends React.Component {
 									onChange={this.changePos.bind(this)}
 									aria-labelledby="continuous-slider"
 									min={0}
-									max={this.state.length}
+									max={this.state.duration}
 									disabled={!this.state.enabled}
 								/>
 							</div>
@@ -244,7 +270,7 @@ class PlayerComponent extends React.Component {
 						<Grid item xs={2}>
 							<Typography variant="caption">{this.state.enabled
 								? ("-" + localizedFuncs[i18n.getLocale()].formatDuration(
-										Math.abs(this.state.itemLength - this.state.position)
+										this.state.itemLength - this.state.position
 								  ))
 								: i18n.__("Idle Duration")}</Typography>
 							
@@ -254,7 +280,7 @@ class PlayerComponent extends React.Component {
 						<Typography variant="h5">{this.state.itemName}</Typography>
 					</span>
 					<span className={styles.playerItemMadeBy}>
-						<Typography variant="h6">{this.state.itemMadeBy}</Typography>
+						<Typography variant="h6"> {this.state.itemMadeBy}</Typography>
 					</span>
 				</div>
 			</>

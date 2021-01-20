@@ -380,7 +380,7 @@ class SongView extends React.Component {
 	}
 	handleRowClick(rowData, index) {
 		console.log(rowData);
-		this.props.controller.emit("playSong", rowData);
+		this.props.controller.emit("queueSong", rowData);
 	}
 	render() {
 		return (

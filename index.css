@@ -14,10 +14,10 @@
 	border-style: solid;
 	box-shadow: 2px;
 	width: calc(100% - 24px);
-	height: 60px;
+	height: 100px;
 }
 .content-pane{
-	height: calc(100% - 60px);
+	height: calc(100% - 100px);
 	width: 100%;
 	margin: 0px;
 }

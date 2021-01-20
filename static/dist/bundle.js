@@ -1,4 +1,4 @@
-process.env.HMR_PORT=52992;process.env.HMR_HOSTNAME="localhost";// modules are defined as an array
+process.env.HMR_PORT=56013;process.env.HMR_HOSTNAME="localhost";// modules are defined as an array
 // [ module function, map of requires ]
 //
 // map of requires is short require name -> numeric require
@@ -324,6 +324,10 @@ class PlayerComponent extends _react.default.Component {
   }
 
   tick() {
+    if (!this.state.enabled && this.state.internalPlaylist.length > 0) {
+      this.playNextSong();
+    }
+
     if (!this.state.player) {
       console.log("tick aborted, due to no player");
       return;
@@ -401,6 +405,27 @@ class PlayerComponent extends _react.default.Component {
     });
   }
 
+  playNextSong() {
+    if (this.state.internalPlaylist.length == 0) {
+      this.setState(function (state, props) {
+        return {
+          enabled: false
+        };
+      });
+      return;
+    }
+
+    let newPlaylist = Array.from(this.state.internalPlaylist);
+    console.log(JSON.stringify(newPlaylist));
+    let nextSong = newPlaylist.shift();
+    this.setState(function (state, props) {
+      return {
+        internalPlaylist: newPlaylist
+      };
+    });
+    this.state.controller.emit("playSong", nextSong);
+  }
+
   registerEvents(ee) {
     if (ee.playerEventsRegistered) {
       return;
@@ -421,7 +446,8 @@ class PlayerComponent extends _react.default.Component {
     });
     ee.on("queueSong", async function (songData) {
       oThis.setState(function (state, props) {
-        let newPlaylist = new Array(this.state.internalPlaylist);
+        let newPlaylist = Array.from(this.state.internalPlaylist); // How to not screw up internal state
+
         newPlaylist.push(songData);
         return {
           internalPlaylist: newPlaylist
@@ -429,11 +455,12 @@ class PlayerComponent extends _react.default.Component {
       });
     });
     ee.on("playing", function (player) {
+      oThis.updateDuration(player.getDuration());
       oThis.tick();
     });
-  }
-
-  componentWillUnmount() {// Componoent dies -> deconstructor
+    ee.on("end", player => {
+      this.playNextSong();
+    });
   }
 
   get duration() {
@@ -476,7 +503,7 @@ class PlayerComponent extends _react.default.Component {
     });
   }
 
-  changePos(ev, newVal) {
+  userChangePos(ev, newVal) {
     console.log("Position changed to", newVal);
     this.setState(function (state, props) {
       return {
@@ -486,10 +513,12 @@ class PlayerComponent extends _react.default.Component {
   }
 
   updateDuration(time) {
-    // Sometimes duration can be found afterwards
+    console.log("Duration updated to ", time); // Sometimes duration can be found afterwards
+
     this.setState(function (state, props) {
       return {
-        itemDuration: time
+        itemLength: time,
+        duration: time
       };
     });
   } // User Drag Handlers
@@ -510,7 +539,7 @@ class PlayerComponent extends _react.default.Component {
         userDragging: false
       };
     });
-    this.state.controller.emit("setPosition", this.state.position);
+    this.userChangePos(ev, this.state.position);
   } // ! Main Rendering Code
 
 
@@ -537,14 +566,14 @@ class PlayerComponent extends _react.default.Component {
       onChange: this.changePos.bind(this),
       "aria-labelledby": "continuous-slider",
       min: 0,
-      max: this.state.length,
+      max: this.state.duration,
       disabled: !this.state.enabled
     }))), /*#__PURE__*/_react.default.createElement(_Grid.default, {
       item: true,
       xs: 2
     }, /*#__PURE__*/_react.default.createElement(_Typography.default, {
       variant: "caption"
-    }, this.state.enabled ? "-" + _utils.localizedFuncs[i18n.getLocale()].formatDuration(Math.abs(this.state.itemLength - this.state.position)) : i18n.__("Idle Duration")))), /*#__PURE__*/_react.default.createElement("span", {
+    }, this.state.enabled ? "-" + _utils.localizedFuncs[i18n.getLocale()].formatDuration(this.state.itemLength - this.state.position) : i18n.__("Idle Duration")))), /*#__PURE__*/_react.default.createElement("span", {
       className: _playerModule.default.playerTitle
     }, /*#__PURE__*/_react.default.createElement(_Typography.default, {
       variant: "h5"
@@ -552,7 +581,7 @@ class PlayerComponent extends _react.default.Component {
       className: _playerModule.default.playerItemMadeBy
     }, /*#__PURE__*/_react.default.createElement(_Typography.default, {
       variant: "h6"
-    }, this.state.itemMadeBy))));
+    }, " ", this.state.itemMadeBy))));
   }
 
 }
@@ -978,7 +1007,7 @@ class SongView extends _react.default.Component {
 
   handleRowClick(rowData, index) {
     console.log(rowData);
-    this.props.controller.emit("playSong", rowData);
+    this.props.controller.emit("queueSong", rowData);
   }
 
   render() {
