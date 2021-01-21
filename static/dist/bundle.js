@@ -455,7 +455,8 @@ class PlayerComponent extends _react.default.Component {
       });
     });
     ee.on("playing", function (player) {
-      oThis.updateDuration(player.getDuration());
+      // Support for start/end metadata needed
+      // oThis.updateDuration(player.getDuration());
       oThis.tick();
     });
     ee.on("end", player => {
@@ -505,6 +506,7 @@ class PlayerComponent extends _react.default.Component {
 
   userChangePos(ev, newVal) {
     console.log("Position changed to", newVal);
+    this.state.player.setCurrentTime(newVal);
     this.setState(function (state, props) {
       return {
         position: newVal
@@ -563,7 +565,7 @@ class PlayerComponent extends _react.default.Component {
       onPointerUp: this.userDragEnd.bind(this)
     }, /*#__PURE__*/_react.default.createElement(_Slider.default, {
       value: this.state.position,
-      onChange: this.changePos.bind(this),
+      onChange: this.userChangePos.bind(this),
       "aria-labelledby": "continuous-slider",
       min: 0,
       max: this.state.duration,

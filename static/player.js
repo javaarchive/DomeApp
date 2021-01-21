@@ -169,7 +169,8 @@ class PlayerComponent extends React.Component {
 		});
 		
 		ee.on("playing",function(player){
-			oThis.updateDuration(player.getDuration());
+			// Support for start/end metadata needed
+			// oThis.updateDuration(player.getDuration());
 			oThis.tick();
 		});
 
@@ -215,7 +216,7 @@ class PlayerComponent extends React.Component {
 	}
 	userChangePos(ev, newVal) {
 		console.log("Position changed to", newVal);
-		await this.player.setCurrentTime(newVal);
+		this.state.player.setCurrentTime(newVal);
 		this.setState(function (state, props) {
 			return { position: newVal };
 		});
@@ -259,7 +260,7 @@ class PlayerComponent extends React.Component {
 							<div className="playback-progress" onPointerDown={this.userDragStart.bind(this)} onPointerUp={this.userDragEnd.bind(this)}>
 								<Slider
 									value={this.state.position}
-									onChange={this.changePos.bind(this)}
+									onChange={this.userChangePos.bind(this)}
 									aria-labelledby="continuous-slider"
 									min={0}
 									max={this.state.duration}

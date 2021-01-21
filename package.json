@@ -59,7 +59,8 @@
 		"sqlite3": "^5.0.0",
 		"uid-generator": "^2.0.0",
 		"uri": "^0.1.0",
-		"url-regex": "^5.0.0"
+		"url-regex": "^5.0.0",
+		"ytdl-core": "^4.4.4"
 	},
 	"devDependencies": {
 		"@babel/plugin-transform-runtime": "^7.12.1",
@@ -83,8 +84,10 @@
 	},
 	"build": {
 		"appId": "io.github.the-ascent",
-		"win":{
-			"publish":["github"]
+		"win": {
+			"publish": [
+				"github"
+			]
 		},
 		"mac": {
 			"category": "public.app-category.music",
