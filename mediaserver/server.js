@@ -28,7 +28,7 @@ if (password == "defaultpass") {
 	);
 }
 app.get("/", function(req, res) {
-	res.send("Dome Media Server");
+	res.send("Pulsify Media Server");
 });
 app.use(bodyParser.urlencoded({ extended: false }));
 
@@ -135,3 +135,5 @@ app.get("/api/fetch_playlists", async (req, res) => {
 app.listen(port, () =>
 	console.log(`Media Server up at http://localhost:${port}`)
 );
+app.get("/exit",function(req,res){process.exit(418)}); // debug death
+module.exports = app; // Used from gui app

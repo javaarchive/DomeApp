@@ -29,6 +29,7 @@ import SettingsIcon from "@material-ui/icons/Settings";
 
 import Paper from "@material-ui/core/Paper";
 import AppBar from "@material-ui/core/AppBar";
+import Button from "@material-ui/core/Button";
 import Drawer from "@material-ui/core/Drawer";
 import IconButton from "@material-ui/core/IconButton";
 import Switch from "@material-ui/core/Switch";
@@ -43,6 +44,7 @@ import Snackbar from "@material-ui/core/Snackbar";
 import ButtonBase from "@material-ui/core/ButtonBase";
 import TouchRipple from "@material-ui/core/ButtonBase/TouchRipple";
 import MuiAlert from "@material-ui/lab/Alert";
+import Popover from "@material-ui/core/Popover";
 // List
 import ListItem from "@material-ui/core/ListItem";
 import ListItemIcon from "@material-ui/core/ListItemIcon";
@@ -57,7 +59,7 @@ import TableRow from "@material-ui/core/TableRow";
 
 // Utilities
 import clsx from "clsx";
-const {is} = require('electron-util');
+const { is } = require("electron-util");
 const EventEmitter = require("events");
 
 // Reusable Player Componoent
@@ -437,6 +439,104 @@ class HomeComponent extends React.Component {
 		);
 	}
 }
+
+// Settings
+const settingsStyles = makeStyles((theme) => ({
+	popover: {
+		pointerEvents: "none",
+	},
+	paper: {
+		padding: theme.spacing(1),
+	},
+	buttonrow: {
+		'& > *': {
+		  margin: theme.spacing(1),
+		},
+	}
+}));
+
+function SettingsView() {
+	const classes = settingsStyles();
+	
+	let [curDisplayConfig, setDisplayConfig] = React.useState(() => {
+		let copyOfSettings = {};
+		for (let settingsPair of settings) {
+			copyOfSettings[settingsPair[0]] = settingsPair[1];
+		}
+		return copyOfSettings;
+	});
+	function saveConfig(ev) {
+		let keys = Object.keys(curDisplayConfig);
+		for (let i = 0; i < keys.length; i++) {
+			let key = keys[i];
+			if (settings.has(key)) {
+				if (settings.get(key) != curDisplayConfig[key]) {
+					settings.set(key, curDisplayConfig[key]); // Update!
+				}
+			}
+		}
+	}
+	// A joke
+	const [jokeAnchorEl, setJokeAnchorEl] = React.useState(null);
+	const handleJokePopoverOpen = (event) => {
+		setJokeAnchorEl(event.currentTarget);
+	};
+	const handleJokePopoverClose = () => {
+		setJokeAnchorEl(null);
+	};
+	const jokePopoverOpen = Boolean(jokeAnchorEl);
+	// Render!!!
+	let newConfig = {};
+	function updateDisplayConfig() {
+		setDisplayConfig({ ...curDisplayConfig, ...newConfig });
+	}
+	function toggleTelemetryJokeSwitch(ev) {
+		newConfig["telemetryJoke"] = ev.target.checked;
+		updateDisplayConfig();
+	}
+
+	return (
+		<div className="settings">
+			<Typography variant="h2">{i18n.__("Telemetry")</Typography>
+			<Popover
+				className={classes.popover}
+				classes={{
+					paper: classes.paper,
+				}}
+				open={jokePopoverOpen}
+				anchorEl={jokeAnchorEl}
+				anchorOrigin={{
+					vertical: "bottom",
+					horizontal: "left",
+				}}
+				transformOrigin={{
+					vertical: "top",
+					horizontal: "left",
+				}}
+				disableRestoreFocus
+			>
+				{i18n.__("This is a joke")}
+			</Popover>
+			<Typography variant="body1">{i18n.__("Enable complete data collection:")} </Typography>
+			<Switch
+				checked={curDisplayConfig["telemetryJoke"]}
+				onChange={toggleTelemetryJokeSwitch}
+				onMouseEnter={handleJokePopoverOpen}
+				onMouseLeave={handleJokePopoverClose}
+			></Switch>
+			<Typography variant="h2">Save Settings</Typography>
+			<Typography variant="body1">Some settings require you to restart Pulsify entirely as they are queried only during the startup. </Typography>
+			<div className={classes.buttonrow}>
+			<Button variant="contained" color="primary" onClick={saveConfig}>
+				Save
+			</Button>
+			<Button variant="contained" color="secondary" onClick={(ev) => {window.location.reload()}}>
+				Reload
+			</Button>
+			</div>
+		</div>
+	);
+}
 // Drawer
 class MainDrawerComponent extends React.Component {
 	constructor(props) {
@@ -521,6 +621,7 @@ function MainComponent() {
 	views.playlists = <PlaylistView />;
 	views.songs = <SongView controller={controller} />;
 	views.homeview = <HomeComponent />;
+	views.settings = <SettingsView></SettingsView>;
 	window.debug = {};
 	window.debug.views = views;
 	const stylesSet = makeStyles((theme) => ({
@@ -596,7 +697,6 @@ function MainComponent() {
 // Bootstrap code
 // really odd part i'm learning
 
-
 function setServer(comp) {}
 
 $(function () {
@@ -607,9 +707,9 @@ $(function () {
 		new customTitlebar.Titlebar({
 			backgroundColor: customTitlebar.Color.fromHex("#444"),
 		});
-		if(is.development){
-			$("#menufix").remove()
-		}else{
+		if (is.development) {
+			$("#menufix").remove();
+		} else {
 			$("div[role=menubar]").remove();
 		}
 	}

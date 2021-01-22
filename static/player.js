@@ -9,6 +9,7 @@ import styles from "./player.module.css";
 import Typography from "@material-ui/core/Typography";
 // Grid Utils
 import Grid from "@material-ui/core/Grid";
+import Paper from "@material-ui/core/Paper";
 // Widgets
 import Slider from "@material-ui/core/Slider";
 // Get localized functions
@@ -74,13 +75,13 @@ class PlayerComponent extends React.Component {
 			this.playNextSong();
 		}
 		if(!this.state.player){
-			console.log("tick aborted, due to no player");
+			//console.log("tick aborted, due to no player");
 			return;
 		}
-		console.log("Ticking");
+		//console.log("Ticking");
 		
 		if(!this.state.userDragging){
-			console.log('user is not dragging');
+			// console.log('user is not dragging');
 			this.setState(function (state, props) {
 				let curTime = this.state.player.getCurrentTime();
 				console.log("Set current time to",curTime);
@@ -120,11 +121,11 @@ class PlayerComponent extends React.Component {
 		}else{
 			player = this.state.player; // Get existing player
 		}
-		console.log('Init Finished');
+		console.log('INFO: Init Finished');
 		await player.load(uri);
-		console.log("Loaded uri into player");
+		console.log("INFO: Loaded uri into player");
 		await player.play();
-		console.log("Playing")
+		console.log("INFO: Playing")
 		this.setState(function (state, props) {
 			return {player: player,playerType:SelectedPlayer.id}
 		});
@@ -152,7 +153,7 @@ class PlayerComponent extends React.Component {
 		ee.playerEventsRegistered = true;
 		ee.on("playSong",async function(songData){
 			// Does not check for queue
-			oThis.updateItem("Song",songData);
+			await oThis.updateItem("Song",songData);
 			await oThis.playSong(songData);
 			oThis.setState(function (state, props) {
 				return {enabled: true}
@@ -170,7 +171,9 @@ class PlayerComponent extends React.Component {
 		
 		ee.on("playing",function(player){
 			// Support for start/end metadata needed
-			// oThis.updateDuration(player.getDuration());
+			if(!oThis.state.duration && player.getDuration()){
+				oThis.updateDuration(player.getDuration());
+			}
 			oThis.tick();
 		});
 
@@ -182,7 +185,7 @@ class PlayerComponent extends React.Component {
 	get duration(){
 		return this.state.duration;
 	}
-	updateItem(type, params) {
+	async updateItem(type, params) {
 		let properties = {};
 
 		if ("name" in params) {
@@ -209,8 +212,8 @@ class PlayerComponent extends React.Component {
 		} else {
 			properties.duration = null; // Not provided
 		}
-		
-		this.setState(function (state, props) {
+		console.log("Updating State with",properties);
+		await this.setState(function (state, props) {
 			return properties;
 		});
 	}
@@ -222,7 +225,7 @@ class PlayerComponent extends React.Component {
 		});
 	}
 	updateDuration(time) {
-		console.log("Duration updated to ",time);
+		console.log("INFO: Duration updated to ",time);
 		// Sometimes duration can be found afterwards
 		this.setState(function (state, props) {
 			return { itemLength: time, duration: time };
@@ -246,6 +249,8 @@ class PlayerComponent extends React.Component {
 		return (
 			<>
 				<div className="player">
+					<Paper>
+						<div className="player-inner">
 					<Grid container spacing={2}>
 						<Grid item xs={2}>
 							
@@ -283,6 +288,8 @@ class PlayerComponent extends React.Component {
 					<span className={styles.playerItemMadeBy}>
 						<Typography variant="h6"> {this.state.itemMadeBy}</Typography>
 					</span>
+					</div>
+					</Paper>
 				</div>
 			</>
 		);

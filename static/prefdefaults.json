@@ -13,5 +13,7 @@
     "initialWindowWidth":800,
     "customWindowbar":true,
     "playerTickrate":250,
-    "useDarkMode":"system"
+    "useDarkMode":"system",
+    "internalServerExecutionMethod":"moduleLoad",
+    "telemetryJoke":false
 }

@@ -12,8 +12,32 @@ const Store = require("electron-store");
 const https = require("https");
 const fs = require("fs");
 const { ipcMain } = require('electron');
+const { execFile } = require('child_process');
+
 ipcMain.on("debug", function(event,msg){
 	console.log(msg);
+})
+ipcMain.on("internalServer", function(ev,eventName){
+	console.log("Running Internal Server Event",eventName);
+	if(eventName == "start"){
+		console.log("Starting internal server!");
+		if(settings.get("internalServerExecutionMethod") == "childProcess"){
+			// ! broken
+			console.log("Using child process internal server startup");
+
+			execFile(path.join(path.join(__dirname, "mediaserver"),"server.js"), (error, stdout, stderr) => {
+				if (error) {
+				  console.error(`error: ${error.message}`);
+				  return;
+				}
+			  
+				if (stderr) {
+				  console.error(`stderr: ${stderr}`);
+				  return;
+				}
+			  });
+		}
+	}
 })
 
 const settings = new Store({

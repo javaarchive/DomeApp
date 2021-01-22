@@ -1,4 +1,4 @@
-process.env.HMR_PORT=56013;process.env.HMR_HOSTNAME="localhost";// modules are defined as an array
+process.env.HMR_PORT=55102;process.env.HMR_HOSTNAME="localhost";// modules are defined as an array
 // [ module function, map of requires ]
 //
 // map of requires is short require name -> numeric require
@@ -243,6 +243,8 @@ var _Typography = _interopRequireDefault(require("@material-ui/core/Typography")
 
 var _Grid = _interopRequireDefault(require("@material-ui/core/Grid"));
 
+var _Paper = _interopRequireDefault(require("@material-ui/core/Paper"));
+
 var _Slider = _interopRequireDefault(require("@material-ui/core/Slider"));
 
 var _utils = require("./utils.js");
@@ -329,14 +331,13 @@ class PlayerComponent extends _react.default.Component {
     }
 
     if (!this.state.player) {
-      console.log("tick aborted, due to no player");
+      //console.log("tick aborted, due to no player");
       return;
-    }
+    } //console.log("Ticking");
 
-    console.log("Ticking");
 
     if (!this.state.userDragging) {
-      console.log('user is not dragging');
+      // console.log('user is not dragging');
       this.setState(function (state, props) {
         let curTime = this.state.player.getCurrentTime();
         console.log("Set current time to", curTime);
@@ -392,11 +393,11 @@ class PlayerComponent extends _react.default.Component {
       player = this.state.player; // Get existing player
     }
 
-    console.log('Init Finished');
+    console.log('INFO: Init Finished');
     await player.load(uri);
-    console.log("Loaded uri into player");
+    console.log("INFO: Loaded uri into player");
     await player.play();
-    console.log("Playing");
+    console.log("INFO: Playing");
     this.setState(function (state, props) {
       return {
         player: player,
@@ -436,7 +437,7 @@ class PlayerComponent extends _react.default.Component {
     ee.playerEventsRegistered = true;
     ee.on("playSong", async function (songData) {
       // Does not check for queue
-      oThis.updateItem("Song", songData);
+      await oThis.updateItem("Song", songData);
       await oThis.playSong(songData);
       oThis.setState(function (state, props) {
         return {
@@ -456,7 +457,10 @@ class PlayerComponent extends _react.default.Component {
     });
     ee.on("playing", function (player) {
       // Support for start/end metadata needed
-      // oThis.updateDuration(player.getDuration());
+      if (!oThis.state.duration && player.getDuration()) {
+        oThis.updateDuration(player.getDuration());
+      }
+
       oThis.tick();
     });
     ee.on("end", player => {
@@ -468,7 +472,7 @@ class PlayerComponent extends _react.default.Component {
     return this.state.duration;
   }
 
-  updateItem(type, params) {
+  async updateItem(type, params) {
     let properties = {};
 
     if ("name" in params) {
@@ -499,7 +503,8 @@ class PlayerComponent extends _react.default.Component {
       properties.duration = null; // Not provided
     }
 
-    this.setState(function (state, props) {
+    console.log("Updating State with", properties);
+    await this.setState(function (state, props) {
       return properties;
     });
   }
@@ -515,7 +520,7 @@ class PlayerComponent extends _react.default.Component {
   }
 
   updateDuration(time) {
-    console.log("Duration updated to ", time); // Sometimes duration can be found afterwards
+    console.log("INFO: Duration updated to ", time); // Sometimes duration can be found afterwards
 
     this.setState(function (state, props) {
       return {
@@ -548,6 +553,8 @@ class PlayerComponent extends _react.default.Component {
   render() {
     return /*#__PURE__*/_react.default.createElement(_react.default.Fragment, null, /*#__PURE__*/_react.default.createElement("div", {
       className: "player"
+    }, /*#__PURE__*/_react.default.createElement(_Paper.default, null, /*#__PURE__*/_react.default.createElement("div", {
+      className: "player-inner"
     }, /*#__PURE__*/_react.default.createElement(_Grid.default, {
       container: true,
       spacing: 2
@@ -583,7 +590,7 @@ class PlayerComponent extends _react.default.Component {
       className: _playerModule.default.playerItemMadeBy
     }, /*#__PURE__*/_react.default.createElement(_Typography.default, {
       variant: "h6"
-    }, " ", this.state.itemMadeBy))));
+    }, " ", this.state.itemMadeBy))))));
   }
 
 }
@@ -606,7 +613,9 @@ module.exports = {
   "initialWindowWidth": 800,
   "customWindowbar": true,
   "playerTickrate": 250,
-  "useDarkMode": "system"
+  "useDarkMode": "system",
+  "internalServerExecutionMethod": "moduleLoad",
+  "telemetryJoke": false
 };
 },{}],"unbundle.js":[function(require,module,exports) {
 "use strict";
@@ -639,6 +648,8 @@ var _Paper = _interopRequireDefault(require("@material-ui/core/Paper"));
 
 var _AppBar = _interopRequireDefault(require("@material-ui/core/AppBar"));
 
+var _Button = _interopRequireDefault(require("@material-ui/core/Button"));
+
 var _Drawer = _interopRequireDefault(require("@material-ui/core/Drawer"));
 
 var _IconButton = _interopRequireDefault(require("@material-ui/core/IconButton"));
@@ -666,6 +677,8 @@ var _ButtonBase = _interopRequireDefault(require("@material-ui/core/ButtonBase")
 var _TouchRipple = _interopRequireDefault(require("@material-ui/core/ButtonBase/TouchRipple"));
 
 var _Alert = _interopRequireDefault(require("@material-ui/lab/Alert"));
+
+var _Popover = _interopRequireDefault(require("@material-ui/core/Popover"));
 
 var _ListItem = _interopRequireDefault(require("@material-ui/core/ListItem"));
 
@@ -699,7 +712,7 @@ function _extends() { _extends = Object.assign || function (target) { for (var i
 
 const {
   is
-} = require('electron-util');
+} = require("electron-util");
 
 const EventEmitter = require("events"); // Reusable Player Componoent
 
@@ -1056,6 +1069,120 @@ class HomeComponent extends _react.default.Component {
     }, i18n.__("Hello! This is the default homescreen for now. ")));
   }
 
+} // Settings
+
+
+const settingsStyles = (0, _styles.makeStyles)(theme => ({
+  popover: {
+    pointerEvents: "none"
+  },
+  paper: {
+    padding: theme.spacing(1)
+  },
+  buttonrow: {
+    '& > *': {
+      margin: theme.spacing(1)
+    }
+  }
+}));
+
+function SettingsView() {
+  const classes = settingsStyles();
+
+  let [curDisplayConfig, setDisplayConfig] = _react.default.useState(() => {
+    let copyOfSettings = {};
+
+    for (let settingsPair of settings) {
+      copyOfSettings[settingsPair[0]] = settingsPair[1];
+    }
+
+    return copyOfSettings;
+  });
+
+  function saveConfig(ev) {
+    let keys = Object.keys(curDisplayConfig);
+
+    for (let i = 0; i < keys.length; i++) {
+      let key = keys[i];
+
+      if (settings.has(key)) {
+        if (settings.get(key) != curDisplayConfig[key]) {
+          settings.set(key, curDisplayConfig[key]); // Update!
+        }
+      }
+    }
+  } // A joke
+
+
+  const [jokeAnchorEl, setJokeAnchorEl] = _react.default.useState(null);
+
+  const handleJokePopoverOpen = event => {
+    setJokeAnchorEl(event.currentTarget);
+  };
+
+  const handleJokePopoverClose = () => {
+    setJokeAnchorEl(null);
+  };
+
+  const jokePopoverOpen = Boolean(jokeAnchorEl); // Render!!!
+
+  let newConfig = {};
+
+  function updateDisplayConfig() {
+    setDisplayConfig({ ...curDisplayConfig,
+      ...newConfig
+    });
+  }
+
+  function toggleTelemetryJokeSwitch(ev) {
+    newConfig["telemetryJoke"] = ev.target.checked;
+    updateDisplayConfig();
+  }
+
+  return /*#__PURE__*/_react.default.createElement("div", {
+    className: "settings"
+  }, /*#__PURE__*/_react.default.createElement(_Typography.default, {
+    variant: "h2"
+  }, "Telemetry"), /*#__PURE__*/_react.default.createElement(_Popover.default, {
+    className: classes.popover,
+    classes: {
+      paper: classes.paper
+    },
+    open: jokePopoverOpen,
+    anchorEl: jokeAnchorEl,
+    anchorOrigin: {
+      vertical: "bottom",
+      horizontal: "left"
+    },
+    transformOrigin: {
+      vertical: "top",
+      horizontal: "left"
+    },
+    disableRestoreFocus: true
+  }, i18n.__("This is a joke")), /*#__PURE__*/_react.default.createElement(_Typography.default, {
+    variant: "body1"
+  }, i18n.__("Enable complete data collection:"), " "), /*#__PURE__*/_react.default.createElement(_Switch.default, {
+    checked: curDisplayConfig["telemetryJoke"],
+    onChange: toggleTelemetryJokeSwitch,
+    onMouseEnter: handleJokePopoverOpen,
+    onMouseLeave: handleJokePopoverClose
+  }), /*#__PURE__*/_react.default.createElement(_Typography.default, {
+    variant: "h2"
+  }, "Save Settings"), /*#__PURE__*/_react.default.createElement(_Typography.default, {
+    variant: "body1"
+  }, "Some settings require you to restart Pulsify entirely as they are queried only during the startup. "), /*#__PURE__*/_react.default.createElement("div", {
+    className: classes.buttonrow
+  }, /*#__PURE__*/_react.default.createElement(_Button.default, {
+    variant: "contained",
+    color: "primary",
+    onClick: saveConfig
+  }, "Save"), /*#__PURE__*/_react.default.createElement(_Button.default, {
+    variant: "contained",
+    color: "secondary",
+    onClick: ev => {
+      window.location.reload();
+    }
+  }, "Reload")));
 } // Drawer
 
 
@@ -1143,6 +1270,7 @@ function MainComponent() {
     controller: controller
   });
   views.homeview = /*#__PURE__*/_react.default.createElement(HomeComponent, null);
+  views.settings = /*#__PURE__*/_react.default.createElement(SettingsView, null);
   window.debug = {};
   window.debug.views = views;
   const stylesSet = (0, _styles.makeStyles)(theme => ({
