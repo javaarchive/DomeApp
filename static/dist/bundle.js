@@ -680,6 +680,10 @@ var _Alert = _interopRequireDefault(require("@material-ui/lab/Alert"));
 
 var _Popover = _interopRequireDefault(require("@material-ui/core/Popover"));
 
+var _Backdrop = _interopRequireDefault(require("@material-ui/core/Backdrop"));
+
+var _CircularProgress = _interopRequireDefault(require("@material-ui/core/CircularProgress"));
+
 var _ListItem = _interopRequireDefault(require("@material-ui/core/ListItem"));
 
 var _ListItemIcon = _interopRequireDefault(require("@material-ui/core/ListItemIcon"));
@@ -1099,7 +1103,21 @@ function SettingsView() {
     return copyOfSettings;
   });
 
+  let [applying, setApplying] = _react.default.useState(false);
+
+  let [applyFinishSnackbarOpen, setApplyFinishedSnackbarOpen] = _react.default.useState(false);
+
+  function showApplyFinishSnackbar(ev) {
+    setApplyFinishedSnackbarOpen(true);
+  }
+
+  function hideApplyFinishSnackbar(ev) {
+    setApplyFinishedSnackbarOpen(false);
+  }
+
   function saveConfig(ev) {
+    setApplying(true);
+    console.log("Saving Configuration from display");
     let keys = Object.keys(curDisplayConfig);
 
     for (let i = 0; i < keys.length; i++) {
@@ -1111,6 +1129,11 @@ function SettingsView() {
         }
       }
     }
+
+    setTimeout(() => {
+      setApplying(false);
+      setApplyFinishedSnackbarOpen(true);
+    }, 200); // Allow brief animation
   } // A joke
 
 
@@ -1124,7 +1147,13 @@ function SettingsView() {
     setJokeAnchorEl(null);
   };
 
-  const jokePopoverOpen = Boolean(jokeAnchorEl); // Render!!!
+  const jokePopoverOpen = Boolean(jokeAnchorEl);
+
+  function toggleTelemetryJokeSwitch(ev) {
+    newConfig["telemetryJoke"] = ev.target.checked;
+    updateDisplayConfig();
+  } // Render!!!
+
 
   let newConfig = {};
 
@@ -1134,16 +1163,16 @@ function SettingsView() {
     });
   }
 
-  function toggleTelemetryJokeSwitch(ev) {
-    newConfig["telemetryJoke"] = ev.target.checked;
-    updateDisplayConfig();
-  }
-
   return /*#__PURE__*/_react.default.createElement("div", {
     className: "settings"
-  }, /*#__PURE__*/_react.default.createElement(_Typography.default, {
+  }, /*#__PURE__*/_react.default.createElement(_Backdrop.default, {
+    className: classes.backdrop,
+    open: applying
+  }, /*#__PURE__*/_react.default.createElement(_CircularProgress.default, {
+    color: "inherit"
+  })), /*#__PURE__*/_react.default.createElement(_Typography.default, {
     variant: "h2"
-  }, "Telemetry"), /*#__PURE__*/_react.default.createElement(_Popover.default, {
+  }, i18n.__("Telemetry")), /*#__PURE__*/_react.default.createElement(_Popover.default, {
     className: classes.popover,
     classes: {
       paper: classes.paper
@@ -1168,21 +1197,28 @@ function SettingsView() {
     onMouseLeave: handleJokePopoverClose
   }), /*#__PURE__*/_react.default.createElement(_Typography.default, {
     variant: "h2"
-  }, "Save Settings"), /*#__PURE__*/_react.default.createElement(_Typography.default, {
+  }, i18n.__("Save Settings")), /*#__PURE__*/_react.default.createElement(_Typography.default, {
     variant: "body1"
-  }, "Some settings require you to restart Pulsify entirely as they are queried only during the startup. "), /*#__PURE__*/_react.default.createElement("div", {
+  }, i18n.__("Some settings require you to restart Pulsify entirely as they are queried only during the startup. ")), /*#__PURE__*/_react.default.createElement("div", {
     className: classes.buttonrow
   }, /*#__PURE__*/_react.default.createElement(_Button.default, {
     variant: "contained",
     color: "primary",
     onClick: saveConfig
-  }, "Save"), /*#__PURE__*/_react.default.createElement(_Button.default, {
+  }, i18n.__("Save")), /*#__PURE__*/_react.default.createElement(_Button.default, {
     variant: "contained",
     color: "secondary",
     onClick: ev => {
       window.location.reload();
     }
-  }, "Reload")));
+  }, i18n.__("Reload")), /*#__PURE__*/_react.default.createElement(_Snackbar.default, {
+    open: applyFinishSnackbarOpen,
+    autoHideDuration: settings.get("snackbarAutoHideDuration"),
+    onClose: hideApplyFinishSnackbar
+  }, /*#__PURE__*/_react.default.createElement(Alert, {
+    onClose: hideApplyFinishSnackbar,
+    severity: "success"
+  }, i18n.__("Settings have been saved succesfully")))));
 } // Drawer
 
 

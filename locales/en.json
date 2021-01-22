@@ -22,5 +22,13 @@
 	"Idle Duration": "Nonexistent",
 	"Unable to establish connection to media provider": "Unable to establish connection to media provider",
 	"Settings": "Settings",
-	"Song Name": "Song Name"
+	"Song Name": "Song Name",
+	"Telemetry": "Telemetry",
+	"This is a joke": "This is a joke",
+	"Enable complete data collection:": "Enable complete data collection:",
+	"Save Settings": "Save Settings",
+	"Some settings require you to restart Pulsify entirely as they are queried only during the startup. ": "Some settings require you to restart Pulsify entirely as they are queried only during the startup. ",
+	"Save": "Save",
+	"Reload": "Reload",
+	"Settings have been saved succesfully": "Settings have been saved succesfully"
 }

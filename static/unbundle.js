@@ -45,6 +45,8 @@ import ButtonBase from "@material-ui/core/ButtonBase";
 import TouchRipple from "@material-ui/core/ButtonBase/TouchRipple";
 import MuiAlert from "@material-ui/lab/Alert";
 import Popover from "@material-ui/core/Popover";
+import Backdrop from "@material-ui/core/Backdrop";
+import CircularProgress from "@material-ui/core/CircularProgress";
 // List
 import ListItem from "@material-ui/core/ListItem";
 import ListItemIcon from "@material-ui/core/ListItemIcon";
@@ -465,7 +467,17 @@ function SettingsView() {
 		}
 		return copyOfSettings;
 	});
+	let [applying, setApplying] = React.useState(false);
+	let [applyFinishSnackbarOpen, setApplyFinishedSnackbarOpen] = React.useState(false);
+	function showApplyFinishSnackbar(ev){
+		setApplyFinishedSnackbarOpen(true);
+	}
+	function hideApplyFinishSnackbar(ev){
+		setApplyFinishedSnackbarOpen(false);
+	}
 	function saveConfig(ev) {
+		setApplying(true);
+		console.log("Saving Configuration from display");
 		let keys = Object.keys(curDisplayConfig);
 		for (let i = 0; i < keys.length; i++) {
 			let key = keys[i];
@@ -475,6 +487,11 @@ function SettingsView() {
 				}
 			}
 		}
+		setTimeout(() => {
+			setApplying(false);
+			setApplyFinishedSnackbarOpen(true);
+		},200); // Allow brief animation
+		
 	}
 	// A joke
 	const [jokeAnchorEl, setJokeAnchorEl] = React.useState(null);
@@ -485,19 +502,24 @@ function SettingsView() {
 		setJokeAnchorEl(null);
 	};
 	const jokePopoverOpen = Boolean(jokeAnchorEl);
+	function toggleTelemetryJokeSwitch(ev) {
+		newConfig["telemetryJoke"] = ev.target.checked;
+		updateDisplayConfig();
+	}
 	// Render!!!
 	let newConfig = {};
 	function updateDisplayConfig() {
 		setDisplayConfig({ ...curDisplayConfig, ...newConfig });
 	}
-	function toggleTelemetryJokeSwitch(ev) {
-		newConfig["telemetryJoke"] = ev.target.checked;
-		updateDisplayConfig();
-	}
+	
 
 	return (
 		<div className="settings">
-			<Typography variant="h2">{i18n.__("Telemetry")</Typography>
+			
+			<Backdrop className={classes.backdrop} open={applying}>
+			<CircularProgress color="inherit" />
+			</Backdrop>
+			<Typography variant="h2">{i18n.__("Telemetry")}</Typography>
 			<Popover
 				className={classes.popover}
 				classes={{
@@ -524,15 +546,20 @@ function SettingsView() {
 				onMouseEnter={handleJokePopoverOpen}
 				onMouseLeave={handleJokePopoverClose}
 			></Switch>
-			<Typography variant="h2">Save Settings</Typography>
-			<Typography variant="body1">Some settings require you to restart Pulsify entirely as they are queried only during the startup. </Typography>
+			<Typography variant="h2">{i18n.__("Save Settings")}</Typography>
+			<Typography variant="body1">{i18n.__("Some settings require you to restart Pulsify entirely as they are queried only during the startup. ")}</Typography>
 			<div className={classes.buttonrow}>
 			<Button variant="contained" color="primary" onClick={saveConfig}>
-				Save
+				{i18n.__("Save")}
 			</Button>
 			<Button variant="contained" color="secondary" onClick={(ev) => {window.location.reload()}}>
-				Reload
+				{i18n.__("Reload")}
 			</Button>
+			<Snackbar open={applyFinishSnackbarOpen} autoHideDuration={settings.get("snackbarAutoHideDuration")} onClose={hideApplyFinishSnackbar}>
+        <Alert onClose={hideApplyFinishSnackbar} severity="success">
+          {i18n.__("Settings have been saved succesfully")}
+        </Alert>
+      </Snackbar>
 			</div>
 		</div>
 	);
