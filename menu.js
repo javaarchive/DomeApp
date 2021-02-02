@@ -51,7 +51,7 @@ if (!is.macos) {
 		},
 		aboutMenuItem({
 			icon: path.join(__dirname, 'static', 'icon.png'),
-			text: 'Created by Your Name'
+			text: 'Created by SemiDev(youtube)/javaarchive(github)'
 		})
 	);
 }

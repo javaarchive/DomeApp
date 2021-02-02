@@ -1,8 +1,8 @@
 {
-	"name": "dome-app",
-	"productName": "Dome App",
-	"version": "1.1.1",
-	"description": "The best app ever",
+	"name": "pulsify-app",
+	"productName": "Pulsify App",
+	"version": "1.2.0",
+	"description": "The last media player you'll ever need",
 	"license": "MIT",
 	"repository": "javaarchive/DomeApp",
 	"author": {
@@ -43,6 +43,7 @@
 		"express": "^4.17.1",
 		"express-session": "^1.17.1",
 		"fontsource-roboto": "^3.1.5",
+		"http-terminator": "^2.0.3",
 		"i18n": "^0.10.0",
 		"id-auto-increment": "^1.0.1",
 		"jquery": "^3.5.1",

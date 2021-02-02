@@ -1,6 +1,10 @@
 module.exports = {
-    database: "sqlite://database.sqlite",
+    database: {
+        dialect: "sqlite",
+        storage: "database.sqlite"
+    },
     PORT: 3000,
     mode: "sequelize",
-    sessionAuth: true
+    sessionAuth: false,
+    connEndTimeout: 1000
 }

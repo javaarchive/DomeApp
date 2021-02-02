@@ -47,6 +47,7 @@ import MuiAlert from "@material-ui/lab/Alert";
 import Popover from "@material-ui/core/Popover";
 import Backdrop from "@material-ui/core/Backdrop";
 import CircularProgress from "@material-ui/core/CircularProgress";
+import Grid from "@material-ui/core/Grid";
 // List
 import ListItem from "@material-ui/core/ListItem";
 import ListItemIcon from "@material-ui/core/ListItemIcon";
@@ -58,10 +59,12 @@ import TableCell from "@material-ui/core/TableCell";
 import TableContainer from "@material-ui/core/TableContainer";
 import TableHead from "@material-ui/core/TableHead";
 import TableRow from "@material-ui/core/TableRow";
+import Select from "@material-ui/core/Select";
 
 // Utilities
 import clsx from "clsx";
 const { is } = require("electron-util");
+const {ipcRenderer} = require("electron");
 const EventEmitter = require("events");
 
 // Reusable Player Componoent
@@ -84,6 +87,7 @@ const $ = require("jquery");
 const regeneratorRuntime = require("regenerator-runtime");
 console.log("bundle :D");
 import { localizedFuncs } from "./utils.js";
+import { TextFieldsOutlined } from "@material-ui/icons";
 
 // Constants
 
@@ -451,15 +455,18 @@ const settingsStyles = makeStyles((theme) => ({
 		padding: theme.spacing(1),
 	},
 	buttonrow: {
-		'& > *': {
-		  margin: theme.spacing(1),
+		"& > *": {
+			margin: theme.spacing(1),
 		},
-	}
+	},
+	settingsGrid: {
+		padding: theme.spacing(2),
+	},
 }));
 
 function SettingsView() {
 	const classes = settingsStyles();
-	
+
 	let [curDisplayConfig, setDisplayConfig] = React.useState(() => {
 		let copyOfSettings = {};
 		for (let settingsPair of settings) {
@@ -468,11 +475,14 @@ function SettingsView() {
 		return copyOfSettings;
 	});
 	let [applying, setApplying] = React.useState(false);
-	let [applyFinishSnackbarOpen, setApplyFinishedSnackbarOpen] = React.useState(false);
-	function showApplyFinishSnackbar(ev){
+	let [internalServerOnline, setInternalServerOnline] = React.useState(false);
+	let [applyFinishSnackbarOpen, setApplyFinishedSnackbarOpen] = React.useState(
+		false
+	);
+	function showApplyFinishSnackbar(ev) {
 		setApplyFinishedSnackbarOpen(true);
 	}
-	function hideApplyFinishSnackbar(ev){
+	function hideApplyFinishSnackbar(ev) {
 		setApplyFinishedSnackbarOpen(false);
 	}
 	function saveConfig(ev) {
@@ -490,8 +500,7 @@ function SettingsView() {
 		setTimeout(() => {
 			setApplying(false);
 			setApplyFinishedSnackbarOpen(true);
-		},200); // Allow brief animation
-		
+		}, 200); // Allow brief animation
 	}
 	// A joke
 	const [jokeAnchorEl, setJokeAnchorEl] = React.useState(null);
@@ -511,15 +520,51 @@ function SettingsView() {
 	function updateDisplayConfig() {
 		setDisplayConfig({ ...curDisplayConfig, ...newConfig });
 	}
-	
+	function createSwitchFunction(toggleKey) {
+		let outputFunc = (ev) => {
+			newConfig[toggleKey] = ev.target.checked;
+			updateDisplayConfig();
+		};
+		return outputFunc;
+	}
+	function updateSnackbarHideDuration(ev) {
+		let newDuration = ev.target.value * 1000; // back to ms
+		newConfig["snackbarAutoHideDuration"] = newDuration;
+		updateDisplayConfig();
+	}
 
+	function handleThemeChange(ev){
+		newConfig["useDarkMode"] = ev.target.value;
+		updateDisplayConfig();
+	}
+	// Internal Server
+	function updateInternalServerState(ev,data){
+		console.log("Internal Server State Update recieved");
+		setInternalServerOnline(data.online);
+	}
+	React.useEffect(() => {
+		ipcRenderer.on("internalServerUpdates",updateInternalServerState);
+		return () => {
+			ipcRenderer.removeListener("internalServerUpdates",updateInternalServerState);
+		};
+	});
+	function startInternalServer(){
+		ipcRenderer.send("internalServer","start");
+	}
+
+	function stopInternalServer(){
+		ipcRenderer.send("internalServer","stop");
+	}
+	// Temporary stuffz
+	const optionSpacing = 3; // Config option?
+	const explainationXS = 11;
+	const optionFormXS = 1;
 	return (
 		<div className="settings">
-			
 			<Backdrop className={classes.backdrop} open={applying}>
-			<CircularProgress color="inherit" />
+				<CircularProgress color="inherit" />
 			</Backdrop>
-			<Typography variant="h2">{i18n.__("Telemetry")}</Typography>
+			<Typography variant="h3">{i18n.__("Telemetry")}</Typography>
 			<Popover
 				className={classes.popover}
 				classes={{
@@ -539,28 +584,97 @@ function SettingsView() {
 			>
 				{i18n.__("This is a joke")}
 			</Popover>
-			<Typography variant="body1">{i18n.__("Enable complete data collection:")} </Typography>
-			<Switch
-				checked={curDisplayConfig["telemetryJoke"]}
-				onChange={toggleTelemetryJokeSwitch}
-				onMouseEnter={handleJokePopoverOpen}
-				onMouseLeave={handleJokePopoverClose}
-			></Switch>
-			<Typography variant="h2">{i18n.__("Save Settings")}</Typography>
-			<Typography variant="body1">{i18n.__("Some settings require you to restart Pulsify entirely as they are queried only during the startup. ")}</Typography>
+			<Grid container spacing={optionSpacing}>
+				<Grid item xs={explainationXS}>
+					<Typography variant="body1">
+						{i18n.__("Enable complete data collection:")}
+					</Typography>
+				</Grid>
+
+				<Grid item xs={optionFormXS}>
+					<Switch
+						checked={curDisplayConfig["telemetryJoke"]}
+						onChange={toggleTelemetryJokeSwitch}
+						onMouseEnter={handleJokePopoverOpen}
+						onMouseLeave={handleJokePopoverClose}
+					></Switch>
+				</Grid>
+			</Grid>
+			<Typography variant="h3">{i18n.__("User Interface")}</Typography>
+			<Grid container spacing={optionSpacing}>
+				<Grid item xs={explainationXS}>
+					<Typography variant="body1">
+						Snackbar Auto Hide Duration in seconds
+					</Typography>
+				</Grid>
+				<Grid item xs={optionFormXS}>
+					<TextField
+						type="number"
+						variant="standard"
+						defaultValue={curDisplayConfig["snackbarAutoHideDuration"] / 1000}
+						onChange={updateSnackbarHideDuration}
+					></TextField>
+				</Grid>
+				<Grid item xs={explainationXS}>
+					<Typography variant="body1">Theme</Typography>
+				</Grid>
+				<Grid item xs={optionFormXS}>
+					<Select
+						onChange={handleThemeChange}
+						value={curDisplayConfig["useDarkMode"]}
+					>
+						<MenuItem value={false}>Light</MenuItem>
+						<MenuItem value={true}>Dark</MenuItem>
+						<MenuItem value={"system"}>System Theme</MenuItem>
+					</Select>
+				</Grid>
+			</Grid>
+			<Typography variant="h3">{i18n.__("Ad Blocking")}</Typography>
+
+			<Typography variant="h3">{i18n.__("Internal Server")}</Typography>
 			<div className={classes.buttonrow}>
-			<Button variant="contained" color="primary" onClick={saveConfig}>
-				{i18n.__("Save")}
-			</Button>
-			<Button variant="contained" color="secondary" onClick={(ev) => {window.location.reload()}}>
-				{i18n.__("Reload")}
-			</Button>
-			<Snackbar open={applyFinishSnackbarOpen} autoHideDuration={settings.get("snackbarAutoHideDuration")} onClose={hideApplyFinishSnackbar}>
-        <Alert onClose={hideApplyFinishSnackbar} severity="success">
-          {i18n.__("Settings have been saved succesfully")}
-        </Alert>
-      </Snackbar>
+				<Button variant="contained" color="primary" onClick={startInternalServer} disabled={internalServerOnline}>
+					{i18n.__("Start Internal Server")}
+				</Button>
+
+				<Button variant="contained" color="primary" onClick={stopInternalServer} disabled={!internalServerOnline}>
+					{i18n.__("Stop Internal Server")}
+				</Button>
+
+				<Button variant="contained" color="secondary" onClick={() => ipcRenderer.send("internalServer","getUpdate")}>
+					{i18n.__("Force Internal Server Ui Update")}
+				</Button>
 			</div>
+			<Typography variant="h3">{i18n.__("Save Settings")}</Typography>
+			<Typography variant="body1">
+				{i18n.__(
+					"Some settings require you to restart Pulsify entirely as they are queried only during the startup. "
+				)}
+			</Typography>
+			<div className={classes.buttonrow}>
+				<Button variant="contained" color="primary" onClick={saveConfig}>
+					{i18n.__("Save")}
+				</Button>
+				<Button
+					variant="contained"
+					color="secondary"
+					onClick={(ev) => {
+						window.location.reload();
+					}}
+				>
+					{i18n.__("Reload")}
+				</Button>
+				<Snackbar
+					open={applyFinishSnackbarOpen}
+					autoHideDuration={settings.get("snackbarAutoHideDuration")}
+					onClose={hideApplyFinishSnackbar}
+				>
+					<Alert onClose={hideApplyFinishSnackbar} severity="success">
+						{i18n.__("Settings have been saved succesfully")}
+					</Alert>
+				</Snackbar>
+			</div>
+			
 		</div>
 	);
 }

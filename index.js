@@ -11,39 +11,68 @@ const utils = require("electron-util");
 const Store = require("electron-store");
 const https = require("https");
 const fs = require("fs");
-const { ipcMain } = require('electron');
-const { execFile } = require('child_process');
-
-ipcMain.on("debug", function(event,msg){
-	console.log(msg);
-})
-ipcMain.on("internalServer", function(ev,eventName){
-	console.log("Running Internal Server Event",eventName);
-	if(eventName == "start"){
-		console.log("Starting internal server!");
-		if(settings.get("internalServerExecutionMethod") == "childProcess"){
-			// ! broken
-			console.log("Using child process internal server startup");
-
-			execFile(path.join(path.join(__dirname, "mediaserver"),"server.js"), (error, stdout, stderr) => {
-				if (error) {
-				  console.error(`error: ${error.message}`);
-				  return;
-				}
-			  
-				if (stderr) {
-				  console.error(`stderr: ${stderr}`);
-				  return;
-				}
-			  });
-		}
-	}
-})
-
+const { ipcMain } = require("electron");
+const { execFile } = require("child_process");
 const settings = new Store({
 	defaults: require("./static/prefdefaults.json"),
 });
 
+ipcMain.on("debug", function (event, msg) {
+	console.log(msg);
+});
+let internalServerMethod = settings.get("internalServerExecutionMethod");
+let internalServerObject;
+let internalServerUp = false;
+function updateStateToRenderer(ev) {
+	console.log("Sent update to renderer");
+	if (ev) {
+		ev.reply("internalServerUpdates", {
+			online: internalServerUp,
+			method: internalServerMethod,
+		});
+	}
+}
+ipcMain.on("internalServer", async function (ev, eventName) {
+	console.log("Running Internal Server Event", eventName);
+	if (eventName == "start") {
+		console.log("Starting internal server!");
+		if (internalServerMethod == "childProcess") {
+			// ! broken
+			console.log("Using child process internal server startup");
+
+			execFile(
+				path.join(path.join(__dirname, "mediaserver"), "server.js"),
+				(error, stdout, stderr) => {
+					if (error) {
+						console.error(`error: ${error.message}`);
+						return;
+					}
+
+					if (stderr) {
+						console.error(`stderr: ${stderr}`);
+						return;
+					}
+				}
+			);
+			internalServerUp = true;
+			updateStateToRenderer(ev);
+		} else if (internalServerMethod == "moduleLoad") {
+			internalServerObject = require("./mediaserver/server");
+			internalServerUp = true;
+			updateStateToRenderer(ev);
+		}
+	} else if (eventName == "stop") {
+		if (internalServerMethod == "moduleLoad") {
+			await internalServerObject.terminator.terminate();
+			// internalServerObject.destroy();
+			delete require.cache[require.resolve('./mediaserver/server')];
+			internalServerUp = false;
+			updateStateToRenderer(ev);
+		}
+	} else {
+		updateStateToRenderer(ev);
+	}
+});
 
 unhandled();
 debug();
@@ -85,7 +114,7 @@ const createMainWindow = async () => {
 	// Init AdBlocker System
 	//console.log(settings.get("adblock"));
 	if (settings.get("adblock")) {
-		if(!filters){
+		if (!filters) {
 			if (!fs.existsSync(settings.get("adblock-file"))) {
 				let outstream = fs.createWriteStream(settings.get("adblock-file"));
 
@@ -99,15 +128,16 @@ const createMainWindow = async () => {
 					console.warn("AdBlocker File Failed to Download", ex);
 				}
 			}
-			let filters = fs.readFileSync(settings.get("adblock-file"), { encoding: "utf-8" })
-			const { ElectronBlocker } = require('@cliqz/adblocker-electron');
+			let filters = fs.readFileSync(settings.get("adblock-file"), {
+				encoding: "utf-8",
+			});
+			const { ElectronBlocker } = require("@cliqz/adblocker-electron");
 			blocker = ElectronBlocker.parse(filters);
 			blocker.enableBlockingInSession(session.defaultSession);
 			console.log("Ad-Blocking Enabled");
 		}
-		
-	}else{
-		console.log("Ad-Blocking Disabled")
+	} else {
+		console.log("Ad-Blocking Disabled");
 	}
 
 	const win = new BrowserWindow({
@@ -115,15 +145,16 @@ const createMainWindow = async () => {
 		show: false,
 		width: settings.get("initialWindowWidth"),
 		height: settings.get("initialWindowHeight"),
-		webPreferences: { nodeIntegration: true, 
-			 preload: path.join(__dirname,"preload.js"),
-			 nodeIntegrationInSubFrames: true // Required, causes security issues but required for iframe control. Preload will sandbox
-			},
+		webPreferences: {
+			nodeIntegration: true,
+			preload: path.join(__dirname, "preload.js"),
+			nodeIntegrationInSubFrames: true, // Required, causes security issues but required for iframe control. Preload will sandbox
+		},
 		autoHideMenuBar: !utils.is.development,
 		center: true,
 		enableRemoteModule: true,
-		titleBarStyle: settings.get("customWindowbar")?"hidden":"default",
-		frame:!settings.get("customWindowbar")
+		titleBarStyle: settings.get("customWindowbar") ? "hidden" : "default",
+		frame: !settings.get("customWindowbar"),
 	});
 
 	win.on("ready-to-show", () => {

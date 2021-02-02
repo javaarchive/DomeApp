@@ -11,6 +11,7 @@ function pick(arg, def) {
  //console.log(config.PORT);
  const port = pick(config.PORT,process.env.PORT);
 const password = pick("defaultpass",config.password);
+const {createHttpTerminator,} = require('http-terminator');
 //const { set } = require("../config");
 var api;
 if(config.mode == "sequelize"){
@@ -27,6 +28,7 @@ if (password == "defaultpass") {
 		"You are using the default password. If this server is exposed to the internet you MUST change the password otherwise anyone can crash the server easily."
 	);
 }
+console.log("Starting server in",__dirname);
 app.get("/", function(req, res) {
 	res.send("Pulsify Media Server");
 });
@@ -45,13 +47,15 @@ function formatResponse(data) {
 if(config.sessionAuth){
 	var session = require("express-session");
 	//app.set('trust proxy', 1) // trust first proxy
-app.use(express.static('public'))
-app.use(session({
-  secret:process.env.SECRET,
-  resave: true,
-  saveUninitialized: true,
-  cookie: { secure: false }
-}));
+app.use(express.static('public'));
+if(config.sessionAuth){
+	app.use(session({
+	secret:process.env.SECRET,
+	resave: true,
+	saveUninitialized: true,
+	cookie: { secure: false }
+	}));
+}
 }
 function checkAuth(req){
 	if(tokens.has(req.get("auth-token"))){
@@ -132,8 +136,19 @@ app.get("/api/fetch_playlists", async (req, res) => {
 		res.json({status: "fail"});
 	}
 })
-app.listen(port, () =>
+let server = app.listen(port, () =>
 	console.log(`Media Server up at http://localhost:${port}`)
 );
-app.get("/exit",function(req,res){process.exit(418)}); // debug death
+// https://stackoverflow.com/questions/43003870/how-do-i-shut-down-my-express-server-gracefully-when-its-process-is-killed
+/*let connections = [];
+server.on('connection', connection => {
+    connections.push(connection);
+    connection.on('close', () => connections = connections.filter(curr => curr !== connection));
+});
+app.destroy = function(){
+	connections.forEach((conn) => conn.end());
+	setTimeout(() => connections.forEach(curr => curr.destroy()), config.connEndTimeout);
+}*/
+app.terminator = createHttpTerminator({server,});
+// app.get("/exit",function(req,res){process.exit(418)}); // debug death
 module.exports = app; // Used from gui app

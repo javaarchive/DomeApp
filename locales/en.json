@@ -30,5 +30,11 @@
 	"Some settings require you to restart Pulsify entirely as they are queried only during the startup. ": "Some settings require you to restart Pulsify entirely as they are queried only during the startup. ",
 	"Save": "Save",
 	"Reload": "Reload",
-	"Settings have been saved succesfully": "Settings have been saved succesfully"
+	"Settings have been saved succesfully": "Settings have been saved succesfully",
+	"User Interface": "User Interface",
+	"Ad Blocking": "Ad Blocking",
+	"Internal Server": "Internal Server",
+	"Start Internal Server": "Start Internal Server",
+	"Stop Internal Server": "Stop Internal Server",
+	"Force Internal Server Ui Update": "Force Internal Server Ui Update"
 }
