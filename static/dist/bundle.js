@@ -581,7 +581,7 @@ class PlayerComponent extends _react.default.Component {
       xs: 2
     }, /*#__PURE__*/_react.default.createElement(_Typography.default, {
       variant: "caption"
-    }, this.state.enabled ? _utils.localizedFuncs[i18n.getLocale()].formatDuration(this.state.position) : i18n.__("Idle Duration"))), /*#__PURE__*/_react.default.createElement("span", {
+    }, this.state.enabled ? _utils.localizedFuncs[i18n.getLocale()].formatDuration(this.state.position) : i18n.__("Idle Duration")), /*#__PURE__*/_react.default.createElement("br", null), /*#__PURE__*/_react.default.createElement("span", {
       className: _playerModule.default.playerTitle
     }, /*#__PURE__*/_react.default.createElement(_Typography.default, {
       variant: "h5"
@@ -589,7 +589,7 @@ class PlayerComponent extends _react.default.Component {
       className: _playerModule.default.playerItemMadeBy
     }, /*#__PURE__*/_react.default.createElement(_Typography.default, {
       variant: "h6"
-    }, " ", this.state.itemMadeBy)), /*#__PURE__*/_react.default.createElement(_Grid.default, {
+    }, " ", this.state.itemMadeBy))), /*#__PURE__*/_react.default.createElement(_Grid.default, {
       item: true,
       xs: 8
     }, /*#__PURE__*/_react.default.createElement("div", {

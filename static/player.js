@@ -270,14 +270,15 @@ class PlayerComponent extends React.Component {
 										this.state.position
 								  ))
 								: i18n.__("Idle Duration")}</Typography>
-							
-						</Grid>
+							<br />
 						<span className={styles.playerTitle}>
 						<Typography variant="h5">{this.state.itemName}</Typography>
 					</span>
 					<span className={styles.playerItemMadeBy}>
 						<Typography variant="h6"> {this.state.itemMadeBy}</Typography>
 					</span>
+						</Grid>
+						
 						<Grid item xs={8}>
 							<div className="playback-progress" onPointerDown={this.userDragStart.bind(this)} onPointerUp={this.userDragEnd.bind(this)}>
 								<Slider
