@@ -673,7 +673,6 @@ module.exports = {
   "test": true,
   "enabledContentHandlers": ["./static/modules/contenthandlers/youtube"],
   "youtubePlayerMethod": "./static/modules/youtube_embed_iframe",
-  "fallbackYoutubePlayerMethod": "browserView",
   "adblock": true,
   "adblock-file": "easylist.blocklist",
   "adblock-download-list": "http://easylist.to/easylist/easylist.txt",
