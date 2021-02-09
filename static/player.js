@@ -10,8 +10,13 @@ import Typography from "@material-ui/core/Typography";
 // Grid Utils
 import Grid from "@material-ui/core/Grid";
 import Paper from "@material-ui/core/Paper";
+import Box from '@material-ui/core/Box';
 // Widgets
 import Slider from "@material-ui/core/Slider";
+import Fab from '@material-ui/core/Fab';
+// Icons
+import PauseIcon from "@material-ui/icons/Pause";
+import PlayArrowIcon from "@material-ui/icons/PlayArrow";
 // Get localized functions
 import { localizedFuncs } from "./utils.js";
 // Event Emitter
@@ -57,7 +62,8 @@ class PlayerComponent extends React.Component {
 			enabled: false,
 			userDragging: false, // Do not update while user is dragging
 			internalPlaylist: [],
-			playerType: "none"
+			playerType: "none",
+			paused: true
 		};
 		if (props.name) {
 			preparedState["name"] = props.name;
@@ -144,6 +150,11 @@ class PlayerComponent extends React.Component {
 			return {internalPlaylist: newPlaylist};
 		});
 		this.state.controller.emit("playSong",nextSong);
+	}
+	setPaused(paused){
+		this.setState(function (state, props) {
+			return {paused:paused};
+		});
 	}
 	registerEvents(ee){
 		if(ee.playerEventsRegistered){
@@ -261,6 +272,12 @@ class PlayerComponent extends React.Component {
 								: i18n.__("Idle Duration")}</Typography>
 							
 						</Grid>
+						<span className={styles.playerTitle}>
+						<Typography variant="h5">{this.state.itemName}</Typography>
+					</span>
+					<span className={styles.playerItemMadeBy}>
+						<Typography variant="h6"> {this.state.itemMadeBy}</Typography>
+					</span>
 						<Grid item xs={8}>
 							<div className="playback-progress" onPointerDown={this.userDragStart.bind(this)} onPointerUp={this.userDragEnd.bind(this)}>
 								<Slider
@@ -271,7 +288,12 @@ class PlayerComponent extends React.Component {
 									max={this.state.duration}
 									disabled={!this.state.enabled}
 								/>
-							</div>
+								<br />
+							
+								
+							</div>	<Box display="flex" justifyContent="center"><Fab color="primary" aria-label="pause-play" className="pausePlay">
+									{this.state.paused?<PauseIcon></PauseIcon>:<PlayArrowIcon></PlayArrowIcon>}
+								</Fab></Box>
 						</Grid>
 						<Grid item xs={2}>
 							<Typography variant="caption">{this.state.enabled
@@ -282,12 +304,6 @@ class PlayerComponent extends React.Component {
 							
 						</Grid>
 					</Grid>
-					<span className={styles.playerTitle}>
-						<Typography variant="h5">{this.state.itemName}</Typography>
-					</span>
-					<span className={styles.playerItemMadeBy}>
-						<Typography variant="h6"> {this.state.itemMadeBy}</Typography>
-					</span>
 					</div>
 					</Paper>
 				</div>

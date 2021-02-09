@@ -1,12 +1,1767 @@
-process.env.HMR_PORT=0;process.env.HMR_HOSTNAME="localhost";parcelRequire=function(e,r,t,n){var i,o="function"==typeof parcelRequire&&parcelRequire,u="function"==typeof require&&require;function f(t,n){if(!r[t]){if(!e[t]){var i="function"==typeof parcelRequire&&parcelRequire;if(!n&&i)return i(t,!0);if(o)return o(t,!0);if(u&&"string"==typeof t)return u(t);var c=new Error("Cannot find module '"+t+"'");throw c.code="MODULE_NOT_FOUND",c}p.resolve=function(r){return e[t][1][r]||r},p.cache={};var l=r[t]=new f.Module(t);e[t][0].call(l.exports,p,l,l.exports,this)}return r[t].exports;function p(e){return f(p.resolve(e))}}f.isParcelRequire=!0,f.Module=function(e){this.id=e,this.bundle=f,this.exports={}},f.modules=e,f.cache=r,f.parent=o,f.register=function(r,t){e[r]=[function(e,r){r.exports=t},{}]};for(var c=0;c<t.length;c++)try{f(t[c])}catch(e){i||(i=e)}if(t.length){var l=f(t[t.length-1]);"object"==typeof exports&&"undefined"!=typeof module?module.exports=l:"function"==typeof define&&define.amd?define(function(){return l}):n&&(this[n]=l)}if(parcelRequire=f,i)throw i;return f}({"YafY":[function(require,module,exports) {
-module.exports={player_font:"_player_font_fad94","drop-shadow":"_drop-shadow_fad94",playerTitle:"_playerTitle_fad94",playerItemMadeBy:"_playerItemMadeBy_fad94"};
-},{}],"FOZT":[function(require,module,exports) {
-"use strict";function t(t){if(!(t=Math.floor(t)))return"---";let o=t,r="";return o>3600&&(r+=Math.floor(o/3600)+":",o%=3600),r+=Math.floor(o/60).toString().padStart(2,"0")+":"+(o%60).toString().padStart(2,"0")}Object.defineProperty(exports,"__esModule",{value:!0}),exports.localizedFuncs=void 0;const o={en:{formatDuration:t}};exports.localizedFuncs=o;
-},{}],"qbJK":[function(require,module,exports) {
-"use strict";Object.defineProperty(exports,"__esModule",{value:!0}),exports.PlayerComponent=void 0;var t=o(require("react")),e=o(require("react-dom")),a=o(require("./player.module.css")),n=o(require("@material-ui/core/Typography")),i=o(require("@material-ui/core/Grid")),r=o(require("@material-ui/core/Paper")),l=o(require("@material-ui/core/Slider")),s=require("./utils.js");function o(t){return t&&t.__esModule?t:{default:t}}const u=require("events"),d=["Song"],c=["Album"];if(!h)try{var h=require("i18n")}catch(y){h=null}function p(t){return t.get("enabledContentHandlers").map(require)}function g(t,e){let a=t.split(",");for(let n=0;n<a.length;n++)for(let t=0;t<e.length;t++)if(e[t].canHandle(a[n]))return[a[n],e[t]]}let m={};class f extends t.default.Component{constructor(t){super(t);let e={itemName:h.__("Nothing Playing"),position:0,itemLength:0,length:1200,enabled:!1,userDragging:!1,internalPlaylist:[],playerType:"none"};t.name&&(e.name=t.name,e.enabled=!0),t.controller?e.controller=t.controller:e.controller=new u,this.state=e}tick(){!this.state.enabled&&this.state.internalPlaylist.length>0&&this.playNextSong(),this.state.player&&(this.state.userDragging||this.setState(function(t,e){let a=this.state.player.getCurrentTime();return console.log("Set current time to",a),{position:a}}))}componentDidMount(){this.registerEvents(this.state.controller),this.tickInterval=setInterval(this.tick.bind(this),this.props.settings.get("playerTickrate"))}componentWillUnmount(){this.tickInterval&&clearInterval(this.tickInterval)}setNewController(t){this.setState(function(e,a){return{controller:t}})}async playSong(t){let e,a=t.contentURI,[n,i]=g(a,p(this.props.settings)),r=this.props.settings.get(i.prefferedPlayerKey),l=require(r);this.state.playerType!=l.id?(this.state.player&&this.state.player.unload&&await this.state.player.unload(),e=new l({document:document,window:window,emitter:this.state.controller}),await e.init()):e=this.state.player,console.log("INFO: Init Finished"),await e.load(n),console.log("INFO: Loaded uri into player"),await e.play(),console.log("INFO: Playing"),this.setState(function(t,a){return{player:e,playerType:l.id}})}playNextSong(){if(0==this.state.internalPlaylist.length)return void this.setState(function(t,e){return{enabled:!1}});let t=Array.from(this.state.internalPlaylist);console.log(JSON.stringify(t));let e=t.shift();this.setState(function(e,a){return{internalPlaylist:t}}),this.state.controller.emit("playSong",e)}registerEvents(t){if(t.playerEventsRegistered)return;let e=this;t.playerEventsRegistered=!0,t.on("playSong",async function(t){await e.updateItem("Song",t),await e.playSong(t),e.setState(function(t,e){return{enabled:!0}})}),t.on("queueSong",async function(t){e.setState(function(e,a){let n=Array.from(this.state.internalPlaylist);return n.push(t),{internalPlaylist:n}})}),t.on("playing",function(t){!e.state.duration&&t.getDuration()&&e.updateDuration(t.getDuration()),e.tick()}),t.on("end",t=>{this.playNextSong()})}get duration(){return this.state.duration}async updateItem(t,e){let a={};"name"in e&&(a.itemName=e.name),d.includes(t)&&"artist"in e&&(a.itemMadeBy=e.artist),"duration"in e?(e.start?e.end?a.duration=end-start:a.duration=e.duration-start:e.end?a.duration=end:a.duration=e.duration,a.itemLength=a.duration):a.duration=null,console.log("Updating State with",a),await this.setState(function(t,e){return a})}userChangePos(t,e){console.log("Position changed to",e),this.state.player.setCurrentTime(e),this.setState(function(t,a){return{position:e}})}updateDuration(t){console.log("INFO: Duration updated to ",t),this.setState(function(e,a){return{itemLength:t,duration:t}})}userDragStart(t){this.setState(function(t,e){return{userDragging:!0}})}userDragEnd(t){this.setState(function(t,e){return{userDragging:!1}}),this.userChangePos(t,this.state.position)}render(){return t.default.createElement(t.default.Fragment,null,t.default.createElement("div",{className:"player"},t.default.createElement(r.default,null,t.default.createElement("div",{className:"player-inner"},t.default.createElement(i.default,{container:!0,spacing:2},t.default.createElement(i.default,{item:!0,xs:2},t.default.createElement(n.default,{variant:"caption"},this.state.enabled?s.localizedFuncs[h.getLocale()].formatDuration(this.state.position):h.__("Idle Duration"))),t.default.createElement(i.default,{item:!0,xs:8},t.default.createElement("div",{className:"playback-progress",onPointerDown:this.userDragStart.bind(this),onPointerUp:this.userDragEnd.bind(this)},t.default.createElement(l.default,{value:this.state.position,onChange:this.userChangePos.bind(this),"aria-labelledby":"continuous-slider",min:0,max:this.state.duration,disabled:!this.state.enabled}))),t.default.createElement(i.default,{item:!0,xs:2},t.default.createElement(n.default,{variant:"caption"},this.state.enabled?"-"+s.localizedFuncs[h.getLocale()].formatDuration(this.state.itemLength-this.state.position):h.__("Idle Duration")))),t.default.createElement("span",{className:a.default.playerTitle},t.default.createElement(n.default,{variant:"h5"},this.state.itemName)),t.default.createElement("span",{className:a.default.playerItemMadeBy},t.default.createElement(n.default,{variant:"h6"}," ",this.state.itemMadeBy))))))}}exports.PlayerComponent=f,console.log("Imported styles",a.default);
-},{"./player.module.css":"YafY","./utils.js":"FOZT"}],"XPVq":[function(require,module,exports) {
-module.exports={pageSize:25,snackbarAutoHideDuration:5e3,test:!0,enabledContentHandlers:["./static/modules/contenthandlers/youtube"],youtubePlayerMethod:"./static/modules/youtube_embed_iframe",fallbackYoutubePlayerMethod:"browserView",adblock:!0,"adblock-file":"easylist.blocklist","adblock-download-list":"http://easylist.to/easylist/easylist.txt","cookie-obliterator":!1,initialWindowHeight:600,initialWindowWidth:800,customWindowbar:!0,playerTickrate:250,useDarkMode:"system",internalServerExecutionMethod:"moduleLoad",telemetryJoke:!1};
-},{}],"J20K":[function(require,module,exports) {
-"use strict";var e=Q(require("react")),t=Q(require("react-dom")),a=require("@material-ui/lab"),r=require("@material-ui/core"),l=Q(require("@material-ui/core/CssBaseline")),n=Q(require("@material-ui/core/useMediaQuery")),i=require("@material-ui/core/styles"),u=Q(require("@material-ui/icons/Menu")),o=Q(require("@material-ui/icons/Storage")),c=Q(require("@material-ui/icons/MusicNote")),s=Q(require("@material-ui/icons/HomeRounded")),d=Q(require("@material-ui/icons/Settings")),f=Q(require("@material-ui/core/Paper")),m=Q(require("@material-ui/core/AppBar")),h=Q(require("@material-ui/core/Button")),p=Q(require("@material-ui/core/Drawer")),g=Q(require("@material-ui/core/IconButton")),E=Q(require("@material-ui/core/Switch")),v=Q(require("@material-ui/core/Toolbar")),b=Q(require("@material-ui/core/MenuItem")),C=Q(require("@material-ui/core/Menu")),y=Q(require("@material-ui/core/Typography")),S=Q(require("@material-ui/core/List")),k=Q(require("@material-ui/core/Divider")),q=Q(require("@material-ui/core/TextField")),_=Q(require("@material-ui/core/Snackbar")),w=Q(require("@material-ui/core/ButtonBase")),x=Q(require("@material-ui/core/ButtonBase/TouchRipple")),D=Q(require("@material-ui/lab/Alert")),T=Q(require("@material-ui/core/Popover")),I=Q(require("@material-ui/core/Backdrop")),B=Q(require("@material-ui/core/CircularProgress")),M=Q(require("@material-ui/core/Grid")),F=Q(require("@material-ui/core/ListItem")),H=Q(require("@material-ui/core/ListItemIcon")),R=Q(require("@material-ui/core/ListItemText")),A=Q(require("@material-ui/core/Table")),N=Q(require("@material-ui/core/TableBody")),U=Q(require("@material-ui/core/TableCell")),V=Q(require("@material-ui/core/TableContainer")),O=Q(require("@material-ui/core/TableHead")),P=Q(require("@material-ui/core/TableRow")),j=Q(require("@material-ui/core/Select")),L=Q(require("clsx")),z=require("./player"),W=Q(require("./prefdefaults.json")),G=require("./utils.js"),J=require("@material-ui/icons");function Q(e){return e&&e.__esModule?e:{default:e}}function K(){return(K=Object.assign||function(e){for(var t=1;t<arguments.length;t++){var a=arguments[t];for(var r in a)Object.prototype.hasOwnProperty.call(a,r)&&(e[r]=a[r])}return e}).apply(this,arguments)}const{is:X}=require("electron-util"),{ipcRenderer:Y}=require("electron"),Z=require("events"),$=require("electron-store");$||console.warn("NO STORE found");const ee=new $({defaults:W.default}),te=["Song Name","Artist","Duration"],ae=require("jquery"),re=require("regenerator-runtime");console.log("bundle :D");const le=Math.floor(1e5*Math.random()).toString();let ne="http://localhost:3000";function ie(e){return e.charAt(0).toUpperCase()+e.slice(1)}function ue(e){var t=[];for(var a in e)t.push(encodeURIComponent(a)+"="+encodeURIComponent(e[a]));return t.join("&")}function oe(e){return"s"+12/e}function ce(t){return e.default.createElement(D.default,K({elevation:6,variant:"filled"},t))}function se(t,r){return e.default.createElement(a.Skeleton,{animation:"wave",key:r})}class de extends e.default.PureComponent{constructor(e){super(e),this.state={pageIndex:0,type:e.type,pageData:[],connectionFailedSnackbarOpen:!1,columns:3},e.columns&&(this.state.columns=e.columns),e.columnHeaders?this.state.colHeaders=e.columnHeaders.map(e=>i18n.__(e)):this.state.colHeaders=new Array(this.state.columns).map(e=>i18n.__("Unknown Header")),this.search.bind(this)()}componentDidUpdate(e){this.props.query!==e.query&&this.search()}componentDidMount(){console.info("Result View Mounted"),this.search();let e=this;this.updateSearchInterval=setInterval(function(){e.query&&e.search.bind(e)()},2500)}componentWillUnmount(){clearInterval(this.updateSearchInterval)}hideConnectionFailureSnackbar(){this.setState(function(e,t){return{connectionFailedSnackbarOpen:!1}})}showConnectionFailureSnackbar(){this.setState(function(e,t){return{connectionFailedSnackbarOpen:!0}})}handleConnectionFailureSnackbarClose(e,t){"clickaway"!=t&&this.hideConnectionFailureSnackbar()}async search(){console.log("Running Search Request");let e=ee.get("pageSize");try{let a=await(await fetch(ne+"/api/fetch_"+this.state.type+"?"+ue({limit:e,offset:e*this.state.pageIndex,name:this.props.query+"%"}))).json();if("ok"==a.status){let e=a.data;console.log("Updating data for "+this.state.query),this.setState(function(t,a){return{pageData:e}})}}catch(t){return console.log("Connection failed: showing connection failure snackbar",t),void this.showConnectionFailureSnackbar()}}onRowClickActivator(e){this.props.onRowClick(this.state.pageData[e],e)}render(){let t=this;let a=this.state.pageData.map(function(a,r){let l=[];for(let n=0;n<this.state.columns;n++){let r=e.default.createElement(U.default,{align:"left",key:n},t.props.renderCols(a,n));l.push(r)}return e.default.createElement(P.default,{key:r,onClick:this.onRowClickActivator.bind(this,r)},l)}.bind(this)),r=[];for(let l=0;l<this.state.columns;l++)r.push(e.default.createElement(U.default,{key:l,align:"left"},this.state.colHeaders[l]));return e.default.createElement(e.default.Fragment,null,e.default.createElement("div",{className:"results-wrapper"},e.default.createElement(V.default,{component:f.default},e.default.createElement(A.default,null,e.default.createElement(O.default,null,e.default.createElement(P.default,null,r)),e.default.createElement(N.default,null,a))),e.default.createElement("p",null,i18n.__("Showing "),this.state.pageData.length," ",i18n.__(" items"),";")),e.default.createElement(_.default,{open:this.state.connectionFailedSnackbarOpen,autoHideDuration:ee.get("snackbarAutoHideDuration"),onClose:this.handleConnectionFailureSnackbarClose.bind(this)},e.default.createElement(ce,{onClose:this.handleConnectionFailureSnackbarClose.bind(this),severity:"error"},i18n.__("Unable to establish connection to media provider"))))}}class fe extends e.default.Component{constructor(e){super(),this.state={searchBoxValue:""}}componentDidMount(){}componentWillUnmount(){}fetchSearch(e){let t=e.target.value;e.target.value&&this.setState(function(e,a){return{searchBoxValue:t}})}onItemClick(e){console.log("Item Click",e,this)}render(){return e.default.createElement(e.default.Fragment,null,e.default.createElement(q.default,{type:"text",className:"searchbox",onChange:this.fetchSearch.bind(this),label:i18n.__("Type to search"),fullWidth:!0}),e.default.createElement(de,{type:"playlists",query:this.state.searchBoxValue,onItemClick:this.onItemClick.bind(this)}),e.default.createElement("p",null,i18n.__("Current querying ")," ",ee.get("pageSize")," ",i18n.__(" playlists matching the query ")," ",this.state.searchBoxValue),e.default.createElement("div",null))}}class me extends e.default.Component{constructor(e){super(),this.state={searchBoxValue:""}}componentDidMount(){}componentWillUnmount(){}fetchSearch(e){let t=e.target.value;e.target.value&&this.setState(function(e,a){return{searchBoxValue:t}})}createSongNameCol(t,a){return e.default.createElement("div",{key:a},e.default.createElement(g.default,null,e.default.createElement(c.default,null)),t.name)}createSongArtistCol(t,a){return e.default.createElement("div",null,t.artist)}createDurationCol(t,a){return e.default.createElement("div",null,G.localizedFuncs[i18n.getLocale()].formatDuration(t.duration))}renderCols(e,t,a){return[this.createSongNameCol.bind(this),this.createSongArtistCol.bind(this),this.createDurationCol.bind(this)][t](e,t)}handleRowClick(e,t){console.log(e),this.props.controller.emit("queueSong",e)}render(){return e.default.createElement(e.default.Fragment,null,e.default.createElement(q.default,{type:"text",className:"searchbox",onChange:this.fetchSearch.bind(this),label:i18n.__("Type to search"),fullWidth:!0}),e.default.createElement(de,{type:"songs",query:this.state.searchBoxValue,renderCols:this.renderCols.bind(this),columnHeaders:te,onRowClick:this.handleRowClick.bind(this)}),e.default.createElement("p",null,i18n.__("Current querying ")," ",ee.get("pageSize")," ",i18n.__(" songs matching the query ")," ",this.state.searchBoxValue),e.default.createElement("div",null))}}class he extends e.default.Component{constructor(e){super(e),this.state={}}componentDidMount(){}componentWillUnmount(){}stateChange(){this.setState(function(e,t){return{}})}render(){return e.default.createElement(e.default.Fragment,null,e.default.createElement(y.default,{variant:"h3"},i18n.__("Hello! This is the default homescreen for now. ")))}}const pe=(0,i.makeStyles)(e=>({popover:{pointerEvents:"none"},paper:{padding:e.spacing(1)},buttonrow:{"& > *":{margin:e.spacing(1)}},settingsGrid:{padding:e.spacing(2)}}));function ge(){const t=pe();let[a,r]=e.default.useState(()=>{let e={};for(let t of ee)e[t[0]]=t[1];return e}),[l,n]=e.default.useState(!1),[i,u]=e.default.useState(!1),[o,c]=e.default.useState(!1);function s(e){c(!1)}const[d,f]=e.default.useState(null),m=Boolean(d);let p={};function g(){r({...a,...p})}function v(e,t){console.log("Internal Server State Update recieved"),u(t.online)}e.default.useEffect(()=>(Y.on("internalServerUpdates",v),()=>{Y.removeListener("internalServerUpdates",v)}));return e.default.createElement("div",{className:"settings"},e.default.createElement(I.default,{className:t.backdrop,open:l},e.default.createElement(B.default,{color:"inherit"})),e.default.createElement(y.default,{variant:"h3"},i18n.__("Telemetry")),e.default.createElement(T.default,{className:t.popover,classes:{paper:t.paper},open:m,anchorEl:d,anchorOrigin:{vertical:"bottom",horizontal:"left"},transformOrigin:{vertical:"top",horizontal:"left"},disableRestoreFocus:!0},i18n.__("This is a joke")),e.default.createElement(M.default,{container:!0,spacing:3},e.default.createElement(M.default,{item:!0,xs:11},e.default.createElement(y.default,{variant:"body1"},i18n.__("Enable complete data collection:"))),e.default.createElement(M.default,{item:!0,xs:1},e.default.createElement(E.default,{checked:a.telemetryJoke,onChange:function(e){p.telemetryJoke=e.target.checked,g()},onMouseEnter:e=>{f(e.currentTarget)},onMouseLeave:()=>{f(null)}}))),e.default.createElement(y.default,{variant:"h3"},i18n.__("User Interface")),e.default.createElement(M.default,{container:!0,spacing:3},e.default.createElement(M.default,{item:!0,xs:11},e.default.createElement(y.default,{variant:"body1"},"Snackbar Auto Hide Duration in seconds")),e.default.createElement(M.default,{item:!0,xs:1},e.default.createElement(q.default,{type:"number",variant:"standard",defaultValue:a.snackbarAutoHideDuration/1e3,onChange:function(e){let t=1e3*e.target.value;p.snackbarAutoHideDuration=t,g()}})),e.default.createElement(M.default,{item:!0,xs:11},e.default.createElement(y.default,{variant:"body1"},"Theme")),e.default.createElement(M.default,{item:!0,xs:1},e.default.createElement(j.default,{onChange:function(e){p.useDarkMode=e.target.value,g()},value:a.useDarkMode},e.default.createElement(b.default,{value:!1},"Light"),e.default.createElement(b.default,{value:!0},"Dark"),e.default.createElement(b.default,{value:"system"},"System Theme")))),e.default.createElement(y.default,{variant:"h3"},i18n.__("Ad Blocking")),e.default.createElement(y.default,{variant:"h3"},i18n.__("Internal Server")),e.default.createElement("div",{className:t.buttonrow},e.default.createElement(h.default,{variant:"contained",color:"primary",onClick:function(){Y.send("internalServer","start")},disabled:i},i18n.__("Start Internal Server")),e.default.createElement(h.default,{variant:"contained",color:"primary",onClick:function(){Y.send("internalServer","stop")},disabled:!i},i18n.__("Stop Internal Server")),e.default.createElement(h.default,{variant:"contained",color:"secondary",onClick:()=>Y.send("internalServer","getUpdate")},i18n.__("Force Internal Server Ui Update"))),e.default.createElement(y.default,{variant:"h3"},i18n.__("Save Settings")),e.default.createElement(y.default,{variant:"body1"},i18n.__("Some settings require you to restart Pulsify entirely as they are queried only during the startup. ")),e.default.createElement("div",{className:t.buttonrow},e.default.createElement(h.default,{variant:"contained",color:"primary",onClick:function(e){n(!0),console.log("Saving Configuration from display");let t=Object.keys(a);for(let r=0;r<t.length;r++){let e=t[r];ee.has(e)&&ee.get(e)!=a[e]&&ee.set(e,a[e])}setTimeout(()=>{n(!1),c(!0)},200)}},i18n.__("Save")),e.default.createElement(h.default,{variant:"contained",color:"secondary",onClick:e=>{window.location.reload()}},i18n.__("Reload")),e.default.createElement(_.default,{open:o,autoHideDuration:ee.get("snackbarAutoHideDuration"),onClose:s},e.default.createElement(ce,{onClose:s,severity:"success"},i18n.__("Settings have been saved succesfully")))))}class Ee extends e.default.Component{constructor(e){super(e),this.state={}}triggerView(e){return(t=>this.props.setCurView(e)).bind(this)}render(){return e.default.createElement("div",{onClick:this.props.drawerToggle},e.default.createElement(S.default,null,e.default.createElement(F.default,null,e.default.createElement(y.default,{variant:"h3"},i18n.__("App Name"))),e.default.createElement(F.default,{button:!0,onClick:this.triggerView("homeview")},e.default.createElement(H.default,null,e.default.createElement(s.default,null)),e.default.createElement(R.default,{primary:"Home"})),e.default.createElement(k.default,null),e.default.createElement(F.default,{button:!0,onClick:this.triggerView("songs")},e.default.createElement(H.default,null,e.default.createElement(c.default,null)),e.default.createElement(R.default,{primary:i18n.__("Songs")})),e.default.createElement(F.default,{button:!0,onClick:this.triggerView("settings")},e.default.createElement(H.default,null,e.default.createElement(d.default,null)),e.default.createElement(R.default,{primary:i18n.__("Settings")}))))}}function ve(){let t=(0,n.default)("(prefers-color-scheme: dark)");"system"!=ee.get("useDarkMode")&&(t=ee.get("useDarkMode"));const a=e.default.useMemo(()=>(0,i.createMuiTheme)({palette:{type:t?"dark":"light"}}),[t]);let[c,s]=e.default.useState(null),[d,f]=e.default.useState(!1);function h(e){f(!d)}let[E,S]=e.default.useState("homeview");const k=Boolean(c),[q,_]=e.default.useState(new Z);let w={};w.playlists=e.default.createElement(fe,null),w.songs=e.default.createElement(me,{controller:q}),w.homeview=e.default.createElement(he,null),w.settings=e.default.createElement(ge,null),window.debug={},window.debug.views=w;const x=(0,i.makeStyles)(e=>({root:{flexGrow:1},title:{flexGrow:1},menuButton:{marginRight:e.spacing(2)}}))();return e.default.createElement(e.default.Fragment,null,e.default.createElement(i.ThemeProvider,{theme:a},e.default.createElement(l.default,null),e.default.createElement("div",{className:x.root},e.default.createElement(p.default,{anchor:"left",open:d,onClick:h},e.default.createElement(Ee,{drawerToggle:h,setCurView:S})),e.default.createElement(m.default,{position:"static"},e.default.createElement(v.default,null,e.default.createElement(g.default,{edge:"start",className:x.menuButton,color:"inherit","aria-label":"menu",onClick:h},e.default.createElement(u.default,null)),e.default.createElement(y.default,{variant:"h6",className:x.title},i18n.__("App Name")),e.default.createElement("div",null,e.default.createElement(g.default,{color:"inherit","aria-label":"Switch Media Server","aria-controls":"menu-appbar","aria-haspopup":"true",onClick:function(e){console.log(this),s(e.target)}},e.default.createElement(o.default,null)),e.default.createElement(C.default,{id:"menu-appbar",anchorEl:c,anchorOrigin:{vertical:"top",horizontal:"right"},keepMounted:!0,transformOrigin:{vertical:"top",horizontal:"right"},onClose:function(e){console.log(this),s(null)},open:k},e.default.createElement(b.default,{onClick:be},"Local"),e.default.createElement(b.default,{onClick:be},"Add new server"))))),e.default.createElement(r.Container,{maxWidth:"md"},w[E]),e.default.createElement(z.PlayerComponent,{settings:ee,controller:q}))))}function be(e){}ae(function(){if(ee.get("customWindowbar")){const e=require("custom-electron-titlebar");new e.Titlebar({backgroundColor:e.Color.fromHex("#444")}),X.development?ae("#menufix").remove():ae("div[role=menubar]").remove()}t.default.render(e.default.createElement(ve,null),document.getElementById("root"))}),console.log("Player Comp",z.PlayerComponent);
-},{"./player":"qbJK","./prefdefaults.json":"XPVq","./utils.js":"FOZT"}]},{},["J20K"], null)
+process.env.HMR_PORT=59209;process.env.HMR_HOSTNAME="localhost";// modules are defined as an array
+// [ module function, map of requires ]
+//
+// map of requires is short require name -> numeric require
+//
+// anything defined in a previous bundle is accessed via the
+// orig method which is the require for previous bundles
+parcelRequire = (function (modules, cache, entry, globalName) {
+  // Save the require from previous bundle to this closure if any
+  var previousRequire = typeof parcelRequire === 'function' && parcelRequire;
+  var nodeRequire = typeof require === 'function' && require;
+
+  function newRequire(name, jumped) {
+    if (!cache[name]) {
+      if (!modules[name]) {
+        // if we cannot find the module within our internal map or
+        // cache jump to the current global require ie. the last bundle
+        // that was added to the page.
+        var currentRequire = typeof parcelRequire === 'function' && parcelRequire;
+        if (!jumped && currentRequire) {
+          return currentRequire(name, true);
+        }
+
+        // If there are other bundles on this page the require from the
+        // previous one is saved to 'previousRequire'. Repeat this as
+        // many times as there are bundles until the module is found or
+        // we exhaust the require chain.
+        if (previousRequire) {
+          return previousRequire(name, true);
+        }
+
+        // Try the node require function if it exists.
+        if (nodeRequire && typeof name === 'string') {
+          return nodeRequire(name);
+        }
+
+        var err = new Error('Cannot find module \'' + name + '\'');
+        err.code = 'MODULE_NOT_FOUND';
+        throw err;
+      }
+
+      localRequire.resolve = resolve;
+      localRequire.cache = {};
+
+      var module = cache[name] = new newRequire.Module(name);
+
+      modules[name][0].call(module.exports, localRequire, module, module.exports, this);
+    }
+
+    return cache[name].exports;
+
+    function localRequire(x){
+      return newRequire(localRequire.resolve(x));
+    }
+
+    function resolve(x){
+      return modules[name][1][x] || x;
+    }
+  }
+
+  function Module(moduleName) {
+    this.id = moduleName;
+    this.bundle = newRequire;
+    this.exports = {};
+  }
+
+  newRequire.isParcelRequire = true;
+  newRequire.Module = Module;
+  newRequire.modules = modules;
+  newRequire.cache = cache;
+  newRequire.parent = previousRequire;
+  newRequire.register = function (id, exports) {
+    modules[id] = [function (require, module) {
+      module.exports = exports;
+    }, {}];
+  };
+
+  var error;
+  for (var i = 0; i < entry.length; i++) {
+    try {
+      newRequire(entry[i]);
+    } catch (e) {
+      // Save first error but execute all entries
+      if (!error) {
+        error = e;
+      }
+    }
+  }
+
+  if (entry.length) {
+    // Expose entry point to Node, AMD or browser globals
+    // Based on https://github.com/ForbesLindesay/umd/blob/master/template.js
+    var mainExports = newRequire(entry[entry.length - 1]);
+
+    // CommonJS
+    if (typeof exports === "object" && typeof module !== "undefined") {
+      module.exports = mainExports;
+
+    // RequireJS
+    } else if (typeof define === "function" && define.amd) {
+     define(function () {
+       return mainExports;
+     });
+
+    // <script>
+    } else if (globalName) {
+      this[globalName] = mainExports;
+    }
+  }
+
+  // Override the current require with this new one
+  parcelRequire = newRequire;
+
+  if (error) {
+    // throw error from earlier, _after updating parcelRequire_
+    throw error;
+  }
+
+  return newRequire;
+})({"../node_modules/parcel-bundler/src/builtins/bundle-url.js":[function(require,module,exports) {
+var bundleURL = null;
+function getBundleURLCached() {
+  if (!bundleURL) {
+    bundleURL = getBundleURL();
+  }
+
+  return bundleURL;
+}
+
+function getBundleURL() {
+  // Attempt to find the URL of the current script and use that as the base URL
+  try {
+    throw new Error;
+  } catch (err) {
+    var matches = ('' + err.stack).match(/(https?|file|ftp|chrome-extension|moz-extension):\/\/[^)\n]+/g);
+    if (matches) {
+      return getBaseURL(matches[0]);
+    }
+  }
+
+  return '/';
+}
+
+function getBaseURL(url) {
+  return ('' + url).replace(/^((?:https?|file|ftp|chrome-extension|moz-extension):\/\/.+)\/[^/]+$/, '$1') + '/';
+}
+
+exports.getBundleURL = getBundleURLCached;
+exports.getBaseURL = getBaseURL;
+
+},{}],"../node_modules/parcel-bundler/src/builtins/css-loader.js":[function(require,module,exports) {
+var bundle = require('./bundle-url');
+
+function updateLink(link) {
+  var newLink = link.cloneNode();
+  newLink.onload = function () {
+    link.remove();
+  };
+  newLink.href = link.href.split('?')[0] + '?' + Date.now();
+  link.parentNode.insertBefore(newLink, link.nextSibling);
+}
+
+var cssTimeout = null;
+function reloadCSS() {
+  if (cssTimeout) {
+    return;
+  }
+
+  cssTimeout = setTimeout(function () {
+    var links = document.querySelectorAll('link[rel="stylesheet"]');
+    for (var i = 0; i < links.length; i++) {
+      if (bundle.getBaseURL(links[i].href) === bundle.getBundleURL()) {
+        updateLink(links[i]);
+      }
+    }
+
+    cssTimeout = null;
+  }, 50);
+}
+
+module.exports = reloadCSS;
+
+},{"./bundle-url":"../node_modules/parcel-bundler/src/builtins/bundle-url.js"}],"player.module.css":[function(require,module,exports) {
+var reloadCSS = require('_css_loader');
+
+module.hot.dispose(reloadCSS);
+module.hot.accept(reloadCSS);
+module.exports = {
+  "player_font": "_player_font_fad94",
+  "drop-shadow": "_drop-shadow_fad94",
+  "playerTitle": "_playerTitle_fad94",
+  "playerItemMadeBy": "_playerItemMadeBy_fad94"
+};
+},{"_css_loader":"../node_modules/parcel-bundler/src/builtins/css-loader.js"}],"utils.js":[function(require,module,exports) {
+"use strict";
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+exports.localizedFuncs = void 0;
+
+// Localizations
+function formatDuration(seconds) {
+  seconds = Math.floor(seconds);
+
+  if (!seconds) {
+    return "---";
+  }
+
+  let curSecs = seconds;
+  let out = "";
+
+  if (curSecs > 60 * 60) {
+    out += Math.floor(curSecs / (60 * 60)) + ":";
+    curSecs = curSecs % (60 * 60);
+  }
+
+  out += Math.floor(curSecs / 60).toString().padStart(2, "0") + ":" + (curSecs % 60).toString().padStart(2, "0");
+  return out;
+}
+
+const localizedFuncs = {
+  "en": {
+    formatDuration: formatDuration
+  }
+};
+exports.localizedFuncs = localizedFuncs;
+},{}],"player.js":[function(require,module,exports) {
+"use strict";
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+exports.PlayerComponent = void 0;
+
+var _react = _interopRequireDefault(require("react"));
+
+var _reactDom = _interopRequireDefault(require("react-dom"));
+
+var _playerModule = _interopRequireDefault(require("./player.module.css"));
+
+var _Typography = _interopRequireDefault(require("@material-ui/core/Typography"));
+
+var _Grid = _interopRequireDefault(require("@material-ui/core/Grid"));
+
+var _Paper = _interopRequireDefault(require("@material-ui/core/Paper"));
+
+var _Box = _interopRequireDefault(require("@material-ui/core/Box"));
+
+var _Slider = _interopRequireDefault(require("@material-ui/core/Slider"));
+
+var _Fab = _interopRequireDefault(require("@material-ui/core/Fab"));
+
+var _Pause = _interopRequireDefault(require("@material-ui/icons/Pause"));
+
+var _PlayArrow = _interopRequireDefault(require("@material-ui/icons/PlayArrow"));
+
+var _utils = require("./utils.js");
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+// Fonts (broken currently)
+// import "fontsource-roboto";
+// Styles
+// Text Stuff
+// Grid Utils
+// Widgets
+// Icons
+// Get localized functions
+// Event Emitter
+const EventEmitter = require('events'); // React Player to be imported
+// Meant to be reusable in other contexts
+
+
+const hasArtist = ["Song"];
+const hasMultipleArtists = ["Album"]; // Playlists are usually user created so they will have a variety of artists
+
+if (!i18n) {
+  try {
+    var i18n = require("i18n");
+  } catch (ex) {
+    var i18n = null; // Allow custom instances to be added later.
+  }
+} // Might already be init
+
+
+function loadAllContentHandlers(settings) {
+  return settings.get("enabledContentHandlers").map(require);
+}
+
+function getBestContentHandler(uris, ch) {
+  // Earlier in the protocol string the better
+  // Comma seperated URIs are not fully supported yet
+  let uriList = uris.split(",");
+
+  for (let i = 0; i < uriList.length; i++) {
+    for (let j = 0; j < ch.length; j++) {
+      if (ch[j].canHandle(uriList[i])) {
+        return [uriList[i], ch[j]];
+      }
+    }
+  }
+}
+
+let contentPlayerCache = {};
+
+class PlayerComponent extends _react.default.Component {
+  constructor(props) {
+    super(props); // Deprecated but needed
+
+    let preparedState = {
+      itemName: i18n.__("Nothing Playing"),
+      position: 0,
+      itemLength: 0,
+      length: 1200,
+      enabled: false,
+      userDragging: false,
+      // Do not update while user is dragging
+      internalPlaylist: [],
+      playerType: "none",
+      paused: true
+    };
+
+    if (props.name) {
+      preparedState["name"] = props.name;
+      preparedState["enabled"] = true;
+    }
+
+    if (props.controller) {
+      preparedState["controller"] = props.controller;
+    } else {
+      preparedState["controller"] = new EventEmitter();
+    }
+
+    this.state = preparedState;
+  }
+
+  tick() {
+    if (!this.state.enabled && this.state.internalPlaylist.length > 0) {
+      this.playNextSong();
+    }
+
+    if (!this.state.player) {
+      //console.log("tick aborted, due to no player");
+      return;
+    } //console.log("Ticking");
+
+
+    if (!this.state.userDragging) {
+      // console.log('user is not dragging');
+      this.setState(function (state, props) {
+        let curTime = this.state.player.getCurrentTime();
+        console.log("Set current time to", curTime);
+        return {
+          position: curTime
+        };
+      });
+    }
+  }
+
+  componentDidMount() {
+    this.registerEvents(this.state.controller);
+    this.tickInterval = setInterval(this.tick.bind(this), this.props.settings.get("playerTickrate"));
+  }
+
+  componentWillUnmount() {
+    if (this.tickInterval) {
+      clearInterval(this.tickInterval);
+    }
+  }
+
+  setNewController(ee) {
+    this.setState(function (state, props) {
+      return {
+        controller: ee
+      };
+    });
+  }
+
+  async playSong(songData) {
+    // Does not check queue
+    let uris = songData.contentURI; // TODO: NOT DEPEND ON REQUIRE CACHE
+
+    let [uri, ch] = getBestContentHandler(uris, loadAllContentHandlers(this.props.settings));
+    let prefferedPlayer = this.props.settings.get(ch.prefferedPlayerKey);
+
+    let SelectedPlayer = require(prefferedPlayer);
+
+    let player;
+
+    if (this.state.playerType != SelectedPlayer.id) {
+      if (this.state.player && this.state.player.unload) {
+        await this.state.player.unload();
+      }
+
+      player = new SelectedPlayer({
+        document: document,
+        window: window,
+        emitter: this.state.controller
+      });
+      await player.init();
+    } else {
+      player = this.state.player; // Get existing player
+    }
+
+    console.log('INFO: Init Finished');
+    await player.load(uri);
+    console.log("INFO: Loaded uri into player");
+    await player.play();
+    console.log("INFO: Playing");
+    this.setState(function (state, props) {
+      return {
+        player: player,
+        playerType: SelectedPlayer.id
+      };
+    });
+  }
+
+  playNextSong() {
+    if (this.state.internalPlaylist.length == 0) {
+      this.setState(function (state, props) {
+        return {
+          enabled: false
+        };
+      });
+      return;
+    }
+
+    let newPlaylist = Array.from(this.state.internalPlaylist);
+    console.log(JSON.stringify(newPlaylist));
+    let nextSong = newPlaylist.shift();
+    this.setState(function (state, props) {
+      return {
+        internalPlaylist: newPlaylist
+      };
+    });
+    this.state.controller.emit("playSong", nextSong);
+  }
+
+  setPaused(paused) {
+    this.setState(function (state, props) {
+      return {
+        paused: paused
+      };
+    });
+  }
+
+  registerEvents(ee) {
+    if (ee.playerEventsRegistered) {
+      return;
+    }
+
+    let oThis = this; // original this
+
+    ee.playerEventsRegistered = true;
+    ee.on("playSong", async function (songData) {
+      // Does not check for queue
+      await oThis.updateItem("Song", songData);
+      await oThis.playSong(songData);
+      oThis.setState(function (state, props) {
+        return {
+          enabled: true
+        };
+      });
+    });
+    ee.on("queueSong", async function (songData) {
+      oThis.setState(function (state, props) {
+        let newPlaylist = Array.from(this.state.internalPlaylist); // How to not screw up internal state
+
+        newPlaylist.push(songData);
+        return {
+          internalPlaylist: newPlaylist
+        };
+      });
+    });
+    ee.on("playing", function (player) {
+      // Support for start/end metadata needed
+      if (!oThis.state.duration && player.getDuration()) {
+        oThis.updateDuration(player.getDuration());
+      }
+
+      oThis.tick();
+    });
+    ee.on("end", player => {
+      this.playNextSong();
+    });
+  }
+
+  get duration() {
+    return this.state.duration;
+  }
+
+  async updateItem(type, params) {
+    let properties = {};
+
+    if ("name" in params) {
+      properties.itemName = params.name;
+    }
+
+    if (hasArtist.includes(type)) {
+      if ("artist" in params) {
+        properties.itemMadeBy = params.artist;
+      }
+    }
+
+    if ("duration" in params) {
+      if (params.start) {
+        if (params.end) {
+          properties.duration = end - start;
+        } else {
+          properties.duration = params.duration - start;
+        }
+      } else if (params.end) {
+        properties.duration = end;
+      } else {
+        properties.duration = params.duration;
+      }
+
+      properties.itemLength = properties.duration;
+    } else {
+      properties.duration = null; // Not provided
+    }
+
+    console.log("Updating State with", properties);
+    await this.setState(function (state, props) {
+      return properties;
+    });
+  }
+
+  userChangePos(ev, newVal) {
+    console.log("Position changed to", newVal);
+    this.state.player.setCurrentTime(newVal);
+    this.setState(function (state, props) {
+      return {
+        position: newVal
+      };
+    });
+  }
+
+  updateDuration(time) {
+    console.log("INFO: Duration updated to ", time); // Sometimes duration can be found afterwards
+
+    this.setState(function (state, props) {
+      return {
+        itemLength: time,
+        duration: time
+      };
+    });
+  } // User Drag Handlers
+  // TODO: Account for touch displays???
+
+
+  userDragStart(ev) {
+    this.setState(function (state, props) {
+      return {
+        userDragging: true
+      };
+    });
+  }
+
+  userDragEnd(ev) {
+    this.setState(function (state, props) {
+      return {
+        userDragging: false
+      };
+    });
+    this.userChangePos(ev, this.state.position);
+  } // ! Main Rendering Code
+
+
+  render() {
+    return /*#__PURE__*/_react.default.createElement(_react.default.Fragment, null, /*#__PURE__*/_react.default.createElement("div", {
+      className: "player"
+    }, /*#__PURE__*/_react.default.createElement(_Paper.default, null, /*#__PURE__*/_react.default.createElement("div", {
+      className: "player-inner"
+    }, /*#__PURE__*/_react.default.createElement(_Grid.default, {
+      container: true,
+      spacing: 2
+    }, /*#__PURE__*/_react.default.createElement(_Grid.default, {
+      item: true,
+      xs: 2
+    }, /*#__PURE__*/_react.default.createElement(_Typography.default, {
+      variant: "caption"
+    }, this.state.enabled ? _utils.localizedFuncs[i18n.getLocale()].formatDuration(this.state.position) : i18n.__("Idle Duration"))), /*#__PURE__*/_react.default.createElement("span", {
+      className: _playerModule.default.playerTitle
+    }, /*#__PURE__*/_react.default.createElement(_Typography.default, {
+      variant: "h5"
+    }, this.state.itemName)), /*#__PURE__*/_react.default.createElement("span", {
+      className: _playerModule.default.playerItemMadeBy
+    }, /*#__PURE__*/_react.default.createElement(_Typography.default, {
+      variant: "h6"
+    }, " ", this.state.itemMadeBy)), /*#__PURE__*/_react.default.createElement(_Grid.default, {
+      item: true,
+      xs: 8
+    }, /*#__PURE__*/_react.default.createElement("div", {
+      className: "playback-progress",
+      onPointerDown: this.userDragStart.bind(this),
+      onPointerUp: this.userDragEnd.bind(this)
+    }, /*#__PURE__*/_react.default.createElement(_Slider.default, {
+      value: this.state.position,
+      onChange: this.userChangePos.bind(this),
+      "aria-labelledby": "continuous-slider",
+      min: 0,
+      max: this.state.duration,
+      disabled: !this.state.enabled
+    }), /*#__PURE__*/_react.default.createElement("br", null)), " ", /*#__PURE__*/_react.default.createElement(_Box.default, {
+      display: "flex",
+      justifyContent: "center"
+    }, /*#__PURE__*/_react.default.createElement(_Fab.default, {
+      color: "primary",
+      "aria-label": "pause-play",
+      className: "pausePlay"
+    }, this.state.paused ? /*#__PURE__*/_react.default.createElement(_Pause.default, null) : /*#__PURE__*/_react.default.createElement(_PlayArrow.default, null)))), /*#__PURE__*/_react.default.createElement(_Grid.default, {
+      item: true,
+      xs: 2
+    }, /*#__PURE__*/_react.default.createElement(_Typography.default, {
+      variant: "caption"
+    }, this.state.enabled ? "-" + _utils.localizedFuncs[i18n.getLocale()].formatDuration(this.state.itemLength - this.state.position) : i18n.__("Idle Duration"))))))));
+  }
+
+}
+
+exports.PlayerComponent = PlayerComponent;
+console.log("Imported styles", _playerModule.default);
+},{"./player.module.css":"player.module.css","./utils.js":"utils.js"}],"prefdefaults.json":[function(require,module,exports) {
+module.exports = {
+  "pageSize": 25,
+  "snackbarAutoHideDuration": 5000,
+  "test": true,
+  "enabledContentHandlers": ["./static/modules/contenthandlers/youtube"],
+  "youtubePlayerMethod": "./static/modules/youtube_embed_iframe",
+  "fallbackYoutubePlayerMethod": "browserView",
+  "adblock": true,
+  "adblock-file": "easylist.blocklist",
+  "adblock-download-list": "http://easylist.to/easylist/easylist.txt",
+  "cookie-obliterator": false,
+  "initialWindowHeight": 600,
+  "initialWindowWidth": 800,
+  "customWindowbar": true,
+  "playerTickrate": 250,
+  "useDarkMode": "system",
+  "internalServerExecutionMethod": "moduleLoad",
+  "telemetryJoke": false
+};
+},{}],"unbundle.js":[function(require,module,exports) {
+"use strict";
+
+var _react = _interopRequireDefault(require("react"));
+
+var _reactDom = _interopRequireDefault(require("react-dom"));
+
+var _lab = require("@material-ui/lab");
+
+var _core = require("@material-ui/core");
+
+var _CssBaseline = _interopRequireDefault(require("@material-ui/core/CssBaseline"));
+
+var _useMediaQuery = _interopRequireDefault(require("@material-ui/core/useMediaQuery"));
+
+var _styles = require("@material-ui/core/styles");
+
+var _Menu = _interopRequireDefault(require("@material-ui/icons/Menu"));
+
+var _Storage = _interopRequireDefault(require("@material-ui/icons/Storage"));
+
+var _MusicNote = _interopRequireDefault(require("@material-ui/icons/MusicNote"));
+
+var _HomeRounded = _interopRequireDefault(require("@material-ui/icons/HomeRounded"));
+
+var _Settings = _interopRequireDefault(require("@material-ui/icons/Settings"));
+
+var _Paper = _interopRequireDefault(require("@material-ui/core/Paper"));
+
+var _AppBar = _interopRequireDefault(require("@material-ui/core/AppBar"));
+
+var _Button = _interopRequireDefault(require("@material-ui/core/Button"));
+
+var _Drawer = _interopRequireDefault(require("@material-ui/core/Drawer"));
+
+var _IconButton = _interopRequireDefault(require("@material-ui/core/IconButton"));
+
+var _Switch = _interopRequireDefault(require("@material-ui/core/Switch"));
+
+var _Toolbar = _interopRequireDefault(require("@material-ui/core/Toolbar"));
+
+var _MenuItem = _interopRequireDefault(require("@material-ui/core/MenuItem"));
+
+var _Menu2 = _interopRequireDefault(require("@material-ui/core/Menu"));
+
+var _Typography = _interopRequireDefault(require("@material-ui/core/Typography"));
+
+var _List = _interopRequireDefault(require("@material-ui/core/List"));
+
+var _Divider = _interopRequireDefault(require("@material-ui/core/Divider"));
+
+var _TextField = _interopRequireDefault(require("@material-ui/core/TextField"));
+
+var _Snackbar = _interopRequireDefault(require("@material-ui/core/Snackbar"));
+
+var _ButtonBase = _interopRequireDefault(require("@material-ui/core/ButtonBase"));
+
+var _TouchRipple = _interopRequireDefault(require("@material-ui/core/ButtonBase/TouchRipple"));
+
+var _Alert = _interopRequireDefault(require("@material-ui/lab/Alert"));
+
+var _Popover = _interopRequireDefault(require("@material-ui/core/Popover"));
+
+var _Backdrop = _interopRequireDefault(require("@material-ui/core/Backdrop"));
+
+var _CircularProgress = _interopRequireDefault(require("@material-ui/core/CircularProgress"));
+
+var _Grid = _interopRequireDefault(require("@material-ui/core/Grid"));
+
+var _ListItem = _interopRequireDefault(require("@material-ui/core/ListItem"));
+
+var _ListItemIcon = _interopRequireDefault(require("@material-ui/core/ListItemIcon"));
+
+var _ListItemText = _interopRequireDefault(require("@material-ui/core/ListItemText"));
+
+var _Table = _interopRequireDefault(require("@material-ui/core/Table"));
+
+var _TableBody = _interopRequireDefault(require("@material-ui/core/TableBody"));
+
+var _TableCell = _interopRequireDefault(require("@material-ui/core/TableCell"));
+
+var _TableContainer = _interopRequireDefault(require("@material-ui/core/TableContainer"));
+
+var _TableHead = _interopRequireDefault(require("@material-ui/core/TableHead"));
+
+var _TableRow = _interopRequireDefault(require("@material-ui/core/TableRow"));
+
+var _Select = _interopRequireDefault(require("@material-ui/core/Select"));
+
+var _clsx = _interopRequireDefault(require("clsx"));
+
+var _player = require("./player");
+
+var _prefdefaults = _interopRequireDefault(require("./prefdefaults.json"));
+
+var _utils = require("./utils.js");
+
+var _icons = require("@material-ui/icons");
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+function _extends() { _extends = Object.assign || function (target) { for (var i = 1; i < arguments.length; i++) { var source = arguments[i]; for (var key in source) { if (Object.prototype.hasOwnProperty.call(source, key)) { target[key] = source[key]; } } } return target; }; return _extends.apply(this, arguments); }
+
+const {
+  is
+} = require("electron-util");
+
+const {
+  ipcRenderer
+} = require("electron");
+
+const EventEmitter = require("events"); // Reusable Player Componoent
+
+
+const Store = require("electron-store"); // Settings Loading
+
+
+if (!Store) {
+  console.warn("NO STORE found");
+}
+
+const settings = new Store({
+  defaults: _prefdefaults.default
+}); // Constants
+
+const songViewHeaders = ["Song Name", "Artist", "Duration"]; //import {$} from "jquery";
+
+const $ = require("jquery");
+
+const regeneratorRuntime = require("regenerator-runtime");
+
+console.log("bundle :D");
+// Constants
+const documentID = Math.floor(Math.random() * 100000).toString();
+let musicServer = "http://localhost:3000"; // NO SLASH!
+
+function capitlizeFirst(string) {
+  return string.charAt(0).toUpperCase() + string.slice(1);
+} // https://stackoverflow.com/questions/7045065/how-do-i-turn-a-javascript-dictionary-into-an-encoded-url-string
+
+
+function serialize(obj) {
+  var str = [];
+
+  for (var p in obj) str.push(encodeURIComponent(p) + "=" + encodeURIComponent(obj[p]));
+
+  return str.join("&");
+}
+
+function calcColClass(cols) {
+  return "s" + 12 / cols;
+} // https://material-ui.com/components/snackbars/
+
+
+function Alert(props) {
+  return /*#__PURE__*/_react.default.createElement(_Alert.default, _extends({
+    elevation: 6,
+    variant: "filled"
+  }, props));
+}
+
+function placeholder(item, key) {
+  return /*#__PURE__*/_react.default.createElement(_lab.Skeleton, {
+    animation: "wave",
+    key: key
+  });
+}
+
+class ResultView extends _react.default.PureComponent {
+  constructor(props) {
+    super(props); // Deprecated but needed anyway
+
+    this.state = {
+      pageIndex: 0,
+      type: props.type,
+      pageData: [],
+      connectionFailedSnackbarOpen: false,
+      columns: 3
+    };
+
+    if (props.columns) {
+      this.state.columns = props.columns;
+    }
+
+    if (props.columnHeaders) {
+      this.state.colHeaders = props.columnHeaders.map(unlocalizedName => i18n.__(unlocalizedName));
+    } else {
+      this.state.colHeaders = new Array(this.state.columns).map(something => i18n.__("Unknown Header"));
+    }
+
+    this.search.bind(this)();
+  }
+
+  componentDidUpdate(prevProps) {
+    if (this.props.query !== prevProps.query) {
+      this.search();
+    }
+  }
+
+  componentDidMount() {
+    // Code to run when component starts
+    console.info("Result View Mounted");
+    this.search();
+    let componentThis = this;
+    this.updateSearchInterval = setInterval(function () {
+      if (componentThis.query) {
+        componentThis.search.bind(componentThis)();
+      }
+    }, 2500);
+  }
+
+  componentWillUnmount() {
+    // Componoent dies -> deconstructor
+    clearInterval(this.updateSearchInterval);
+  }
+
+  hideConnectionFailureSnackbar() {
+    this.setState(function (state, props) {
+      return {
+        connectionFailedSnackbarOpen: false
+      };
+    });
+  }
+
+  showConnectionFailureSnackbar() {
+    this.setState(function (state, props) {
+      return {
+        connectionFailedSnackbarOpen: true
+      };
+    });
+  }
+
+  handleConnectionFailureSnackbarClose(event, reason) {
+    if (reason == "clickaway") {
+      return;
+    }
+
+    this.hideConnectionFailureSnackbar();
+  }
+
+  async search() {
+    console.log("Running Search Request");
+    let pageSize = settings.get("pageSize");
+
+    try {
+      let resp = await (await fetch(musicServer + "/api/fetch_" + this.state.type + "?" + serialize({
+        limit: pageSize,
+        offset: pageSize * this.state.pageIndex,
+        name: this.props.query + "%"
+      }))).json();
+
+      if (resp.status == "ok") {
+        let data = resp.data;
+        console.log("Updating data for " + this.state.query);
+        this.setState(function (state, props) {
+          return {
+            pageData: data
+          };
+        });
+      }
+    } catch (ex) {
+      console.log("Connection failed: showing connection failure snackbar", ex);
+      this.showConnectionFailureSnackbar();
+      return;
+    }
+  }
+
+  onRowClickActivator(index) {
+    this.props.onRowClick(this.state.pageData[index], index);
+  }
+
+  render() {
+    let outerThis = this;
+
+    function colgenerator(item, index) {
+      let cols = [];
+
+      for (let i = 0; i < this.state.columns; i++) {
+        let elem = /*#__PURE__*/_react.default.createElement(_TableCell.default, {
+          align: "left",
+          key: i
+        }, outerThis.props.renderCols(item, i));
+
+        cols.push(elem);
+      }
+
+      return /*#__PURE__*/_react.default.createElement(_TableRow.default, {
+        key: index,
+        onClick: this.onRowClickActivator.bind(this, index)
+      }, cols);
+    }
+
+    let comps = this.state.pageData.map(colgenerator.bind(this));
+    let tableHead = [];
+
+    for (let i = 0; i < this.state.columns; i++) {
+      tableHead.push( /*#__PURE__*/_react.default.createElement(_TableCell.default, {
+        key: i,
+        align: "left"
+      }, this.state.colHeaders[i]));
+    }
+
+    return /*#__PURE__*/_react.default.createElement(_react.default.Fragment, null, /*#__PURE__*/_react.default.createElement("div", {
+      className: "results-wrapper"
+    }, /*#__PURE__*/_react.default.createElement(_TableContainer.default, {
+      component: _Paper.default
+    }, /*#__PURE__*/_react.default.createElement(_Table.default, null, /*#__PURE__*/_react.default.createElement(_TableHead.default, null, /*#__PURE__*/_react.default.createElement(_TableRow.default, null, tableHead)), /*#__PURE__*/_react.default.createElement(_TableBody.default, null, comps))), /*#__PURE__*/_react.default.createElement("p", null, i18n.__("Showing "), this.state.pageData.length, " ", i18n.__(" items"), ";")), /*#__PURE__*/_react.default.createElement(_Snackbar.default, {
+      open: this.state.connectionFailedSnackbarOpen,
+      autoHideDuration: settings.get("snackbarAutoHideDuration"),
+      onClose: this.handleConnectionFailureSnackbarClose.bind(this)
+    }, /*#__PURE__*/_react.default.createElement(Alert, {
+      onClose: this.handleConnectionFailureSnackbarClose.bind(this),
+      severity: "error"
+    }, i18n.__("Unable to establish connection to media provider"))));
+  }
+
+}
+
+class PlaylistView extends _react.default.Component {
+  constructor(props) {
+    super(); //super(props);
+
+    this.state = {
+      searchBoxValue: ""
+    }; //this.fetchSearch = this.fetchSearch.bind(this);
+  }
+
+  componentDidMount() {// Code to run when component is destoryed -> constructor
+  }
+
+  componentWillUnmount() {// Componoent dies -> deconstructor
+  }
+
+  fetchSearch(event) {
+    //console.log(event);
+    //console.log("Updating Search");
+    let searchValue = event.target.value; //console.log("New search value "+searchValue);
+
+    if (event.target.value) {
+      this.setState(function (state, props) {
+        return {
+          searchBoxValue: searchValue
+        };
+      });
+    }
+  }
+
+  onItemClick(e) {
+    console.log("Item Click", e, this);
+  }
+
+  render() {
+    return /*#__PURE__*/_react.default.createElement(_react.default.Fragment, null, /*#__PURE__*/_react.default.createElement(_TextField.default, {
+      type: "text",
+      className: "searchbox",
+      onChange: this.fetchSearch.bind(this),
+      label: i18n.__("Type to search"),
+      fullWidth: true
+    }), /*#__PURE__*/_react.default.createElement(ResultView, {
+      type: "playlists",
+      query: this.state.searchBoxValue,
+      onItemClick: this.onItemClick.bind(this)
+    }), /*#__PURE__*/_react.default.createElement("p", null, i18n.__("Current querying "), " ", settings.get("pageSize"), " ", i18n.__(" playlists matching the query "), " ", this.state.searchBoxValue), /*#__PURE__*/_react.default.createElement("div", null));
+  }
+
+}
+
+class SongView extends _react.default.Component {
+  constructor(props) {
+    super(); //super(props);
+
+    this.state = {
+      searchBoxValue: ""
+    }; //this.fetchSearch = this.fetchSearch.bind(this);
+  }
+
+  componentDidMount() {// Code to run when component is destoryed -> constructor
+  }
+
+  componentWillUnmount() {// Componoent dies -> deconstructor
+  }
+
+  fetchSearch(event) {
+    //console.log(event);
+    //console.log("Updating Search");
+    let searchValue = event.target.value; //console.log("New search value "+searchValue);
+
+    if (event.target.value) {
+      this.setState(function (state, props) {
+        return {
+          searchBoxValue: searchValue
+        };
+      });
+    }
+  }
+
+  createSongNameCol(item, key) {
+    // TODO: NOT USE INLINE STYLES
+    return /*#__PURE__*/_react.default.createElement("div", {
+      key: key
+    }, /*#__PURE__*/_react.default.createElement(_IconButton.default, null, /*#__PURE__*/_react.default.createElement(_MusicNote.default, null)), item.name);
+  }
+
+  createSongArtistCol(item, key) {
+    return /*#__PURE__*/_react.default.createElement("div", null, item.artist);
+  }
+
+  createDurationCol(item, key) {
+    return /*#__PURE__*/_react.default.createElement("div", null, _utils.localizedFuncs[i18n.getLocale()].formatDuration(item.duration));
+  }
+
+  renderCols(item, index, classes) {
+    let colGenerators = [this.createSongNameCol.bind(this), this.createSongArtistCol.bind(this), this.createDurationCol.bind(this)]; // TODO: Not hardcode this here
+
+    return colGenerators[index](item, index); // Execute column generator function with the index
+  }
+
+  handleRowClick(rowData, index) {
+    console.log(rowData);
+    this.props.controller.emit("queueSong", rowData);
+  }
+
+  render() {
+    return /*#__PURE__*/_react.default.createElement(_react.default.Fragment, null, /*#__PURE__*/_react.default.createElement(_TextField.default, {
+      type: "text",
+      className: "searchbox",
+      onChange: this.fetchSearch.bind(this),
+      label: i18n.__("Type to search"),
+      fullWidth: true
+    }), /*#__PURE__*/_react.default.createElement(ResultView, {
+      type: "songs",
+      query: this.state.searchBoxValue,
+      renderCols: this.renderCols.bind(this),
+      columnHeaders: songViewHeaders,
+      onRowClick: this.handleRowClick.bind(this)
+    }), /*#__PURE__*/_react.default.createElement("p", null, i18n.__("Current querying "), " ", settings.get("pageSize"), " ", i18n.__(" songs matching the query "), " ", this.state.searchBoxValue), /*#__PURE__*/_react.default.createElement("div", null));
+  }
+
+} // Home View
+// TODO: Populate with intresting things
+
+
+class HomeComponent extends _react.default.Component {
+  constructor(props) {
+    super(props);
+    this.state = {};
+  }
+
+  componentDidMount() {// Code to run when component is destoryed -> constructor
+  }
+
+  componentWillUnmount() {// Componoent dies -> deconstructor
+  }
+
+  stateChange() {
+    this.setState(function (state, props) {
+      return {};
+    });
+  }
+
+  render() {
+    return /*#__PURE__*/_react.default.createElement(_react.default.Fragment, null, /*#__PURE__*/_react.default.createElement(_Typography.default, {
+      variant: "h3"
+    }, i18n.__("Hello! This is the default homescreen for now. ")));
+  }
+
+} // Settings
+
+
+const settingsStyles = (0, _styles.makeStyles)(theme => ({
+  popover: {
+    pointerEvents: "none"
+  },
+  paper: {
+    padding: theme.spacing(1)
+  },
+  buttonrow: {
+    "& > *": {
+      margin: theme.spacing(1)
+    }
+  },
+  settingsGrid: {
+    padding: theme.spacing(2)
+  }
+}));
+
+function SettingsView() {
+  const classes = settingsStyles();
+
+  let [curDisplayConfig, setDisplayConfig] = _react.default.useState(() => {
+    let copyOfSettings = {};
+
+    for (let settingsPair of settings) {
+      copyOfSettings[settingsPair[0]] = settingsPair[1];
+    }
+
+    return copyOfSettings;
+  });
+
+  let [applying, setApplying] = _react.default.useState(false);
+
+  let [internalServerOnline, setInternalServerOnline] = _react.default.useState(false);
+
+  let [applyFinishSnackbarOpen, setApplyFinishedSnackbarOpen] = _react.default.useState(false);
+
+  function showApplyFinishSnackbar(ev) {
+    setApplyFinishedSnackbarOpen(true);
+  }
+
+  function hideApplyFinishSnackbar(ev) {
+    setApplyFinishedSnackbarOpen(false);
+  }
+
+  function saveConfig(ev) {
+    setApplying(true);
+    console.log("Saving Configuration from display");
+    let keys = Object.keys(curDisplayConfig);
+
+    for (let i = 0; i < keys.length; i++) {
+      let key = keys[i];
+
+      if (settings.has(key)) {
+        if (settings.get(key) != curDisplayConfig[key]) {
+          settings.set(key, curDisplayConfig[key]); // Update!
+        }
+      }
+    }
+
+    setTimeout(() => {
+      setApplying(false);
+      setApplyFinishedSnackbarOpen(true);
+    }, 200); // Allow brief animation
+  } // A joke
+
+
+  const [jokeAnchorEl, setJokeAnchorEl] = _react.default.useState(null);
+
+  const handleJokePopoverOpen = event => {
+    setJokeAnchorEl(event.currentTarget);
+  };
+
+  const handleJokePopoverClose = () => {
+    setJokeAnchorEl(null);
+  };
+
+  const jokePopoverOpen = Boolean(jokeAnchorEl);
+
+  function toggleTelemetryJokeSwitch(ev) {
+    newConfig["telemetryJoke"] = ev.target.checked;
+    updateDisplayConfig();
+  } // Render!!!
+
+
+  let newConfig = {};
+
+  function updateDisplayConfig() {
+    setDisplayConfig({ ...curDisplayConfig,
+      ...newConfig
+    });
+  }
+
+  function createSwitchFunction(toggleKey) {
+    let outputFunc = ev => {
+      newConfig[toggleKey] = ev.target.checked;
+      updateDisplayConfig();
+    };
+
+    return outputFunc;
+  }
+
+  function updateSnackbarHideDuration(ev) {
+    let newDuration = ev.target.value * 1000; // back to ms
+
+    newConfig["snackbarAutoHideDuration"] = newDuration;
+    updateDisplayConfig();
+  }
+
+  function handleThemeChange(ev) {
+    newConfig["useDarkMode"] = ev.target.value;
+    updateDisplayConfig();
+  } // Internal Server
+
+
+  function updateInternalServerState(ev, data) {
+    console.log("Internal Server State Update recieved");
+    setInternalServerOnline(data.online);
+  }
+
+  _react.default.useEffect(() => {
+    ipcRenderer.on("internalServerUpdates", updateInternalServerState);
+    return () => {
+      ipcRenderer.removeListener("internalServerUpdates", updateInternalServerState);
+    };
+  });
+
+  function startInternalServer() {
+    ipcRenderer.send("internalServer", "start");
+  }
+
+  function stopInternalServer() {
+    ipcRenderer.send("internalServer", "stop");
+  } // Temporary stuffz
+
+
+  const optionSpacing = 3; // Config option?
+
+  const explainationXS = 11;
+  const optionFormXS = 1;
+  return /*#__PURE__*/_react.default.createElement("div", {
+    className: "settings"
+  }, /*#__PURE__*/_react.default.createElement(_Backdrop.default, {
+    className: classes.backdrop,
+    open: applying
+  }, /*#__PURE__*/_react.default.createElement(_CircularProgress.default, {
+    color: "inherit"
+  })), /*#__PURE__*/_react.default.createElement(_Typography.default, {
+    variant: "h3"
+  }, i18n.__("Telemetry")), /*#__PURE__*/_react.default.createElement(_Popover.default, {
+    className: classes.popover,
+    classes: {
+      paper: classes.paper
+    },
+    open: jokePopoverOpen,
+    anchorEl: jokeAnchorEl,
+    anchorOrigin: {
+      vertical: "bottom",
+      horizontal: "left"
+    },
+    transformOrigin: {
+      vertical: "top",
+      horizontal: "left"
+    },
+    disableRestoreFocus: true
+  }, i18n.__("This is a joke")), /*#__PURE__*/_react.default.createElement(_Grid.default, {
+    container: true,
+    spacing: optionSpacing
+  }, /*#__PURE__*/_react.default.createElement(_Grid.default, {
+    item: true,
+    xs: explainationXS
+  }, /*#__PURE__*/_react.default.createElement(_Typography.default, {
+    variant: "body1"
+  }, i18n.__("Enable complete data collection:"))), /*#__PURE__*/_react.default.createElement(_Grid.default, {
+    item: true,
+    xs: optionFormXS
+  }, /*#__PURE__*/_react.default.createElement(_Switch.default, {
+    checked: curDisplayConfig["telemetryJoke"],
+    onChange: toggleTelemetryJokeSwitch,
+    onMouseEnter: handleJokePopoverOpen,
+    onMouseLeave: handleJokePopoverClose
+  }))), /*#__PURE__*/_react.default.createElement(_Typography.default, {
+    variant: "h3"
+  }, i18n.__("User Interface")), /*#__PURE__*/_react.default.createElement(_Grid.default, {
+    container: true,
+    spacing: optionSpacing
+  }, /*#__PURE__*/_react.default.createElement(_Grid.default, {
+    item: true,
+    xs: explainationXS
+  }, /*#__PURE__*/_react.default.createElement(_Typography.default, {
+    variant: "body1"
+  }, "Snackbar Auto Hide Duration in seconds")), /*#__PURE__*/_react.default.createElement(_Grid.default, {
+    item: true,
+    xs: optionFormXS
+  }, /*#__PURE__*/_react.default.createElement(_TextField.default, {
+    type: "number",
+    variant: "standard",
+    defaultValue: curDisplayConfig["snackbarAutoHideDuration"] / 1000,
+    onChange: updateSnackbarHideDuration
+  })), /*#__PURE__*/_react.default.createElement(_Grid.default, {
+    item: true,
+    xs: explainationXS
+  }, /*#__PURE__*/_react.default.createElement(_Typography.default, {
+    variant: "body1"
+  }, "Theme")), /*#__PURE__*/_react.default.createElement(_Grid.default, {
+    item: true,
+    xs: optionFormXS
+  }, /*#__PURE__*/_react.default.createElement(_Select.default, {
+    onChange: handleThemeChange,
+    value: curDisplayConfig["useDarkMode"]
+  }, /*#__PURE__*/_react.default.createElement(_MenuItem.default, {
+    value: false
+  }, "Light"), /*#__PURE__*/_react.default.createElement(_MenuItem.default, {
+    value: true
+  }, "Dark"), /*#__PURE__*/_react.default.createElement(_MenuItem.default, {
+    value: "system"
+  }, "System Theme")))), /*#__PURE__*/_react.default.createElement(_Typography.default, {
+    variant: "h3"
+  }, i18n.__("Ad Blocking")), /*#__PURE__*/_react.default.createElement(_Typography.default, {
+    variant: "h3"
+  }, i18n.__("Internal Server")), /*#__PURE__*/_react.default.createElement("div", {
+    className: classes.buttonrow
+  }, /*#__PURE__*/_react.default.createElement(_Button.default, {
+    variant: "contained",
+    color: "primary",
+    onClick: startInternalServer,
+    disabled: internalServerOnline
+  }, i18n.__("Start Internal Server")), /*#__PURE__*/_react.default.createElement(_Button.default, {
+    variant: "contained",
+    color: "primary",
+    onClick: stopInternalServer,
+    disabled: !internalServerOnline
+  }, i18n.__("Stop Internal Server")), /*#__PURE__*/_react.default.createElement(_Button.default, {
+    variant: "contained",
+    color: "secondary",
+    onClick: () => ipcRenderer.send("internalServer", "getUpdate")
+  }, i18n.__("Force Internal Server Ui Update"))), /*#__PURE__*/_react.default.createElement(_Typography.default, {
+    variant: "h3"
+  }, i18n.__("Save Settings")), /*#__PURE__*/_react.default.createElement(_Typography.default, {
+    variant: "body1"
+  }, i18n.__("Some settings require you to restart Pulsify entirely as they are queried only during the startup. ")), /*#__PURE__*/_react.default.createElement("div", {
+    className: classes.buttonrow
+  }, /*#__PURE__*/_react.default.createElement(_Button.default, {
+    variant: "contained",
+    color: "primary",
+    onClick: saveConfig
+  }, i18n.__("Save")), /*#__PURE__*/_react.default.createElement(_Button.default, {
+    variant: "contained",
+    color: "secondary",
+    onClick: ev => {
+      window.location.reload();
+    }
+  }, i18n.__("Reload")), /*#__PURE__*/_react.default.createElement(_Snackbar.default, {
+    open: applyFinishSnackbarOpen,
+    autoHideDuration: settings.get("snackbarAutoHideDuration"),
+    onClose: hideApplyFinishSnackbar
+  }, /*#__PURE__*/_react.default.createElement(Alert, {
+    onClose: hideApplyFinishSnackbar,
+    severity: "success"
+  }, i18n.__("Settings have been saved succesfully")))));
+} // Drawer
+
+
+class MainDrawerComponent extends _react.default.Component {
+  constructor(props) {
+    super(props);
+    this.state = {};
+  }
+
+  triggerView(viewName) {
+    return (event => this.props.setCurView(viewName)).bind(this);
+  }
+
+  render() {
+    return /*#__PURE__*/_react.default.createElement("div", {
+      onClick: this.props.drawerToggle
+    }, /*#__PURE__*/_react.default.createElement(_List.default, null, /*#__PURE__*/_react.default.createElement(_ListItem.default, null, /*#__PURE__*/_react.default.createElement(_Typography.default, {
+      variant: "h3"
+    }, i18n.__("App Name"))), /*#__PURE__*/_react.default.createElement(_ListItem.default, {
+      button: true,
+      onClick: this.triggerView("homeview")
+    }, /*#__PURE__*/_react.default.createElement(_ListItemIcon.default, null, /*#__PURE__*/_react.default.createElement(_HomeRounded.default, null)), /*#__PURE__*/_react.default.createElement(_ListItemText.default, {
+      primary: "Home"
+    })), /*#__PURE__*/_react.default.createElement(_Divider.default, null), /*#__PURE__*/_react.default.createElement(_ListItem.default, {
+      button: true,
+      onClick: this.triggerView("songs")
+    }, /*#__PURE__*/_react.default.createElement(_ListItemIcon.default, null, /*#__PURE__*/_react.default.createElement(_MusicNote.default, null)), /*#__PURE__*/_react.default.createElement(_ListItemText.default, {
+      primary: i18n.__("Songs")
+    })), /*#__PURE__*/_react.default.createElement(_ListItem.default, {
+      button: true,
+      onClick: this.triggerView("settings")
+    }, /*#__PURE__*/_react.default.createElement(_ListItemIcon.default, null, /*#__PURE__*/_react.default.createElement(_Settings.default, null)), /*#__PURE__*/_react.default.createElement(_ListItemText.default, {
+      primary: i18n.__("Settings")
+    }))));
+  }
+
+} // Main Comp
+
+
+function MainComponent() {
+  // Theme Logic
+  let useDarkMode = (0, _useMediaQuery.default)("(prefers-color-scheme: dark)");
+
+  if (settings.get("useDarkMode") != "system") {
+    useDarkMode = settings.get("useDarkMode");
+  }
+
+  const theme = _react.default.useMemo(() => (0, _styles.createMuiTheme)({
+    palette: {
+      type: useDarkMode ? "dark" : "light"
+    }
+  }), [useDarkMode]); // Handle Menu Logic
+
+
+  let [serversAnchorEl, setServersAnchorEl] = _react.default.useState(null);
+
+  let [drawerOpen, setDrawerOpen] = _react.default.useState(false);
+
+  function toggleDrawer(event) {
+    setDrawerOpen(!drawerOpen);
+  }
+
+  function handleMenu(event) {
+    console.log(this);
+    setServersAnchorEl(event.target);
+  }
+
+  function handleClose(event) {
+    console.log(this);
+    setServersAnchorEl(null);
+  } //let [open] = React.useState(true);
+  // Current View
+
+
+  let [curView, setCurView] = _react.default.useState("homeview");
+
+  const serversOpen = Boolean(serversAnchorEl);
+
+  const [controller, changeController] = _react.default.useState(new EventEmitter()); // Legacy Views System
+
+
+  let views = {};
+  views.playlists = /*#__PURE__*/_react.default.createElement(PlaylistView, null);
+  views.songs = /*#__PURE__*/_react.default.createElement(SongView, {
+    controller: controller
+  });
+  views.homeview = /*#__PURE__*/_react.default.createElement(HomeComponent, null);
+  views.settings = /*#__PURE__*/_react.default.createElement(SettingsView, null);
+  window.debug = {};
+  window.debug.views = views;
+  const stylesSet = (0, _styles.makeStyles)(theme => ({
+    root: {
+      flexGrow: 1
+    },
+    title: {
+      flexGrow: 1
+    },
+    menuButton: {
+      marginRight: theme.spacing(2)
+    }
+  }));
+  const classes = stylesSet();
+  return /*#__PURE__*/_react.default.createElement(_react.default.Fragment, null, /*#__PURE__*/_react.default.createElement(_styles.ThemeProvider, {
+    theme: theme
+  }, /*#__PURE__*/_react.default.createElement(_CssBaseline.default, null), /*#__PURE__*/_react.default.createElement("div", {
+    className: classes.root
+  }, /*#__PURE__*/_react.default.createElement(_Drawer.default, {
+    anchor: "left",
+    open: drawerOpen,
+    onClick: toggleDrawer
+  }, /*#__PURE__*/_react.default.createElement(MainDrawerComponent, {
+    drawerToggle: toggleDrawer,
+    setCurView: setCurView
+  })), /*#__PURE__*/_react.default.createElement(_AppBar.default, {
+    position: "static"
+  }, /*#__PURE__*/_react.default.createElement(_Toolbar.default, null, /*#__PURE__*/_react.default.createElement(_IconButton.default, {
+    edge: "start",
+    className: classes.menuButton,
+    color: "inherit",
+    "aria-label": "menu",
+    onClick: toggleDrawer
+  }, /*#__PURE__*/_react.default.createElement(_Menu.default, null)), /*#__PURE__*/_react.default.createElement(_Typography.default, {
+    variant: "h6",
+    className: classes.title
+  }, i18n.__("App Name")), /*#__PURE__*/_react.default.createElement("div", null, /*#__PURE__*/_react.default.createElement(_IconButton.default, {
+    color: "inherit",
+    "aria-label": "Switch Media Server",
+    "aria-controls": "menu-appbar",
+    "aria-haspopup": "true",
+    onClick: handleMenu
+  }, /*#__PURE__*/_react.default.createElement(_Storage.default, null)), /*#__PURE__*/_react.default.createElement(_Menu2.default, {
+    id: "menu-appbar",
+    anchorEl: serversAnchorEl,
+    anchorOrigin: {
+      vertical: "top",
+      horizontal: "right"
+    },
+    keepMounted: true,
+    transformOrigin: {
+      vertical: "top",
+      horizontal: "right"
+    },
+    onClose: handleClose,
+    open: serversOpen
+  }, /*#__PURE__*/_react.default.createElement(_MenuItem.default, {
+    onClick: setServer
+  }, "Local"), /*#__PURE__*/_react.default.createElement(_MenuItem.default, {
+    onClick: setServer
+  }, "Add new server"))))), /*#__PURE__*/_react.default.createElement(_core.Container, {
+    maxWidth: "md"
+  }, views[curView]), /*#__PURE__*/_react.default.createElement(_player.PlayerComponent, {
+    settings: settings,
+    controller: controller
+  }))));
+} // Bootstrap code
+// really odd part i'm learning
+
+
+function setServer(comp) {}
+
+$(function () {
+  // TODO: Replace with Vanilla JS to make script size smaller
+  if (settings.get("customWindowbar")) {
+    const customTitlebar = require("custom-electron-titlebar");
+
+    new customTitlebar.Titlebar({
+      backgroundColor: customTitlebar.Color.fromHex("#444")
+    });
+
+    if (is.development) {
+      $("#menufix").remove();
+    } else {
+      $("div[role=menubar]").remove();
+    }
+  }
+
+  _reactDom.default.render( /*#__PURE__*/_react.default.createElement(MainComponent, null), document.getElementById("root"));
+});
+console.log("Player Comp", _player.PlayerComponent);
+},{"./player":"player.js","./prefdefaults.json":"prefdefaults.json","./utils.js":"utils.js"}],"../node_modules/parcel-bundler/src/builtins/hmr-runtime.js":[function(require,module,exports) {
+var OVERLAY_ID = '__parcel__error__overlay__';
+
+var OldModule = module.bundle.Module;
+
+function Module(moduleName) {
+  OldModule.call(this, moduleName);
+  this.hot = {
+    data: module.bundle.hotData,
+    _acceptCallbacks: [],
+    _disposeCallbacks: [],
+    accept: function (fn) {
+      this._acceptCallbacks.push(fn || function () {});
+    },
+    dispose: function (fn) {
+      this._disposeCallbacks.push(fn);
+    }
+  };
+
+  module.bundle.hotData = null;
+}
+
+module.bundle.Module = Module;
+var checkedAssets, assetsToAccept;
+
+var parent = module.bundle.parent;
+if ((!parent || !parent.isParcelRequire) && typeof WebSocket !== 'undefined') {
+  var hostname = process.env.HMR_HOSTNAME || location.hostname;
+  var protocol = location.protocol === 'https:' ? 'wss' : 'ws';
+  var ws = new WebSocket(protocol + '://' + hostname + ':' + process.env.HMR_PORT + '/');
+  ws.onmessage = function(event) {
+    checkedAssets = {};
+    assetsToAccept = [];
+
+    var data = JSON.parse(event.data);
+
+    if (data.type === 'update') {
+      var handled = false;
+      data.assets.forEach(function(asset) {
+        if (!asset.isNew) {
+          var didAccept = hmrAcceptCheck(global.parcelRequire, asset.id);
+          if (didAccept) {
+            handled = true;
+          }
+        }
+      });
+
+      // Enable HMR for CSS by default.
+      handled = handled || data.assets.every(function(asset) {
+        return asset.type === 'css' && asset.generated.js;
+      });
+
+      if (handled) {
+        console.clear();
+
+        data.assets.forEach(function (asset) {
+          hmrApply(global.parcelRequire, asset);
+        });
+
+        assetsToAccept.forEach(function (v) {
+          hmrAcceptRun(v[0], v[1]);
+        });
+      } else if (location.reload) { // `location` global exists in a web worker context but lacks `.reload()` function.
+        location.reload();
+      }
+    }
+
+    if (data.type === 'reload') {
+      ws.close();
+      ws.onclose = function () {
+        location.reload();
+      }
+    }
+
+    if (data.type === 'error-resolved') {
+      console.log('[parcel] ✨ Error resolved');
+
+      removeErrorOverlay();
+    }
+
+    if (data.type === 'error') {
+      console.error('[parcel] 🚨  ' + data.error.message + '\n' + data.error.stack);
+
+      removeErrorOverlay();
+
+      var overlay = createErrorOverlay(data);
+      document.body.appendChild(overlay);
+    }
+  };
+}
+
+function removeErrorOverlay() {
+  var overlay = document.getElementById(OVERLAY_ID);
+  if (overlay) {
+    overlay.remove();
+  }
+}
+
+function createErrorOverlay(data) {
+  var overlay = document.createElement('div');
+  overlay.id = OVERLAY_ID;
+
+  // html encode message and stack trace
+  var message = document.createElement('div');
+  var stackTrace = document.createElement('pre');
+  message.innerText = data.error.message;
+  stackTrace.innerText = data.error.stack;
+
+  overlay.innerHTML = (
+    '<div style="background: black; font-size: 16px; color: white; position: fixed; height: 100%; width: 100%; top: 0px; left: 0px; padding: 30px; opacity: 0.85; font-family: Menlo, Consolas, monospace; z-index: 9999;">' +
+      '<span style="background: red; padding: 2px 4px; border-radius: 2px;">ERROR</span>' +
+      '<span style="top: 2px; margin-left: 5px; position: relative;">🚨</span>' +
+      '<div style="font-size: 18px; font-weight: bold; margin-top: 20px;">' + message.innerHTML + '</div>' +
+      '<pre>' + stackTrace.innerHTML + '</pre>' +
+    '</div>'
+  );
+
+  return overlay;
+
+}
+
+function getParents(bundle, id) {
+  var modules = bundle.modules;
+  if (!modules) {
+    return [];
+  }
+
+  var parents = [];
+  var k, d, dep;
+
+  for (k in modules) {
+    for (d in modules[k][1]) {
+      dep = modules[k][1][d];
+      if (dep === id || (Array.isArray(dep) && dep[dep.length - 1] === id)) {
+        parents.push(k);
+      }
+    }
+  }
+
+  if (bundle.parent) {
+    parents = parents.concat(getParents(bundle.parent, id));
+  }
+
+  return parents;
+}
+
+function hmrApply(bundle, asset) {
+  var modules = bundle.modules;
+  if (!modules) {
+    return;
+  }
+
+  if (modules[asset.id] || !bundle.parent) {
+    var fn = new Function('require', 'module', 'exports', asset.generated.js);
+    asset.isNew = !modules[asset.id];
+    modules[asset.id] = [fn, asset.deps];
+  } else if (bundle.parent) {
+    hmrApply(bundle.parent, asset);
+  }
+}
+
+function hmrAcceptCheck(bundle, id) {
+  var modules = bundle.modules;
+  if (!modules) {
+    return;
+  }
+
+  if (!modules[id] && bundle.parent) {
+    return hmrAcceptCheck(bundle.parent, id);
+  }
+
+  if (checkedAssets[id]) {
+    return;
+  }
+  checkedAssets[id] = true;
+
+  var cached = bundle.cache[id];
+
+  assetsToAccept.push([bundle, id]);
+
+  if (cached && cached.hot && cached.hot._acceptCallbacks.length) {
+    return true;
+  }
+
+  return getParents(global.parcelRequire, id).some(function (id) {
+    return hmrAcceptCheck(global.parcelRequire, id)
+  });
+}
+
+function hmrAcceptRun(bundle, id) {
+  var cached = bundle.cache[id];
+  bundle.hotData = {};
+  if (cached) {
+    cached.hot.data = bundle.hotData;
+  }
+
+  if (cached && cached.hot && cached.hot._disposeCallbacks.length) {
+    cached.hot._disposeCallbacks.forEach(function (cb) {
+      cb(bundle.hotData);
+    });
+  }
+
+  delete bundle.cache[id];
+  bundle(id);
+
+  cached = bundle.cache[id];
+  if (cached && cached.hot && cached.hot._acceptCallbacks.length) {
+    cached.hot._acceptCallbacks.forEach(function (cb) {
+      cb();
+    });
+    return true;
+  }
+}
+
+},{}]},{},["../node_modules/parcel-bundler/src/builtins/hmr-runtime.js","unbundle.js"], null)
 //# sourceMappingURL=/bundle.js.map

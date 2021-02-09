@@ -1,2 +1,15 @@
-._player_font_fad94{font-family:Roboto}._drop-shadow_fad94{-webkit-filter:drop-shadow(16px 16px 10px #000);filter:drop-shadow(16px 16px 10px black)}._playerItemMadeBy_fad94,._playerTitle_fad94{color:inherit}
+._player_font_fad94{
+	font-family: "Roboto";
+}
+._drop-shadow_fad94{
+    -webkit-filter: drop-shadow(16px 16px 10px black);
+            filter: drop-shadow(16px 16px 10px black);
+}
+._playerTitle_fad94{
+    color: inherit;
+}
+._playerItemMadeBy_fad94{
+    color: inherit;
+}
+
 /*# sourceMappingURL=/bundle.css.map */
