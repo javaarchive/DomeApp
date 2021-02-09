@@ -19,10 +19,21 @@ if(settings.get("cookie-obliterator")){
 	window.sessionStorage = null;
 }
 ipcRenderer.send("debug","New Start");
+let thisID = Math.floor(Math.random()*1000) + "-" + Date.now();
 ipcRenderer.send("annouce_existence",{
-	link: location.href
-})
-ipcRenderer.on("assign",(modulePath){
-	let onDocumentLoad = require(modulePath);
-	window.onDocumentLoad = onDocumentLoad;
+	link: location.href,
+	id: thisID
+});
+document.pageID = thisID;
+ipcRenderer.on("assign",(opts) => {
+	const {id, modulePath} = opts;
+	if(id != thisID){
+		return;
+	}
+	targetModule = require(modulePath);
+	if(targetModule.getDocumentLoadFunc){
+		let onDocumentLoad = targetModule.getDocumentLoadFunc();
+		window.onDocumentLoad = onDocumentLoad;
+		document.addEventListener("DOMContentLoaded",window.onDocumentLoad);
+	}
 })

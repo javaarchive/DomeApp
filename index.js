@@ -199,6 +199,34 @@ app.on("activate", async () => {
 	}
 });
 
+// ipcMain handles
+
+let chList = settings.get("enabledContentHandlers");
+let contentHandlers = [];
+let contentPlayers = [];
+for(let i = 0; i < N; i ++){
+	
+	try{
+		let newCH = require(chList[i]);
+		let newCP = require(settings.get(newCH.prefferedPlayerKey));
+		contentHandlers.push(newCH);
+		contentPlayers.push(newCP);
+	}catch(ex){
+		console.log("failed to load",chList[i]);
+	}
+}
+ipcMain.on("annouce_existence", (ev, pageInfo) => {
+	for(let i = 0; i < contentHandlers.length; i ++){
+		if(contentHandlers[i].shouldControl && contentHandlers[i].shouldControl(pageInfo)){
+			ev.reply("assign",{
+				modulePath: settings.get(contentHandlers[i].prefferedPlayerKey),
+				id: pageInfo.id
+			});
+			break; // For now only one page should be controlled at a time
+		}
+	}
+})
+
 (async () => {
 	// Top Level Await not yet
 	await app.whenReady();

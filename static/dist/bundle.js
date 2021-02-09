@@ -679,7 +679,7 @@ module.exports = {
   "cookie-obliterator": false,
   "initialWindowHeight": 600,
   "initialWindowWidth": 800,
-  "customWindowbar": true,
+  "customWindowbar": false,
   "playerTickrate": 250,
   "useDarkMode": "system",
   "internalServerExecutionMethod": "moduleLoad",
