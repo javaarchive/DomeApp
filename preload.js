@@ -19,3 +19,10 @@ if(settings.get("cookie-obliterator")){
 	window.sessionStorage = null;
 }
 ipcRenderer.send("debug","New Start");
+ipcRenderer.send("annouce_existence",{
+	link: location.href
+})
+ipcRenderer.on("assign",(modulePath){
+	let onDocumentLoad = require(modulePath);
+	window.onDocumentLoad = onDocumentLoad;
+})

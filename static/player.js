@@ -118,11 +118,18 @@ class PlayerComponent extends React.Component {
 		let prefferedPlayer = this.props.settings.get(ch.prefferedPlayerKey);
 		let SelectedPlayer = require(prefferedPlayer);
 		let player;
+		let metadata = JSON.parse(songData.metadata);
+
 		if(this.state.playerType != SelectedPlayer.id){
 			if(this.state.player && this.state.player.unload){
 				await this.state.player.unload();
 			}
-			player = new SelectedPlayer({document:document,window:window,emitter:this.state.controller});
+			let baseOpts = {document:document,window:window,emitter:this.state.controller};
+			let additionalOpts = this.props.settings.get(SelectedPlayer.optsKey);
+			if(!additionalOpts){
+				additionalOpts = {};
+			}
+			player = new SelectedPlayer({...baseOpts,...additionalOpts});
 			await player.init();
 		}else{
 			player = this.state.player; // Get existing player
@@ -131,6 +138,9 @@ class PlayerComponent extends React.Component {
 		await player.load(uri);
 		console.log("INFO: Loaded uri into player");
 		await player.play();
+		if(metadata.start){
+			await player.setCurrentTime(metadata.start); // Seek!
+		}
 		console.log("INFO: Playing")
 		this.setState(function (state, props) {
 			return {player: player,playerType:SelectedPlayer.id}
@@ -176,7 +186,8 @@ class PlayerComponent extends React.Component {
 		ee.playerEventsRegistered = true;
 		ee.on("playSong",async function(songData){
 			// Does not check for queue
-			await oThis.updateItem("Song",songData);
+			let metadata = JSON.parse(songData.metadata);
+			await oThis.updateItem("Song",{...metadata,...songData});
 			await oThis.playSong(songData);
 			oThis.setState(function (state, props) {
 				return {enabled: true}
@@ -227,12 +238,12 @@ class PlayerComponent extends React.Component {
 		if ("duration" in params) {
 			if(params.start){
 				if(params.end){
-					properties.duration = end - start;
+					properties.duration = params.end - params.start;
 				}else{
-					properties.duration = params.duration - start;
+					properties.duration = params.duration - params.start;
 				}
 			}else if(params.end){
-				properties.duration = end;
+				properties.duration = params.end;
 			}else{
 				properties.duration = params.duration;
 			}
@@ -247,13 +258,19 @@ class PlayerComponent extends React.Component {
 	}
 	userChangePos(ev, newVal) {
 		console.log("Position changed to", newVal);
-		this.state.player.setCurrentTime(newVal);
+		if(this.state.start){
+			this.state.player.setCurrentTime(this.state.start + newVal);
+		}else{
+			this.state.player.setCurrentTime(newVal);
+		}
 		this.setState(function (state, props) {
 			return { position: newVal };
 		});
 	}
 	updateDuration(time) {
 		console.log("INFO: Duration updated to ",time);
+		// Perform calculations for metadata offset
+
 		// Sometimes duration can be found afterwards
 		this.setState(function (state, props) {
 			return { itemLength: time, duration: time };

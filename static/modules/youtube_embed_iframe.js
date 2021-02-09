@@ -22,6 +22,7 @@ function loadAPI(document) {
 }
 class YoutubeEmbedIframePlayer {
 	static id = "io.github.javaarchive.pulsify.youtube_embed_iframe_player";
+	static optsKey = "youtubeIframePlayerOpts";
 	constructor(options) {
 		// Constants
 		
