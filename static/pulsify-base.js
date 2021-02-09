@@ -7,3 +7,4 @@ i18n.configure({
 // Credits to https://stackoverflow.com/a/59563339/10818862
 
 const Store = require("electron-store");
+// const {is} = require("electron-util");

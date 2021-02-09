@@ -850,7 +850,9 @@ $(function () {
 		});
 		if (is.development) {
 			$("#menufix").remove();
+			$('.hide-for-dev').remove();
 		} else {
+			$('.hide-for-prod').remove();
 			$("div[role=menubar]").remove();
 		}
 	}

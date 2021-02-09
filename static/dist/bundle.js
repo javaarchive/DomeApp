@@ -445,6 +445,20 @@ class PlayerComponent extends _react.default.Component {
     });
   }
 
+  togglePause() {
+    if (!this.state.player || !this.state.enabled) {
+      return; // No player = no change
+    }
+
+    if (this.state.paused) {
+      this.state.player.resume();
+      this.setPaused(false);
+    } else {
+      this.state.player.pause();
+      this.setPaused(true);
+    }
+  }
+
   registerEvents(ee) {
     if (ee.playerEventsRegistered) {
       return;
@@ -479,7 +493,11 @@ class PlayerComponent extends _react.default.Component {
         oThis.updateDuration(player.getDuration());
       }
 
+      oThis.setPaused(false);
       oThis.tick();
+    });
+    ee.on("pause", function (player) {
+      oThis.setPaused(true);
     });
     ee.on("end", player => {
       this.playNextSong();
@@ -609,8 +627,9 @@ class PlayerComponent extends _react.default.Component {
     }, /*#__PURE__*/_react.default.createElement(_Fab.default, {
       color: "primary",
       "aria-label": "pause-play",
-      className: "pausePlay"
-    }, this.state.paused ? /*#__PURE__*/_react.default.createElement(_Pause.default, null) : /*#__PURE__*/_react.default.createElement(_PlayArrow.default, null)))), /*#__PURE__*/_react.default.createElement(_Grid.default, {
+      className: "pausePlay",
+      onClick: this.togglePause.bind(this)
+    }, this.state.paused ? /*#__PURE__*/_react.default.createElement(_PlayArrow.default, null) : /*#__PURE__*/_react.default.createElement(_Pause.default, null)))), /*#__PURE__*/_react.default.createElement(_Grid.default, {
       item: true,
       xs: 2
     }, /*#__PURE__*/_react.default.createElement(_Typography.default, {
@@ -1541,7 +1560,9 @@ $(function () {
 
     if (is.development) {
       $("#menufix").remove();
+      $('.hide-for-dev').remove();
     } else {
+      $('.hide-for-prod').remove();
       $("div[role=menubar]").remove();
     }
   }

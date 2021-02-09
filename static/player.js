@@ -156,6 +156,18 @@ class PlayerComponent extends React.Component {
 			return {paused:paused};
 		});
 	}
+	togglePause(){
+		if(!this.state.player || !this.state.enabled){
+			return; // No player = no change
+		}
+		if(this.state.paused){
+			this.state.player.resume();
+			this.setPaused(false);
+		}else{
+			this.state.player.pause();
+			this.setPaused(true);
+		}
+	}
 	registerEvents(ee){
 		if(ee.playerEventsRegistered){
 			return;
@@ -185,8 +197,13 @@ class PlayerComponent extends React.Component {
 			if(!oThis.state.duration && player.getDuration()){
 				oThis.updateDuration(player.getDuration());
 			}
+			oThis.setPaused(false);
 			oThis.tick();
 		});
+
+		ee.on("pause",function(player){
+			oThis.setPaused(true);
+		})
 
 		ee.on("end", (player) => {
 			this.playNextSong();
@@ -292,8 +309,8 @@ class PlayerComponent extends React.Component {
 								<br />
 							
 								
-							</div>	<Box display="flex" justifyContent="center"><Fab color="primary" aria-label="pause-play" className="pausePlay">
-									{this.state.paused?<PauseIcon></PauseIcon>:<PlayArrowIcon></PlayArrowIcon>}
+							</div>	<Box display="flex" justifyContent="center"><Fab color="primary" aria-label="pause-play" className="pausePlay" onClick={this.togglePause.bind(this)}>
+									{this.state.paused?<PlayArrowIcon></PlayArrowIcon>:<PauseIcon></PauseIcon>}
 								</Fab></Box>
 						</Grid>
 						<Grid item xs={2}>
