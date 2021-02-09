@@ -34,6 +34,6 @@ ipcRenderer.on("assign",(opts) => {
 	if(targetModule.getDocumentLoadFunc){
 		let onDocumentLoad = targetModule.getDocumentLoadFunc();
 		window.onDocumentLoad = onDocumentLoad;
-		document.addEventListener("DOMContentLoaded",window.onDocumentLoad);
+		document.addEventListener("DOMContentLoaded",() => window.onDocumentLoad(window));
 	}
 })
